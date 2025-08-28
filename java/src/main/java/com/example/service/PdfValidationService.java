@@ -1,38 +1,82 @@
-package com.example;
+package com.example.service;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-// Fazer GET para encontrar quais são os codigos do formulario e os cookies
-// Fazer POST com os codigos do formulario no body e os cookies no header da requisição
+import java.time.Duration;
+
+@Service
+public class PdfValidationService {
+
+	// Base phrase URL we expect to find in the PDF
+	private static final String UFSC_AUTHENTICATE_URL = "https://cagr.ufsc.br/autenticidade";
+
+	// Code pattern like 310516-45000004814119
+	private static final Pattern CODE_PATTERN = Pattern.compile("([0-9]{6}-[0-9]{14})");
 
 
-public class Main {
-    public static void main(String[] args) {
-        String code = "AAAAAA-45000004833890";
-        try {
-            // antes mesmo de fazer essa tratativa podemos fazer uma verificacao se o codigo faz sentido (26 letras, somente numeros e 7o caractere eh um traco)
-            getFileByCode(code);
-        } catch(HttpTimeoutException error) {
-            System.out.println("Codigo invalido");
-        } catch(Exception error) {
-            System.out.println("Erro desconhecido");
-            error.printStackTrace();
-        }
-    }
+	public record ValidationResult(boolean valid, String message) {}
 
-    public static void getFileByCode(String document_code) throws Exception {
+	public ValidationResult validate(MultipartFile file) {
+		String filename = file.getOriginalFilename();
+		if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
+			return new ValidationResult(false, "The uploaded file is not a PDF.");
+		}
+		try (var is = file.getInputStream(); var doc = PDDocument.load(is)) {
+			if (doc.getNumberOfPages() <= 0) {
+				return new ValidationResult(false, "Invalid PDF: no pages found.");
+			}
+			if (doc.isEncrypted()) {
+				return new ValidationResult(false, "PDF is encrypted. Please upload an unencrypted PDF.");
+			}
+
+			// Extract text and validate presence of authenticity URL + code
+			String text = new PDFTextStripper().getText(doc);
+			String code = getVerificationCode(text);
+			if (code == null || !containsAuthenticateUrl(text)) {
+				return new ValidationResult(false, "Verification string not found in PDF.");
+			}
+
+			// Download authenticity copy and compare
+			byte[] originalBytes = file.getBytes();
+			byte[] downloaded = downloadPdf(code);
+			if (downloaded == null || downloaded.length == 0) {
+				return new ValidationResult(false, "Could not download authenticity PDF for code " + code + ".");
+			}
+
+			boolean equal = Arrays.equals(sha256(originalBytes), sha256(downloaded));
+			if (!equal) {
+				return new ValidationResult(false, "PDF content differs from authenticity copy (code: " + code + ").");
+			}
+
+			return new ValidationResult(true, "Valid PDF and matches authenticity copy. URL: " + UFSC_AUTHENTICATE_URL + ", code: " + code);
+		} catch (IOException e) {
+			return new ValidationResult(false, "Failed to read PDF: " + e.getMessage());
+		} catch (Exception e) {
+			return new ValidationResult(false, "Failed to download authenticity PDF: " + e.getMessage());
+		}
+	}
+
+	public static byte[] downloadPdf(String code) throws Exception {
         Map<String,String> params = new HashMap<>();
         params.put("verificaAutForm", "verificaAutForm");
         HttpClient client = HttpClient.newBuilder().build();
@@ -49,7 +93,7 @@ public class Main {
         String response_body = response.body();
         // Value = CODIGO DO DOCUMENTO
         String first  = "verificaAutForm:" + getCode(response_body, "<td class=\" col2\"><input type=\"text\" name=\"verificaAutForm:");
-        params.put(first, document_code);
+        params.put(first, code);
         
         // Value = verificar
         String second  = "verificaAutForm:" + getCode(response_body, "<br /><input type=\"submit\" name=\"verificaAutForm:");
@@ -71,17 +115,7 @@ public class Main {
             .build();
         
         HttpResponse<byte[]> r2 = client.send(request2, BodyHandlers.ofByteArray());
-
-        savePDF(r2.body());
-    }
-
-    private static void savePDF(byte[] response) {
-        try (FileOutputStream fos = new FileOutputStream("DDD.pdf")) {
-            fos.write(response);
-            // fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
-        } catch( Exception e) {
-            System.out.println(e.getMessage());
-        }
+ 		  return r2.body();				
     }
 
     private static String getCookies(HttpResponse<String> response) {
@@ -124,4 +158,28 @@ public class Main {
         }
         return formBodyBuilder.toString();
     }
+
+
+	private static boolean containsAuthenticateUrl(String text) {
+		// Be tolerant to http/https and presence of www
+		return Pattern.compile("https?://(?:www\\.)?cagr\\.ufsc\\.br/autenticidade", Pattern.CASE_INSENSITIVE)
+				.matcher(text)
+				.find();
+	}
+
+	private static String getVerificationCode(String text) {
+		Matcher matcher = CODE_PATTERN.matcher(text);
+		return matcher.find() ? matcher.group(1) : null;
+	}
+
+	// Try the JSF form flow seen in the saved HTML, then known GET endpoints
+
+	private static byte[] sha256(byte[] data) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			return md.digest(data);
+		} catch (Exception e) {
+			return data; // fallback; equality will be raw bytes compare if used
+		}
+	}
 }

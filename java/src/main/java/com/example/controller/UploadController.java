@@ -1,6 +1,6 @@
-package com.example.pdfauth.controller;
+package com.example.controller;
 
-import com.example.pdfauth.service.PdfValidationService;
+import com.example.service.PdfValidationService;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
