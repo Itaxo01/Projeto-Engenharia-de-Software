@@ -1,0 +1,18 @@
+/* Basic styles */
+* { box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+.container { max-width: 640px; margin: 5rem auto; background: #111827; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+
+h1 { margin-top: 0; font-weight: 700; }
+
+form { display: grid; gap: 1rem; }
+label { font-weight: 600; }
+input[type="file"] { padding: .6rem; background: #0b1220; border: 1px solid #374151; border-radius: 8px; color: #e2e8f0; }
+button { background: #2563eb; color: white; border: none; padding: .8rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+button:hover { background: #1d4ed8; }
+
+.alert { padding: 1rem; border-radius: 8px; }
+.alert.success { background: #064e3b; color: #d1fae5; border: 1px solid #065f46; }
+.alert.error { background: #7f1d1d; color: #fee2e2; border: 1px solid #991b1b; }
+
+a.back { display: inline-block; margin-top: 1rem; color: #93c5fd; }
