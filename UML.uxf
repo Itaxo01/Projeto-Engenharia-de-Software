@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.3">
+  <zoom_level>5</zoom_level>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>405</x>
+      <y>120</y>
+      <w>125</w>
+      <h>105</h>
+    </coordinates>
+    <panel_attributes>Interface Web
+--
+
+bg=orange</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>395</x>
+      <y>255</y>
+      <w>310</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>Controller
+--
+
+bg=White</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>495</x>
+      <y>165</y>
+      <w>170</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+Dependency
+</panel_attributes>
+    <additional_attributes>250.0;240.0;230.0;70.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>435</x>
+      <y>140</y>
+      <w>65</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>Página de Login</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>435</x>
+      <y>160</y>
+      <w>65</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>Registro</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>435</x>
+      <y>180</y>
+      <w>65</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>Dashboard</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>430</x>
+      <y>200</y>
+      <w>75</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>Modal da Disciplina</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>585</x>
+      <y>130</y>
+      <w>70</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>A interface Web manda todas as requisições para o Controller
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>790</x>
+      <y>250</y>
+      <w>520</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>Service
+--
+
+bg=White</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1140</x>
+      <y>285</y>
+      <w>160</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>PdfValidationService
+--
+--
++ Validate(PDF Matricula): ValidationResult
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>620</x>
+      <y>275</y>
+      <w>70</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>RegisterController</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>685</x>
+      <y>280</y>
+      <w>130</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;10.0;240.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>805</x>
+      <y>285</y>
+      <w>250</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>RegisterService
+--
+- PdfValidationService: PdfValidationService
+--
++ Register(String Email, String Senha, PDF Matricula): RegisterResult
+- ValidaEmail(String Email): Boolean
+- ValidaSenha(String Senha): Boolean
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1050</x>
+      <y>280</y>
+      <w>100</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;use&gt;&gt;</panel_attributes>
+    <additional_attributes>180.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1140</x>
+      <y>340</y>
+      <w>160</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>ModelDB
+--
+--
++ Create()
++ Update()
++ Delete()
++ Read()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1050</x>
+      <y>315</y>
+      <w>100</w>
+      <h>75</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;use&gt;&gt;</panel_attributes>
+    <additional_attributes>180.0;130.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>905</x>
+      <y>545</y>
+      <w>165</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>Banco De Dados
+--
+
+bg=White</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1065</x>
+      <y>385</y>
+      <w>230</w>
+      <h>275</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>440.0;10.0;400.0;450.0;10.0;530.0</additional_attributes>
+  </element>
+</diagram>
