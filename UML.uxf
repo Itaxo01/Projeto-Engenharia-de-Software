@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="13.3">
-  <zoom_level>5</zoom_level>
+  <help_text>fontsize=25
+// Uncomment the following line to change the fontsize and font:
+// fontfamily=SansSerif //possible: SansSerif,Serif,Monospaced
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Welcome to UMLet!
+//
+// Double-click on elements to add them to the diagram, or to copy them
+// Edit elements by modifying the text in this panel
+// Hold Ctrl to select multiple elements
+// Use Ctrl+mouse to select via lasso
+//
+// Use +/- or Ctrl+mouse wheel to zoom
+// Drag a whole relation at its central square icon
+//
+// Press Ctrl+C to copy the whole diagram to the system clipboard (then just paste it to, eg, Word)
+// Edit the files in the "palettes" directory to create your own element palettes
+//
+// Select "Custom Elements &gt; New..." to create new element types
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// This text will be stored with each diagram;  use it for notes.</help_text>
+  <zoom_level>7</zoom_level>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>405</x>
-      <y>120</y>
-      <w>125</w>
-      <h>105</h>
+      <x>14</x>
+      <y>0</y>
+      <w>175</w>
+      <h>147</h>
     </coordinates>
     <panel_attributes>Interface Web
 --
@@ -18,10 +42,10 @@ bg=orange</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>395</x>
-      <y>255</y>
-      <w>310</w>
-      <h>240</h>
+      <x>0</x>
+      <y>189</y>
+      <w>434</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>Controller
 --
@@ -32,10 +56,10 @@ bg=White</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>495</x>
-      <y>165</y>
-      <w>170</w>
-      <h>130</h>
+      <x>140</x>
+      <y>63</y>
+      <w>287</w>
+      <h>182</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 Dependency
@@ -45,10 +69,10 @@ Dependency
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>435</x>
-      <y>140</y>
-      <w>65</w>
-      <h>15</h>
+      <x>56</x>
+      <y>28</y>
+      <w>91</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>Página de Login</panel_attributes>
     <additional_attributes/>
@@ -56,10 +80,10 @@ Dependency
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>435</x>
-      <y>160</y>
-      <w>65</w>
-      <h>15</h>
+      <x>56</x>
+      <y>56</y>
+      <w>91</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>Registro</panel_attributes>
     <additional_attributes/>
@@ -67,10 +91,10 @@ Dependency
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>435</x>
-      <y>180</y>
-      <w>65</w>
-      <h>15</h>
+      <x>56</x>
+      <y>84</y>
+      <w>91</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>Dashboard</panel_attributes>
     <additional_attributes/>
@@ -78,10 +102,10 @@ Dependency
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>430</x>
-      <y>200</y>
-      <w>75</w>
-      <h>15</h>
+      <x>49</x>
+      <y>112</y>
+      <w>105</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>Modal da Disciplina</panel_attributes>
     <additional_attributes/>
@@ -89,10 +113,10 @@ Dependency
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>585</x>
-      <y>130</y>
-      <w>70</w>
-      <h>40</h>
+      <x>266</x>
+      <y>14</y>
+      <w>98</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>A interface Web manda todas as requisições para o Controller
 bg=blue</panel_attributes>
@@ -101,10 +125,10 @@ bg=blue</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>790</x>
-      <y>250</y>
-      <w>520</w>
-      <h>240</h>
+      <x>553</x>
+      <y>182</y>
+      <w>728</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>Service
 --
@@ -115,10 +139,10 @@ bg=White</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1140</x>
-      <y>285</y>
-      <w>160</w>
-      <h>25</h>
+      <x>1043</x>
+      <y>231</y>
+      <w>224</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>PdfValidationService
 --
@@ -130,10 +154,10 @@ bg=White</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>620</x>
-      <y>275</y>
-      <w>70</w>
-      <h>15</h>
+      <x>315</x>
+      <y>217</y>
+      <w>98</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>RegisterController</panel_attributes>
     <additional_attributes/>
@@ -141,21 +165,21 @@ bg=White</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>685</x>
-      <y>280</y>
-      <w>130</w>
-      <h>25</h>
+      <x>406</x>
+      <y>217</y>
+      <w>182</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes/>
-    <additional_attributes>10.0;10.0;240.0;30.0</additional_attributes>
+    <additional_attributes>10.0;20.0;240.0;40.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>805</x>
-      <y>285</y>
-      <w>250</w>
-      <h>50</h>
+      <x>574</x>
+      <y>231</y>
+      <w>350</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>RegisterService
 --
@@ -170,22 +194,22 @@ bg=White</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1050</x>
-      <y>280</y>
-      <w>100</w>
-      <h>20</h>
+      <x>917</x>
+      <y>217</y>
+      <w>140</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 &lt;&lt;use&gt;&gt;</panel_attributes>
-    <additional_attributes>180.0;20.0;10.0;20.0</additional_attributes>
+    <additional_attributes>180.0;30.0;10.0;30.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1140</x>
-      <y>340</y>
-      <w>160</w>
-      <h>50</h>
+      <x>1043</x>
+      <y>308</y>
+      <w>224</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>ModelDB
 --
@@ -200,10 +224,10 @@ bg=White</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1050</x>
-      <y>315</y>
-      <w>100</w>
-      <h>75</h>
+      <x>917</x>
+      <y>273</y>
+      <w>140</w>
+      <h>105</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 &lt;&lt;use&gt;&gt;</panel_attributes>
@@ -212,10 +236,10 @@ bg=White</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>905</x>
-      <y>545</y>
-      <w>165</w>
-      <h>240</h>
+      <x>714</x>
+      <y>595</y>
+      <w>231</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>Banco De Dados
 --
@@ -226,12 +250,211 @@ bg=White</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1065</x>
-      <y>385</y>
-      <w>230</w>
-      <h>275</h>
+      <x>938</x>
+      <y>371</y>
+      <w>322</w>
+      <h>385</h>
     </coordinates>
     <panel_attributes/>
     <additional_attributes>440.0;10.0;400.0;450.0;10.0;530.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>112</x>
+      <y>1386</y>
+      <w>315</w>
+      <h>161</h>
+    </coordinates>
+    <panel_attributes>fontsize=50
+Web Interface</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>518</x>
+      <y>1379</y>
+      <w>399</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Linux Server&gt;&gt;
+fontsize=30
+Servidor</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>105</x>
+      <y>1554</y>
+      <w>133</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>fontsize=20
+Todo JS, HTML e CSS necessário
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>420</x>
+      <y>1400</y>
+      <w>112</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>fontsize=19
+lt=-
+m1=0..n
+m2=1
+&lt;&lt;internet&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;30.0;140.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>756</x>
+      <y>1596</y>
+      <w>182</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;artifact&gt;&gt;
+restAPI.jar
+
+group=3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>721</x>
+      <y>1512</y>
+      <w>154</w>
+      <h>98</h>
+    </coordinates>
+    <panel_attributes>fontsize=18
+lt=.&gt;
+&lt;&lt;deploy&gt;&gt;</panel_attributes>
+    <additional_attributes>200.0;120.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>1043</x>
+      <y>1400</y>
+      <w>252</w>
+      <h>168</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;device&gt;&gt;
+Banco de Dados</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>910</x>
+      <y>1407</y>
+      <w>147</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>fontsize=19
+lt=-
+m1=1
+m2=1
+&lt;&lt;intranet&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;30.0;190.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1092</x>
+      <y>1498</y>
+      <w>147</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;artifact&gt;&gt;
+PostgreSQL DB
+group=4</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>798</x>
+      <y>1673</y>
+      <w>224</w>
+      <h>84</h>
+    </coordinates>
+    <panel_attributes>fontsize=17
+A API fornecerá os métodos de verificação e consulta no banco de dados através de endpoints, que poderão ser consumidos pela aplicação FrontEnd em JavaScript.
+bg=light_gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>182</x>
+      <y>1470</y>
+      <w>161</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>fontsize=20
+&lt;&lt;artifact&gt;&gt;
+ApplicationJS.js
+group=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>322</x>
+      <y>1477</y>
+      <w>14</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>
+bg=white
+group=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1218</x>
+      <y>1505</y>
+      <w>14</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>
+bg=white
+group=4</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>917</x>
+      <y>1603</y>
+      <w>14</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>
+bg=white
+group=3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>630</x>
+      <y>1449</y>
+      <w>175</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>fontsize=18
+&lt;&lt;execution environment&gt;&gt;
+JRE</panel_attributes>
+    <additional_attributes/>
   </element>
 </diagram>
