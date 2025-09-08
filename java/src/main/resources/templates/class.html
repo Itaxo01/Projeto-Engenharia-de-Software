@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disciplina - Sistema Acadêmico</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/class.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>Sistema Acadêmico</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/user" class="nav-link">Perfil</a>
+                <a href="/login" class="nav-link">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="class-container">
+        <div class="breadcrumb">
+            <a href="/dashboard">Dashboard</a> > <span>INE5402 - Programação Orientada a Objetos I</span>
+        </div>
+
+        <div class="class-header">
+            <div class="class-info">
+                <h1>INE5402 - Programação Orientada a Objetos I</h1>
+                <div class="class-meta">
+                    <span class="class-credits">4 Créditos</span>
+                    <span class="class-department">Departamento de Informática e Estatística</span>
+                    <span class="class-status available">Disponível</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="class-content">
+            <div class="class-description-section">
+                <h2>Descrição da Disciplina</h2>
+                <div class="description-card">
+                    <p>Conceitos fundamentais de programação orientada a objetos. Classes, objetos, métodos e atributos. Encapsulamento, herança e polimorfismo. Interfaces e classes abstratas. Tratamento de exceções. Introdução aos padrões de projeto.</p>
+                    
+                    <div class="class-details">
+                        <div class="detail-row">
+                            <label>Pré-requisitos:</label>
+                            <span>INE5401 - Introdução à Computação</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Carga Horária:</label>
+                            <span>72 horas/aula</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Modalidade:</label>
+                            <span>Presencial</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="teachers-section">
+                <h2>Professores</h2>
+                <div class="teachers-grid">
+                    <div class="teacher-card">
+                        <div class="teacher-info">
+                            <div class="teacher-avatar">
+                                <span>JS</span>
+                            </div>
+                            <div class="teacher-details">
+                                <h3>Prof. João Silva</h3>
+                                <p>Doutor em Ciência da Computação</p>
+                            </div>
+                        </div>
+                        <div class="teacher-rating">
+                            <div class="rating-stars">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star">★</span>
+                                <span class="rating-value">4.2</span>
+                            </div>
+                            <span class="rating-count">(24 avaliações)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="teacher-card">
+                        <div class="teacher-info">
+                            <div class="teacher-avatar">
+                                <span>MS</span>
+                            </div>
+                            <div class="teacher-details">
+                                <h3>Prof. Maria Santos</h3>
+                                <p>Doutora em Engenharia de Software</p>
+                            </div>
+                        </div>
+                        <div class="teacher-rating">
+                            <div class="rating-stars">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="rating-value">4.8</span>
+                            </div>
+                            <span class="rating-count">(31 avaliações)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h2>Avaliações da Disciplina</h2>
+                    <button class="btn-primary" onclick="openReviewModal()">Adicionar Avaliação</button>
+                </div>
+                
+                <div class="overall-rating">
+                    <div class="rating-summary">
+                        <div class="rating-score">4.5</div>
+                        <div class="rating-stars">
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star filled">★</span>
+                            <span class="star half">★</span>
+                        </div>
+                        <div class="rating-text">Baseado em 45 avaliações</div>
+                    </div>
+                </div>
+
+                <div class="reviews-list">
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">A</div>
+                                <div class="reviewer-details">
+                                    <span class="reviewer-name">Aluno Anônimo</span>
+                                    <span class="review-date">Março 2024</span>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p>Excelente disciplina! O professor explica muito bem os conceitos de OOP. Os exercícios práticos ajudam muito no aprendizado. Recomendo para quem quer entender bem programação orientada a objetos.</p>
+                        </div>
+                        <div class="review-tags">
+                            <span class="tag">Didática excelente</span>
+                            <span class="tag">Exercícios práticos</span>
+                            <span class="tag">Conteúdo relevante</span>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">B</div>
+                                <div class="reviewer-details">
+                                    <span class="reviewer-name">Aluno Anônimo</span>
+                                    <span class="review-date">Fevereiro 2024</span>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star">★</span>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p>Disciplina interessante, mas um pouco puxada. É importante ter uma base sólida de programação antes de cursá-la. As provas são justas e o conteúdo é bem aplicado.</p>
+                        </div>
+                        <div class="review-tags">
+                            <span class="tag">Desafiadora</span>
+                            <span class="tag">Provas justas</span>
+                            <span class="tag">Pré-requisitos importantes</span>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">C</div>
+                                <div class="reviewer-details">
+                                    <span class="reviewer-name">Aluno Anônimo</span>
+                                    <span class="review-date">Janeiro 2024</span>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p>Conteúdo muito importante para a formação, mas poderia ter mais exemplos práticos. A teoria é bem explicada, mas falta um pouco de aplicação real.</p>
+                        </div>
+                        <div class="review-tags">
+                            <span class="tag">Teoria sólida</span>
+                            <span class="tag">Falta prática</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Avaliar Disciplina</h3>
+                <span class="close" onclick="closeReviewModal()">&times;</span>
+            </div>
+            <form class="modal-form">
+                <div class="form-group">
+                    <label>Nota Geral</label>
+                    <div class="rating-input">
+                        <input type="radio" id="star5" name="rating" value="5">
+                        <label for="star5">★</label>
+                        <input type="radio" id="star4" name="rating" value="4">
+                        <label for="star4">★</label>
+                        <input type="radio" id="star3" name="rating" value="3">
+                        <label for="star3">★</label>
+                        <input type="radio" id="star2" name="rating" value="2">
+                        <label for="star2">★</label>
+                        <input type="radio" id="star1" name="rating" value="1">
+                        <label for="star1">★</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reviewText">Comentário</label>
+                    <textarea id="reviewText" name="reviewText" rows="4" placeholder="Compartilhe sua experiência com esta disciplina..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tags (opcional)</label>
+                    <div class="tags-input">
+                        <input type="text" placeholder="Digite uma tag e pressione Enter" onkeypress="addTag(event)">
+                        <div class="selected-tags" id="selectedTags"></div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeReviewModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Publicar Avaliação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/class.js"></script>
+</body>
+</html>

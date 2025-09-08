@@ -21,7 +21,7 @@ public class UploadController {
         this.pdfValidationService = pdfValidationService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/pdf-validator")
     public String index() {
         return "index";
     }

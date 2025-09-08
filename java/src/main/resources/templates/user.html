@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Sistema Acadêmico</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/user.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>Sistema Acadêmico</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/user" class="nav-link active">Perfil</a>
+                <a href="/login" class="nav-link">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="user-container">
+        <div class="user-header">
+            <h1>Configurações do Perfil</h1>
+            <p>Gerencie suas informações pessoais e configurações da conta</p>
+        </div>
+
+        <div class="user-content">
+            <div class="user-info-section">
+                <div class="section-title">
+                    <h2>Informações Pessoais</h2>
+                </div>
+                
+                <div class="user-info-card">
+                    <div class="user-avatar">
+                        <div class="avatar-circle">
+                            <span>JD</span>
+                        </div>
+                        <button class="change-avatar-btn">Alterar Foto</button>
+                    </div>
+                    
+                    <div class="user-details">
+                        <div class="detail-row">
+                            <label>Nome:</label>
+                            <span>João da Silva</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Email:</label>
+                            <span>joao.silva@grad.ufsc.br</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Matrícula:</label>
+                            <span>20230001</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Curso:</label>
+                            <span>Ciência da Computação</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Semestre Atual:</label>
+                            <span>5º Semestre</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <div class="section-title">
+                    <h2>Configurações da Conta</h2>
+                </div>
+                
+                <div class="actions-grid">
+                    <div class="action-card">
+                        <div class="action-icon">🔑</div>
+                        <div class="action-content">
+                            <h3>Alterar Senha</h3>
+                            <p>Atualize sua senha para manter sua conta segura</p>
+                            <button class="btn-secondary" onclick="openPasswordModal()">Alterar Senha</button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-card">
+                        <div class="action-icon">📄</div>
+                        <div class="action-content">
+                            <h3>Atualizar Histórico</h3>
+                            <p>Faça upload de um novo histórico acadêmico</p>
+                            <button class="btn-secondary" onclick="openUploadModal()">Atualizar PDF</button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-card danger">
+                        <div class="action-icon">🗑️</div>
+                        <div class="action-content">
+                            <h3>Excluir Conta</h3>
+                            <p>Remover permanentemente sua conta do sistema</p>
+                            <button class="btn-danger" onclick="openDeleteModal()">Excluir Conta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Alterar Senha</h3>
+                <span class="close" onclick="closePasswordModal()">&times;</span>
+            </div>
+            <form class="modal-form">
+                <div class="form-group">
+                    <label for="currentPassword">Senha Atual</label>
+                    <input type="password" id="currentPassword" name="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Nova Senha</label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Confirmar Nova Senha</label>
+                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closePasswordModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Alterar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Atualizar Histórico Acadêmico</h3>
+                <span class="close" onclick="closeUploadModal()">&times;</span>
+            </div>
+            <form class="modal-form" enctype="multipart/form-data">
+                <div class="form-group file-upload">
+                    <label for="newPdf">Novo Histórico (PDF)</label>
+                    <input type="file" id="newPdf" name="newPdf" accept=".pdf" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeUploadModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Atualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Exclusão</h3>
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
+                <div class="form-group">
+                    <label for="deleteConfirmation">Digite "EXCLUIR" para confirmar:</label>
+                    <input type="text" id="deleteConfirmation" name="deleteConfirmation" required>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn-danger" onclick="confirmDelete()">Excluir Conta</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/user.js"></script>
+</body>
+</html>

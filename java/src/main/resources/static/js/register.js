@@ -1,0 +1,131 @@
+document.addEventListener('DOMContentLoaded', function() {
+	const fileInput = document.getElementById('pdf');
+	const fileUploadText = document.querySelector('.file-upload-text span:last-child');
+   
+	const emailInput = document.getElementById('email');
+	const passwordInput = document.getElementById('password');
+	const confirmPasswordInput = document.getElementById('confirmPassword');
+
+	function validateEmail(email) {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+
+	function validatePassword(password) {
+		// Example requirements: at least 8 characters, one uppercase, one lowercase, one number
+		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+		return passwordRegex.test(password);
+	}
+
+	emailInput.addEventListener('blur', function() {
+		if(!validateEmail(emailInput.value)){
+			document.getElementById('email-error-message').textContent = 'Email inválido.';
+		} else {
+			document.getElementById('email-error-message').textContent = '';
+		}
+	});
+
+	passwordInput.addEventListener('blur', function() {
+		if (!validatePassword(passwordInput.value)) {
+			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.';
+		} else {
+			document.getElementById('password-error-message').textContent = '';
+		}
+	});
+
+	confirmPasswordInput.addEventListener('blur', function() {
+		if (confirmPasswordInput.value !== passwordInput.value) {
+			document.getElementById('password-confirm-error-message').textContent = 'As senhas não coincidem';
+		} else {
+			document.getElementById('password-confirm-error-message').textContent = '';
+		}
+	});
+
+	fileInput.addEventListener('change', function(e) {
+		const file = e.target.files[0];
+		if (file) {
+			// Update the text to show the selected file name
+			fileUploadText.textContent = `Arquivo selecionado: ${file.name}`;
+			// Optional: Add a class for styling (e.g., to change color)
+			fileUploadText.parentElement.classList.add('file-selected');
+		} else {
+			// Reset if no file is selected
+			fileUploadText.textContent = 'Selecione seu histórico acadêmico em PDF';
+			fileUploadText.parentElement.classList.remove('file-selected');
+		}
+	});
+
+	function checkInitialFile(){
+		if(fileInput.files && fileInput.files[0]){
+			const file = fileInput.files[0];
+			fileUploadText.textContent = `Arquivo selecionado: ${file.name}`;
+			fileUploadText.parentElement.classList.add('file-selected');
+		}
+	}
+	checkInitialFile();
+});
+
+
+function validateAndSubmit() {
+	let isValid = true;
+	let errorMessage = document.getElementById('error-message');
+	const form = document.querySelector('form'); // Assuming there's a form element
+	const fileInput = document.getElementById('pdf');
+   
+	const emailInput = document.getElementById('email');
+	const passwordInput = document.getElementById('password');
+	const confirmPasswordInput = document.getElementById('confirmPassword');
+	
+	// Clear previous error message
+	errorMessage.textContent = '';
+	
+	function validateEmail(email) {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+	
+	function validatePassword(password) {
+		// Example requirements: at least 8 characters, one uppercase, one lowercase, one number
+		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+		return passwordRegex.test(password);
+	}
+	
+	// Check all validations separately (not else if chain)
+	if (!validateEmail(emailInput.value)) {
+		errorMessage.textContent = 'Email inválido.';
+		isValid = false;
+	}
+	if (!validatePassword(passwordInput.value)) {
+		errorMessage.textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.';
+		isValid = false;
+	}
+	if (confirmPasswordInput.value !== passwordInput.value) {
+		errorMessage.textContent = 'As senhas não coincidem';
+		isValid = false;
+	}
+	if (!fileInput.files || !fileInput.files[0]) {
+		errorMessage.textContent = 'Selecione um arquivo pdf válido.';
+		isValid = false;
+	} else {
+		const file = fileInput.files[0];
+		const maxSizeInBytes = 1 * 1024 * 1024; // 1MB
+		if (file.size > maxSizeInBytes) {
+			errorMessage.textContent = 'O arquivo excede o tamanho máximo de 1MB.';
+			isValid = false;
+		}
+	}
+	console.log("Form is:" + (isValid ? "Valid" : "Not Valid"));
+	// alert(fileInput.files[0].name + (isValid ? "Valid" : "Not Valid"));
+
+	if (!isValid) {
+		e.preventDefault();
+		document.getElementById('email-error-message').textContent = '';
+		document.getElementById('password-error-message').textContent = '';
+		document.getElementById('password-confirm-error-message').textContent = '';
+		setTimeout(() => {
+			document.getElementById('error-message').textContent = '';
+		}, 3000);
+	} else {
+		form.submit();
+	}
+}
