@@ -1,0 +1,6 @@
+This file will contain the instructions to build the pages
+login_page: Just a regular login page, that takes a email and a password to a form. Will be the index for those who are not logged in (Nothing besides the login and the register pages will be allowed for non logged users)
+register_page: Just a regular register page, that takes in an email, password and a pdf file to a form.
+dashboard_page: The dashboard page will be the index for the logged users, there it will be shown the classes that the user still needs to take, with a color distribution based on the status of the class (White: available, Gray: unavailable, blue: taken but not evaluated, green: evaluated, red: critical (must be taken this semester to not delay the course)). This page will be likely modeled after a DB query, so it would be fine if the page is just a mold for that.
+user_page: Just a regular user configuration panel, where the user can switch password or delete the account
+class_page: a page where the user could access the class ratings and comments, and also see teachers ratings. This, along with the dashboard_page, will too likely be modeled after the DB query so it should be fine to be just a mold for that.

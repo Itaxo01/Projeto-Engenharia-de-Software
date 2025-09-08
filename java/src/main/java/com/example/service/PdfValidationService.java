@@ -5,7 +5,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.time.Duration;
 
 @Service
 public class PdfValidationService {
@@ -36,7 +34,7 @@ public class PdfValidationService {
 
 	public record ValidationResult(boolean valid, String message) {}
 
-	public ValidationResult validate(MultipartFile file) {
+	public static ValidationResult validate(MultipartFile file) {
 		String filename = file.getOriginalFilename();
 		if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
 			return new ValidationResult(false, "The uploaded file is not a PDF.");
@@ -110,7 +108,7 @@ public class PdfValidationService {
             .header("Cookie", cookie_to_post)
             .header("accept", "*/*")
             .header("accept-encoding", "gzip, deflate, br, zstd")
-            .timeout(Duration.ofMillis(700))
+            // .timeout(Duration.ofMillis(1000))
             .POST(HttpRequest.BodyPublishers.ofString(getFormDataAsString(params)))
             .build();
         
