@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="15.1">
-  <help_text>fontsize=25
-// Uncomment the following line to change the fontsize and font:
+<diagram program="umlet" version="13.3">
+  <help_text>// Uncomment the following line to change the fontsize and font:
+fontsize=10
 // fontfamily=SansSerif //possible: SansSerif,Serif,Monospaced
 
 
@@ -58,7 +58,7 @@ bg=White</panel_attributes>
     <coordinates>
       <x>100</x>
       <y>440</y>
-      <w>145</w>
+      <w>160</w>
       <h>130</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
@@ -166,12 +166,12 @@ bg=White</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>290</x>
-      <y>550</y>
+      <y>555</y>
       <w>130</w>
-      <h>30</h>
+      <h>25</h>
     </coordinates>
     <panel_attributes/>
-    <additional_attributes>10.0;20.0;240.0;40.0</additional_attributes>
+    <additional_attributes>10.0;10.0;240.0;30.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -195,13 +195,13 @@ bg=White</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>655</x>
-      <y>550</y>
+      <y>555</y>
       <w>100</w>
-      <h>25</h>
+      <h>20</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 &lt;&lt;use&gt;&gt;</panel_attributes>
-    <additional_attributes>180.0;30.0;10.0;30.0</additional_attributes>
+    <additional_attributes>180.0;20.0;10.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -542,36 +542,36 @@ cursa &gt;</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1635</x>
-      <y>75</y>
-      <w>200</w>
-      <h>160</h>
+      <y>70</y>
+      <w>150</w>
+      <h>165</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1..n
 m2=1..n
 &lt; compoe</panel_attributes>
-    <additional_attributes>10.0;10.0;260.0;10.0;260.0;300.0</additional_attributes>
+    <additional_attributes>10.0;20.0;260.0;20.0;260.0;310.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>1420</x>
-      <y>240</y>
+      <y>245</y>
       <w>305</w>
-      <h>35</h>
+      <h>20</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=1..n
 m2=1..n
 cursa &gt;</panel_attributes>
-    <additional_attributes>10.0;30.0;590.0;30.0</additional_attributes>
+    <additional_attributes>10.0;20.0;590.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>1765</x>
       <y>275</y>
-      <w>65</w>
+      <w>35</w>
       <h>125</h>
     </coordinates>
     <panel_attributes>lt=-
@@ -585,7 +585,7 @@ ensina ^</panel_attributes>
     <coordinates>
       <x>1365</x>
       <y>280</y>
-      <w>60</w>
+      <w>35</w>
       <h>110</h>
     </coordinates>
     <panel_attributes>lt=-
@@ -598,15 +598,15 @@ envia v</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1420</x>
-      <y>395</y>
+      <y>400</y>
       <w>305</w>
-      <h>35</h>
+      <h>20</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=0..n
 m2=1
 avalia &gt;</panel_attributes>
-    <additional_attributes>10.0;30.0;590.0;30.0</additional_attributes>
+    <additional_attributes>10.0;20.0;590.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -628,7 +628,7 @@ votos_negativos</panel_attributes>
     <coordinates>
       <x>1365</x>
       <y>420</y>
-      <w>110</w>
+      <w>55</w>
       <h>90</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;&gt;&gt;
@@ -640,10 +640,10 @@ complementa ^</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1205</x>
-      <y>515</y>
-      <w>270</w>
-      <h>105</h>
+      <x>1240</x>
+      <y>520</y>
+      <w>180</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;&gt;&gt;
 m1=0..n
@@ -651,6 +651,6 @@ r1=comentario-filho
 m2=1
 r2=comentario-pai
 comenta &gt;</panel_attributes>
-    <additional_attributes>220.0;30.0;80.0;30.0;80.0;190.0;340.0;190.0;340.0;100.0</additional_attributes>
+    <additional_attributes>150.0;20.0;10.0;20.0;10.0;180.0;270.0;180.0;270.0;90.0</additional_attributes>
   </element>
 </diagram>

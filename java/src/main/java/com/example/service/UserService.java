@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServlet;
 
 import java.io.*;
 import java.nio.file.*;
@@ -17,17 +16,9 @@ public class UserService {
     
     private final Map<String, String> users = new ConcurrentHashMap<>();
     private final String USERS_FILE = "src/main/resources/users.properties";
-    private final HashMap sessions = new HashMap<String,String>();
 
 	public record CreationResult(boolean success, String message) {}
 
-
-
-    public boolean createSession(String sessionId, String email) {
-        if (sessionId.isEmpty() || email.isEmpty()) return false;
-        sessions.put(sessionId, email);
-        return true;
-    }
 
     @PostConstruct
     public void loadUsersFromFile() {

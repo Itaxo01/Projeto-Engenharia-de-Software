@@ -3,11 +3,12 @@ package com.example.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import jakarta.servlet.http.HttpServletRequest;
 
 import com.example.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.websocket.server.PathParam;
 
 @Controller
 public class MainController {
@@ -42,10 +43,16 @@ public class MainController {
         return "user";
     }
 
-    @GetMapping("/class")
-    public String classDetails(@RequestParam(required = false) String id, Model model) {
-        // TODO: Add logic to fetch class details from database
-        // For now, we'll add mock data for the template
+
+    @GetMapping("/class/{id}")
+    public String classDetails(@PathParam("id") String classId, Model model) {
+        model.addAttribute("classId", classId);
+        return "class";
+    }
+
+    @GetMapping("/class")   
+    public String classDetai(@RequestParam("id") String classId, Model model) {
+        model.addAttribute("classId", classId);
         return "class";
     }
 

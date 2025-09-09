@@ -4,18 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+
+import com.example.service.UserService;
+
 import org.springframework.http.MediaType;
 
-import com.example.service.PdfValidationService;
-import com.example.service.UserService;
-import com.example.service.HashingService;
-import com.example.service.UserService.CreationResult;
-
-import com.example.model.RegisterModel;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 @Controller
@@ -37,7 +31,6 @@ public class LoginController {
 			HttpSession session = request.getSession();
 			session.setAttribute("email", email);
 			session.setMaxInactiveInterval(30*60);
-			userService.createSession(session.getId(), email);
 			return "redirect:/dashboard";
 		} else {
 			model.addAttribute("error", "Invalid email or password.");
