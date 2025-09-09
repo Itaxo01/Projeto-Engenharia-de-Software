@@ -2,18 +2,32 @@ package com.example.service;
 
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServlet;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 @Service
 public class UserService {
     
     private final Map<String, String> users = new ConcurrentHashMap<>();
     private final String USERS_FILE = "src/main/resources/users.properties";
-    
-	 public record CreationResult(boolean success, String message) {}
+    private final HashMap sessions = new HashMap<String,String>();
+
+	public record CreationResult(boolean success, String message) {}
+
+
+
+    public boolean createSession(String sessionId, String email) {
+        if (sessionId.isEmpty() || email.isEmpty()) return false;
+        sessions.put(sessionId, email);
+        return true;
+    }
 
     @PostConstruct
     public void loadUsersFromFile() {
@@ -50,13 +64,28 @@ public class UserService {
         if (emailExists(email)) {
             return new CreationResult(false, "Email already registered.");
         }
-        
-        users.put(email, password);
+		  String hashPassword = HashingService.hashPassword(password);
+        users.put(email, hashPassword);
         saveUsersToFile();
         return new CreationResult(true, "User created successfully.");
     }
     
     public boolean validateUser(String email, String password) {
-        return password.equals(users.get(email));
+		  if (!emailExists(email)) {
+				return false;
+		  }
+        String storedHash = users.get(email);
+        return HashingService.verifyPassword(password, storedHash);
     }
+
+	 public static boolean verifySession(HttpServletRequest request) {
+		HttpSession session =  request.getSession(false);
+		if (session == null) return false;
+		try {
+			String email = session.getAttribute("email").toString();
+			return email != null && !email.isEmpty();
+		} catch(Exception e) {
+			return false;
+		}
+	}
 }

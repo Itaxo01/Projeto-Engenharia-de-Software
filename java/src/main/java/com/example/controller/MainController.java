@@ -5,6 +5,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpServletRequest;
+
+import com.example.service.UserService;
 
 @Controller
 public class MainController {
@@ -25,9 +28,11 @@ public class MainController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        // TODO: Add logic to fetch user classes from database
-        // For now, we'll add mock data for the template
+    public String dashboard(HttpServletRequest request, Model model) {
+		boolean auth = UserService.verifySession(request);
+		if (!auth) {
+			return "redirect:/login";
+		}
         return "dashboard";
     }
 
@@ -44,12 +49,4 @@ public class MainController {
         return "class";
     }
 
-    @PostMapping("/login")
-    public String handleLogin(@RequestParam String email, @RequestParam String password, Model model) {
-        // TODO: Implement authentication logic
-        // For now, redirect to dashboard
-        return "redirect:/dashboard";
-    }
-
-    
 }
