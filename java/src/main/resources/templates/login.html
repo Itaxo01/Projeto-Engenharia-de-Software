@@ -15,7 +15,7 @@
                 <p>Faça login para acessar sua conta</p>
             </div>
             
-            <form class="login-form" method="post" action="/login">
+            <form class="login-form" method="post" enctype="multipart/form-data" action="/login">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" required 
@@ -28,6 +28,11 @@
                            placeholder="Digite sua senha">
                 </div>
                 
+					  <!-- Backend error message display -->
+                <div th:if="${error}" class="alert alert-error">
+                    <h5 style="text-align: center; color: rgb(136, 37, 37);" th:text="${error}" id="backend-error-message"></h5>
+                </div>
+					 
                 <button type="submit" class="btn-primary">Entrar</button>
                 
                 <div class="form-footer">

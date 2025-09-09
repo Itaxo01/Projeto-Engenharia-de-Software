@@ -34,7 +34,7 @@ public class UploadController {
             return "result";
         }
 
-        var result = pdfValidationService.validate(file);
+        var result = PdfValidationService.validate(file);
         model.addAttribute("message", result.message());
         model.addAttribute("status", result.valid() ? "success" : "error");
         return "result";

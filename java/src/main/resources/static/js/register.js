@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	const emailInput = document.getElementById('email');
 	const passwordInput = document.getElementById('password');
 	const confirmPasswordInput = document.getElementById('confirmPassword');
+	let backendError = document.getElementById('backend-error-message');
+	if(backendError){
+		setTimeout(() => {
+			backendError.textContent = '';
+		}, 3000);
+	}
 
 	function validateEmail(email) {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,8 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			document.getElementById('password-confirm-error-message').textContent = '';
 		}
 	});
-
+	
 	fileInput.addEventListener('change', function(e) {
+		if(backendError) backendError.textContent = '';
 		const file = e.target.files[0];
 		if (file) {
 			// Update the text to show the selected file name
@@ -118,7 +125,6 @@ function validateAndSubmit() {
 	// alert(fileInput.files[0].name + (isValid ? "Valid" : "Not Valid"));
 
 	if (!isValid) {
-		e.preventDefault();
 		document.getElementById('email-error-message').textContent = '';
 		document.getElementById('password-error-message').textContent = '';
 		document.getElementById('password-confirm-error-message').textContent = '';
@@ -126,6 +132,7 @@ function validateAndSubmit() {
 			document.getElementById('error-message').textContent = '';
 		}, 3000);
 	} else {
+		console.log("Submitting form...");
 		form.submit();
 	}
 }
