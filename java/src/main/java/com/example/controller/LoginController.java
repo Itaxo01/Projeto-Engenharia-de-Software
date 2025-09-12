@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.service.UserService;
+import com.example.service.SessionService;
 
 import org.springframework.http.MediaType;
 
@@ -28,9 +29,7 @@ public class LoginController {
 		
 		System.out.println("Authentication " + (authenticated ? "succeeded" : "failed") + " for " + email);
 		if(authenticated) {
-			HttpSession session = request.getSession();
-			session.setAttribute("email", email);
-			session.setMaxInactiveInterval(30*60);
+			SessionService.createSession(request, email);
 			return "redirect:/dashboard";
 		} else {
 			model.addAttribute("error", "Invalid email or password.");
