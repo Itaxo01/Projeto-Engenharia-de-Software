@@ -25,7 +25,7 @@ public class RegisterController {
 	
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String handleRegister(@RequestParam("email") String email, @RequestParam("password") String password, @RequestParam("pdf") MultipartFile pdf, Model model) {
-		email = normalizeEmail(email);
+		email = UserService.normalizeEmail(email);
 		System.out.println("Register attempt: " + email);
 		System.out.println("PDF received: " + (pdf != null ? pdf.getOriginalFilename() : "null"));
 		
@@ -45,22 +45,4 @@ public class RegisterController {
 			return "register";
 		}
     }
-
-	 private String normalizeEmail(String email){
-		if(email == null) return null;
-		email = email.trim().toLowerCase();
-		if(email.endsWith("@gmail.com")){
-		  String[] parts = email.split("@");
-        String localPart = parts[0];
-        
-        localPart = localPart.replace(".", "");
-        
-        if (localPart.contains("+")) {
-            localPart = localPart.substring(0, localPart.indexOf("+"));
-        }
-        
-        email = localPart + "@gmail.com";
-		}
-		return email;
-	 }
 }

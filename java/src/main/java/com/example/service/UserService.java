@@ -46,4 +46,22 @@ public class UserService {
         String storedHash = userRepository.getPassword(email);
         return HashingService.verifyPassword(password, storedHash);
     }
+
+	 public static String normalizeEmail(String email){
+		if(email == null) return null;
+		email = email.trim().toLowerCase();
+		if(email.endsWith("@gmail.com")){
+		  String[] parts = email.split("@");
+        String localPart = parts[0];
+        
+        localPart = localPart.replace(".", "");
+        
+        if (localPart.contains("+")) {
+            localPart = localPart.substring(0, localPart.indexOf("+"));
+        }
+        
+        email = localPart + "@gmail.com";
+		}
+		return email;
+	 }
 }
