@@ -58,6 +58,28 @@ body {
     color: #2980b9;
 }
 
+.nav-logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-logout-form .nav-link {
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 8px 16px;
+}
+
+.nav-logout-form .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
 /* Form components */
 .form-group {
     margin-bottom: 16px;

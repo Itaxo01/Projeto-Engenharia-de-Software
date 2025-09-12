@@ -32,45 +32,75 @@ public class PdfValidationService {
 	private static final Pattern CODE_PATTERN = Pattern.compile("([0-9]{6}-[0-9]{14})");
 
 
-	public record ValidationResult(boolean valid, String message) {}
+	public record ValidationResult(boolean valid, String message, String nome, String matricula, String curso) {}
 
 	public static ValidationResult validate(MultipartFile file) {
 		String filename = file.getOriginalFilename();
 		if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
-			return new ValidationResult(false, "The uploaded file is not a PDF.");
+			return new ValidationResult(false, "The uploaded file is not a PDF.", null, null, null);
 		}
 		try (var is = file.getInputStream(); var doc = PDDocument.load(is)) {
 			if (doc.getNumberOfPages() <= 0) {
-				return new ValidationResult(false, "Invalid PDF: no pages found.");
+				return new ValidationResult(false, "Invalid PDF: no pages found.", null, null, null);
 			}
 			if (doc.isEncrypted()) {
-				return new ValidationResult(false, "PDF is encrypted. Please upload an unencrypted PDF.");
+				return new ValidationResult(false, "PDF is encrypted. Please upload an unencrypted PDF.", null, null, null);
 			}
 
 			// Extract text and validate presence of authenticity URL + code
 			String text = new PDFTextStripper().getText(doc);
+			text = text.replaceAll("\\R+", " ").replaceAll("\\s+", " ");
 			String code = getVerificationCode(text);
 			if (code == null || !containsAuthenticateUrl(text)) {
-				return new ValidationResult(false, "Verification string not found in PDF.");
+				return new ValidationResult(false, "Verification string not found in PDF.", null, null, null);
 			}
 
 			// Download authenticity copy and compare
 			byte[] originalBytes = file.getBytes();
 			byte[] downloaded = downloadPdf(code);
 			if (downloaded == null || downloaded.length == 0) {
-				return new ValidationResult(false, "Could not download authenticity PDF for code " + code + ".");
+				return new ValidationResult(false, "Could not download authenticity PDF for code " + code + ".", null, null, null);
 			}
 
 			boolean equal = Arrays.equals(sha256(originalBytes), sha256(downloaded));
 			if (!equal) {
-				return new ValidationResult(false, "PDF content differs from authenticity copy (code: " + code + ").");
+				return new ValidationResult(false, "PDF content differs from authenticity copy (code: " + code + ").", null, null, null);
+			}
+			// Extract user details from the original PDF text
+			// Apenas uns regex burros
+			String nome = null, matricula = null, curso = null;
+			Matcher nomeMatcherPTBR = Pattern.compile("arquivos, que\\s+([^,]+?)\\s*,").matcher(text);
+			if (nomeMatcherPTBR.find()) {
+				nome = nomeMatcherPTBR.group(1).trim();
+			}
+			if(nome == null){
+				return new ValidationResult(false, "Could not extract name from PDF text. Please insert the correct PDF file", null, null, null);
+			}
+			System.out.println("Nome: " + nome);
+
+			Matcher matriculaMatcherPTBR = Pattern.compile("sob o número\\s+([0-9\\s\\-]{8,})").matcher(text);
+			if (matriculaMatcherPTBR.find()) {
+				matricula = matriculaMatcherPTBR.group(1).trim();
+			} 
+			if(matricula == null){
+				return new ValidationResult(false, "Could not extract enrollment number from PDF text. Please insert the correct PDF file", null, null, null);
+			}
+			System.out.println("Matricula: " + matricula);
+			Matcher cursoMatcherPTBR = Pattern.compile("no curso de\\s+([^,]+?)\\s*,").matcher(text);
+			if (cursoMatcherPTBR.find()) {
+				curso = cursoMatcherPTBR.group(1).trim();
 			}
 
-			return new ValidationResult(true, "Valid PDF and matches authenticity copy. URL: " + UFSC_AUTHENTICATE_URL + ", code: " + code);
+			if(curso == null){
+				return new ValidationResult(false, "Could not extract course from PDF text. Please insert the correct PDF file", null, null, null);
+			}
+			System.out.println("Curso: " + curso);
+			
+			return new ValidationResult(true, "Valid PDF and matches authenticity copy. URL: " + UFSC_AUTHENTICATE_URL + ", code: " + code, nome, matricula, curso);
 		} catch (IOException e) {
-			return new ValidationResult(false, "Failed to read PDF: " + e.getMessage());
+			return new ValidationResult(false, "Failed to read PDF: " + e.getMessage(), null, null, null);
 		} catch (Exception e) {
-			return new ValidationResult(false, "Failed to download authenticity PDF: " + e.getMessage());
+			return new ValidationResult(false, "Failed to download authenticity PDF: " + e.getMessage(), null, null, null);
 		}
 	}
 

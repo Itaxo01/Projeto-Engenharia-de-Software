@@ -16,10 +16,20 @@
             <div class="nav-links">
                 <a href="/dashboard" class="nav-link">Dashboard</a>
                 <a href="/user" class="nav-link active">Perfil</a>
-                <a href="/login" class="nav-link">Sair</a>
+  					 <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
             </div>
         </div>
     </nav>
+
+	 <!-- Hidden form -->
+	<form id="logout-form" method="post" action="/logout" style="display: none;">
+	</form>
+	<script>
+	function logout() {
+		document.getElementById('logout-form').submit();
+	}
+	</script>
+
 
     <div class="user-container">
         <div class="user-header">
@@ -38,7 +48,6 @@
                         <div class="avatar-circle">
                             <span>JD</span>
                         </div>
-                        <button class="change-avatar-btn">Alterar Foto</button>
                     </div>
                     
                     <div class="user-details">
@@ -57,10 +66,6 @@
                         <div class="detail-row">
                             <label>Curso:</label>
                             <span>Ciência da Computação</span>
-                        </div>
-                        <div class="detail-row">
-                            <label>Semestre Atual:</label>
-                            <span>5º Semestre</span>
                         </div>
                     </div>
                 </div>

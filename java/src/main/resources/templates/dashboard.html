@@ -16,10 +16,19 @@
             <div class="nav-links">
                 <a href="/dashboard" class="nav-link active">Dashboard</a>
                 <a href="/user" class="nav-link">Perfil</a>
-                <a href="/login" class="nav-link">Sair</a>
+					 <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
             </div>
         </div>
     </nav>
+
+	 <!-- Hidden form -->
+	<form id="logout-form" method="post" action="/logout" style="display: none;">
+	</form>
+	<script>
+	function logout() {
+		document.getElementById('logout-form').submit();
+	}
+	</script>
 
     <div class="dashboard-container">
         <div class="dashboard-header">

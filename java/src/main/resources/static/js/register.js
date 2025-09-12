@@ -1,3 +1,26 @@
+function validateEmail(email) {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+
+function validatePassword(password) {
+	// pelo menos 8 caracteres, um caixa alta, um caixa baixa, um número e um símbolo 
+	let t = password.length;
+	if(t < 8) return false;
+	let hasUpper = false;
+	let hasLower = false;
+	let hasNumber = false;
+	let hasSymbol = false;
+	for(let i = 0; i<t; i++){
+		let e = password[i];
+		if(e >= 'A' && e <= 'Z') hasUpper=true;
+		else if(e >= 'a' && e <= 'z') hasLower=true;
+		else if(e >= '0' && e <= '9') hasNumber=true;
+		else hasSymbol=true;
+	};
+	return hasUpper && hasLower && hasNumber && hasSymbol;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 	const fileInput = document.getElementById('pdf');
 	const fileUploadText = document.querySelector('.file-upload-text span:last-child');
@@ -12,16 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		}, 3000);
 	}
 
-	function validateEmail(email) {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
-	}
-
-	function validatePassword(password) {
-		// Example requirements: at least 8 characters, one uppercase, one lowercase, one number
-		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-		return passwordRegex.test(password);
-	}
+	
 
 	emailInput.addEventListener('blur', function() {
 		if(!validateEmail(emailInput.value)){
@@ -33,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	passwordInput.addEventListener('blur', function() {
 		if (!validatePassword(passwordInput.value)) {
-			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.';
+			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
 		} else {
 			document.getElementById('password-error-message').textContent = '';
 		}
@@ -86,24 +100,13 @@ function validateAndSubmit() {
 	// Clear previous error message
 	errorMessage.textContent = '';
 	
-	function validateEmail(email) {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
-	}
-	
-	function validatePassword(password) {
-		// Example requirements: at least 8 characters, one uppercase, one lowercase, one number
-		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-		return passwordRegex.test(password);
-	}
-	
 	// Check all validations separately (not else if chain)
 	if (!validateEmail(emailInput.value)) {
 		errorMessage.textContent = 'Email inválido.';
 		isValid = false;
 	}
 	if (!validatePassword(passwordInput.value)) {
-		errorMessage.textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.';
+		errorMessage.textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
 		isValid = false;
 	}
 	if (confirmPasswordInput.value !== passwordInput.value) {
