@@ -5,7 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.service.UserService;
+import com.example.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
@@ -19,18 +19,26 @@ public class MainController {
     }
 
     @GetMapping("/login")
-    public String login() {
-        return "login";
+    public String login(HttpServletRequest request, Model model) {
+      boolean auth = SessionService.verifySession(request);
+		if (!auth) {
+			return "login";
+		}
+		return "dashboard";
     }
 
     @GetMapping("/register")
-    public String register() {
-        return "register";
+    public String register(HttpServletRequest request, Model model) {
+		boolean auth = SessionService.verifySession(request);
+		if (!auth) {
+			return "register";
+		}
+		return "dashboard";
     }
 
     @GetMapping("/dashboard")
     public String dashboard(HttpServletRequest request, Model model) {
-		boolean auth = UserService.verifySession(request);
+		boolean auth = SessionService.verifySession(request);
 		if (!auth) {
 			return "redirect:/login";
 		}

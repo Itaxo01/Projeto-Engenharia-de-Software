@@ -1,5 +1,6 @@
 package com.example.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
@@ -10,73 +11,30 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.example.repository.UserRepository;
+
 
 @Service
 public class UserService {
-    
-    private final Map<String, String> users = new ConcurrentHashMap<>();
-    private final String USERS_FILE = "src/main/resources/users.properties";
+    @Autowired
+	 private UserRepository userRepository;
 
 	public record CreationResult(boolean success, String message) {}
-
-
-    @PostConstruct
-    public void loadUsersFromFile() {
-        try {
-            Path path = Paths.get(USERS_FILE);
-            if (Files.exists(path)) {
-                Properties props = new Properties();
-                props.load(Files.newInputStream(path));
-                props.forEach((key, value) -> users.put(key.toString(), value.toString()));
-            }
-        } catch (IOException e) {
-            // Handle error
-        }
-    }
-    
-    private void saveUsersToFile() {
-        try {
-            Path path = Paths.get(USERS_FILE);
-            Files.createDirectories(path.getParent());
-            
-            Properties props = new Properties();
-            users.forEach(props::setProperty);
-            props.store(Files.newOutputStream(path), "User accounts");
-        } catch (IOException e) {
-            // Handle error
-        }
-    }
-    
-    public boolean emailExists(String email) {
-        return users.containsKey(email);
-    }
     
     public CreationResult createUser(String email, String password) {
-        if (emailExists(email)) {
+        if (userRepository.emailExists(email)) {
             return new CreationResult(false, "Email already registered.");
         }
 		  String hashPassword = HashingService.hashPassword(password);
-        users.put(email, hashPassword);
-        saveUsersToFile();
-        return new CreationResult(true, "User created successfully.");
+		  userRepository.createUser(email, hashPassword);
+        return new CreationResult(true, "Conta criada com sucesso");
     }
     
     public boolean validateUser(String email, String password) {
-		  if (!emailExists(email)) {
+		  if (!userRepository.emailExists(email)) {
 				return false;
 		  }
-        String storedHash = users.get(email);
+        String storedHash = userRepository.getPassword(email);
         return HashingService.verifyPassword(password, storedHash);
     }
-
-	 public static boolean verifySession(HttpServletRequest request) {
-		HttpSession session =  request.getSession(false);
-		if (session == null) return false;
-		try {
-			String email = session.getAttribute("email").toString();
-			return email != null && !email.isEmpty();
-		} catch(Exception e) {
-			return false;
-		}
-	}
 }
