@@ -40,28 +40,41 @@ public class MainController {
     public String dashboard(HttpServletRequest request, Model model) {
 		boolean auth = SessionService.verifySession(request);
 		if (!auth) {
-			return "redirect:/login";
+			return "login";
 		}
         return "dashboard";
     }
 
+	 
     @GetMapping("/user")
-    public String userProfile(Model model) {
-        // TODO: Add logic to fetch user data from database
-        return "user";
-    }
+    public String userProfile(HttpServletRequest request, Model model) {
+		 boolean auth = SessionService.verifySession(request);
+		 if (!auth) {
+			return "login";
+		}
+		return "user";
+	}
 
-
+	
     @GetMapping("/class/{id}")
-    public String classDetails(@PathParam("id") String classId, Model model) {
-        model.addAttribute("classId", classId);
+    public String classDetails(HttpServletRequest request, @PathParam("id") String classId, Model model) {
+        boolean auth = SessionService.verifySession(request);
+		  if (!auth) {
+			return "login";
+		}
+		model.addAttribute("classId", classId);
         return "class";
-    }
+		}
 
     @GetMapping("/class")   
-    public String classDetai(@RequestParam("id") String classId, Model model) {
-        model.addAttribute("classId", classId);
+    public String classDetai(HttpServletRequest request, @RequestParam("id") String classId, Model model) {
+      boolean auth = SessionService.verifySession(request);
+		 if (!auth) {
+			return "login";
+		 }  
+		model.addAttribute("classId", classId);
         return "class";
     }
-
+	 
+	 
 }

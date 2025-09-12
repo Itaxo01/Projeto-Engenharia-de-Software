@@ -1,15 +1,13 @@
 package com.example.repository;
 
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
-import com.example.service.HashingService;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.model.User;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.http.HttpServletRequest;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,57 +16,63 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class UserRepository {
     
-    private final Map<String, String> users = new ConcurrentHashMap<>();
-    private final String USERS_FILE = "src/main/resources/users.properties";
-
-	public record CreationResult(boolean success, String message) {}
-
+    private final Map<String, User> users = new ConcurrentHashMap<>();
+    private final String USERS_JSON = "src/main/resources/users.json";
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
     public void loadUsersFromFile() {
         try {
-            Path path = Paths.get(USERS_FILE);
+            Path path = Paths.get(USERS_JSON);
             if (Files.exists(path)) {
-                Properties props = new Properties();
-                props.load(Files.newInputStream(path));
-                props.forEach((key, value) -> users.put(key.toString(), value.toString()));
+                Map<String, User> node = mapper.readValue(Files.readString(path), new TypeReference<Map<String,User>>() {});
+                users.putAll(node);
+					 System.out.println("Loaded users: " + users.keySet());
+				} else {
+					 System.out.println("users.json file not found, starting with an empty user list.");
             }
         } catch (IOException e) {
-            // Handle error
+            System.err.println("Error loading users: " + e.getMessage());
         }
     }
     
     private void saveUsersToFile() {
         try {
-            Path path = Paths.get(USERS_FILE);
-            Files.createDirectories(path.getParent());
-            
-            Properties props = new Properties();
-            users.forEach(props::setProperty);
-            props.store(Files.newOutputStream(path), "User accounts");
+            Path path = Paths.get(USERS_JSON);
+            // Ensure parent directory exists
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
+            }
+
+            String tmp = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(users);
+            Path tmpPath = path.resolveSibling(path.getFileName().toString() + ".tmp");
+            Files.writeString(tmpPath, tmp, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.move(tmpPath, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
-            // Handle error
+            System.err.println("Failed to save users.json: " + e.getMessage());
         }
     }
     
     public boolean emailExists(String email) {
-        return users.containsKey(email);
+        return email != null && users.containsKey(email);
     }
 
 
-	 public String getPassword(String email){
-			return users.get(email);
-	 }
+    public String getPassword(String email){
+        User u = users.get(email);
+        return u != null ? u.getPassword() : null;
+    }
 
-	 public void createUser(String email, String hashPassword) {
-        users.put(email, hashPassword);
+    public void createUser(String email, String password, String nome, String matricula, String curso) {
+        User user = new User(email, password, nome, matricula, curso);
+        users.put(user.getEmail(), user);
         saveUsersToFile();
     }
 
-	 public void deleteUser(String email){
-		users.remove(email);
-		saveUsersToFile();
-	 }
+    public void deleteUser(String email){
+        users.remove(email);
+        saveUsersToFile();
+    }
 
 
 }

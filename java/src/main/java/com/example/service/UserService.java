@@ -19,19 +19,28 @@ public class UserService {
     @Autowired
 	 private UserRepository userRepository;
 
-	public record CreationResult(boolean success, String message) {}
+	public record QueryResult(boolean success, String message) {}
     
-    public CreationResult createUser(String email, String password) {
+    public QueryResult createUser(String email, String password, String nome, String matricula, String curso) {
         if (userRepository.emailExists(email)) {
-            return new CreationResult(false, "Email already registered.");
+            return new QueryResult(false, "Email já registrado.");
         }
 		  String hashPassword = HashingService.hashPassword(password);
-		  userRepository.createUser(email, hashPassword);
-        return new CreationResult(true, "Conta criada com sucesso");
+		  userRepository.createUser(email, hashPassword, nome, matricula, curso);
+        return new QueryResult(true, "Conta criada com sucesso");
     }
+
+	 public QueryResult deleteUser(String email){
+		if(!userRepository.emailExists(email)){
+			return new QueryResult(false, "Essa conta não existe");
+		}
+		userRepository.deleteUser(email);
+		return new QueryResult(true, "Conta deletada com sucesso!");
+	 }
     
     public boolean validateUser(String email, String password) {
 		  if (!userRepository.emailExists(email)) {
+				System.out.println("Email not found: " + email);
 				return false;
 		  }
         String storedHash = userRepository.getPassword(email);
