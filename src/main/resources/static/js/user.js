@@ -48,6 +48,18 @@ window.onclick = function(event) {
     });
 }
 
+function httpPost(url, body) {
+    fetch(url, {
+        method: "POST",
+        body: body,
+        headers: {
+            "Content-type": "application/json; charset=UTF-8"
+        }
+    })
+    .then((response) => response.json())
+    .then((json) => console.log(json))
+}
+
 // Form validation
 document.addEventListener('DOMContentLoaded', function() {
     // Password change form validation
@@ -71,6 +83,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // TODO: Implement password change
+
+            httpPost("/api/password", JSON.stringify(
+                {"currentPassword": currentPassword, "newPassword": newPassword}));
             alert('Funcionalidade de alteração de senha será implementada no backend');
             closePasswordModal();
         });

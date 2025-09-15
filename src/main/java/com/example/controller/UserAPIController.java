@@ -1,14 +1,23 @@
 package com.example.controller;
 
+import java.util.Map;
+
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import com.example.service.SessionService;
+import com.example.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -27,6 +36,9 @@ public class UserAPIController {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private UserService userService;
+
 	@GetMapping("/me")
 	public ResponseEntity<UserDto> me(HttpServletRequest request) {
 		String email = SessionService.getCurrentUser(request);
@@ -38,6 +50,22 @@ public class UserAPIController {
 			return ResponseEntity.status(404).build();
 		}
 		return ResponseEntity.ok(UserDto.from(user));
+	}
+
+	@PostMapping("/password")
+	public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody Map<String,String> body) {
+		String email = SessionService.getCurrentUser(request);
+		System.out.println(body.get("currentPassword") + " "+body.get("newPassword"));
+		try {
+			userService.changePassword(email, body.get("currentPassword"), body.get("newPassword"));
+		} catch(Exception e) {
+			if (e.getMessage() == "400") 
+				return ResponseEntity.status(400).build();
+			else if (e.getMessage() == "401")
+				return ResponseEntity.status(401).build();
+			return ResponseEntity.status(500).build();
+		}
+		return ResponseEntity.ok("Sucesso");
 	}
 
 	/** DTO exposto pelo endpoint /api/me. */

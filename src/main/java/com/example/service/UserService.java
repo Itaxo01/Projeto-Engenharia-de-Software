@@ -75,4 +75,15 @@ public class UserService {
 		}
 		return email;
 	 }
+
+	/**
+	 * Altera senha de usuário
+	 */
+	public boolean changePassword (String email, String password, String newPassword) throws Exception {
+		if (!userRepository.emailExists(email)) throw new Exception("401");
+		String userPassword = userRepository.getPassword(email);
+		if (!HashingService.verifyPassword(password, userPassword)) throw new Exception("400");;
+		userRepository.changePassword(email, HashingService.hashPassword(newPassword));
+		return true;
+	}
 }

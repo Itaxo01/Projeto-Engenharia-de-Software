@@ -102,4 +102,8 @@ public class UserRepository {
 		users.remove(email);
 		saveUsersToFile();
     }
+
+    public void changePassword(String email, String passwordHash) {
+        users.get(email).setPassord(passwordHash);
+    }
 }

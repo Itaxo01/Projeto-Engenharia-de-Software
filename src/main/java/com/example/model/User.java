@@ -35,6 +35,10 @@ public class User {
 		return password;
 	}
 
+	public void setPassord(String password) {
+		this.password = password;
+	}
+
 	/** Nome completo do usuário extraído do PDF. */
 	public String getNome() {
 		return nome;
