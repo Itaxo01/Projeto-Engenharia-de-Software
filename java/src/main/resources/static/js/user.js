@@ -100,3 +100,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+document.addEventListener('DOMContentLoaded', async function() {
+	// carrega as informações do usuário
+    try {
+		 const res = await fetch('/api/me', { credentials: 'same-origin' });
+		 if (res.status === 401) {
+			 window.location.href = '/login?error=notAuthenticated';
+			 return;
+        }
+        if (!res.ok) {
+			  console.error('Failed to load user', res.status);
+			  return;
+			}
+        const user = await res.json();
+
+        const name = document.getElementById('user-name');
+        const email = document.getElementById('user-email');
+        const matricula = document.getElementById('user-matricula');
+        const curso = document.getElementById('user-curso');
+        const initials = document.getElementById('user-initials');
+
+        if (name) name.textContent = user.nome || '';
+        if (email) email.textContent = user.email || '';
+        if (matricula) matricula.textContent = user.matricula || '';
+        if (curso) curso.textContent = user.curso || '';
+
+        // Set initials from name
+        if (initials) {
+            var Words = user.nome.split(" ");
+				var init = (Words[0][0].toUpperCase() || '') + (Words[Words.length-1][0].toUpperCase() || '');
+            initials.textContent = init || 'U';
+        }
+    } catch (e) {
+        console.error('Error loading user:', e);
+    }
+});

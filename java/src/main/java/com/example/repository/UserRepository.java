@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UserRepository {
     
     private final Map<String, User> users = new ConcurrentHashMap<>();
+    private final Map<String, String> matriculas = new ConcurrentHashMap<>(); // Associa uma matrícula a um email
     private final String USERS_JSON = "src/main/resources/users.json";
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -27,6 +28,9 @@ public class UserRepository {
             if (Files.exists(path)) {
                 Map<String, User> node = mapper.readValue(Files.readString(path), new TypeReference<Map<String,User>>() {});
                 users.putAll(node);
+					 users.forEach((mail, user) -> 
+					 	matriculas.put(user.getMatricula(), mail)
+					 );
 					 System.out.println("Loaded users: " + users.keySet());
 				} else {
 					 System.out.println("users.json file not found, starting with an empty user list.");
@@ -57,11 +61,19 @@ public class UserRepository {
         return email != null && users.containsKey(email);
     }
 
+	 public boolean idExists(String id){
+		return matriculas.containsKey(id);
+	 }
 
     public String getPassword(String email){
         User u = users.get(email);
         return u != null ? u.getPassword() : null;
     }
+
+	 public User getUser(String email){
+		if(!emailExists(email)) return null;
+		return users.get(email);
+	 }
 
     public void createUser(String email, String password, String nome, String matricula, String curso) {
         User user = new User(email, password, nome, matricula, curso);

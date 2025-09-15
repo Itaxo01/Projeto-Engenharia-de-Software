@@ -32,6 +32,7 @@ public class RegisterController {
 		// Se isso aqui der erro a gente não sabe o que aconteceu
 		PdfValidationService.ValidationResult valid = PdfValidationService.validate(pdf);
 		if (!valid.valid()) {
+			System.out.println(valid.message());
 			model.addAttribute("error", valid.message());
 			return "register";
 		}

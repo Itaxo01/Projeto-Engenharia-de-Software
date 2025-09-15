@@ -25,6 +25,9 @@ public class UserService {
         if (userRepository.emailExists(email)) {
             return new QueryResult(false, "Email já registrado.");
         }
+		  if (userRepository.idExists(matricula)){
+            return new QueryResult(false, "Matrícula já registrada.");
+		  }
 		  String hashPassword = HashingService.hashPassword(password);
 		  userRepository.createUser(email, hashPassword, nome, matricula, curso);
         return new QueryResult(true, "Conta criada com sucesso");
