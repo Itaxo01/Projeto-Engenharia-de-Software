@@ -36,7 +36,7 @@ public class UserRepository {
 					 users.forEach((mail, user) -> 
 					 	matriculas.put(user.getMatricula(), mail)
 					 );
-					 System.out.println("Usuários carregados: " + users.keySet());
+					 System.out.println("Usuários carregados: " + users.size());
 				} else {
 					System.err.println("Erro ao carregar usuários: " + "Arquivo users.json não encontrado, iniciando com uma lista de usuários vazia.");
             }
