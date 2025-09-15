@@ -21,89 +21,105 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * Serviço responsável por validar o PDF enviado e extrair informações básicas do aluno.
+ * A validação inclui:
+ * - Checagens estruturais (extensão, páginas, criptografia)
+ * - Presença do link de autenticidade
+ * - Download na API de autenticação da UFSC e comparação de hash entre a original e a cópia
+ * - Extração de nome, matrícula e curso via expressões regulares
+ */
 @Service
 public class PdfValidationService {
 
-	// Base phrase URL we expect to find in the PDF
+	// URL base para verificação de autenticidade (deve conter no PDF)
 	private static final String UFSC_AUTHENTICATE_URL = "https://cagr.ufsc.br/autenticidade";
 
-	// Code pattern like 310516-45000004814119
+	// Regex do código de autenticação no formato 123456-12345678901234
 	private static final Pattern CODE_PATTERN = Pattern.compile("([0-9]{6}-[0-9]{14})");
 
-
+	/** Resultado da validação de PDF. */
 	public record ValidationResult(boolean valid, String message, String nome, String matricula, String curso) {}
 
+	/**
+	 * Valida o arquivo PDF e tenta extrair os dados do aluno.
+	 * @param file arquivo enviado pelo usuário
+	 * @return {@link ValidationResult} com status, mensagem e dados extraídos
+	 */
 	public static ValidationResult validate(MultipartFile file) {
 		String filename = file.getOriginalFilename();
 		if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
-			return new ValidationResult(false, "The uploaded file is not a PDF.", null, null, null);
+			return new ValidationResult(false, "O arquivo enviado não é um PDF.", null, null, null);
 		}
 		try (var is = file.getInputStream(); var doc = PDDocument.load(is)) {
 			if (doc.getNumberOfPages() <= 0) {
-				return new ValidationResult(false, "Invalid PDF: no pages found.", null, null, null);
+				return new ValidationResult(false, "PDF inválido: nenhuma página encontrada.", null, null, null);
 			}
 			if (doc.isEncrypted()) {
-				return new ValidationResult(false, "PDF is encrypted. Please upload an unencrypted PDF.", null, null, null);
+				return new ValidationResult(false, "PDF está criptografado. Por favor, envie um PDF não criptografado.", null, null, null);
 			}
 
-			// Extract text and validate presence of authenticity URL + code
+			// Extrai o texto e valida a presença da URL de autenticidade + código
 			String text = new PDFTextStripper().getText(doc);
 			text = text.replaceAll("\\R+", " ").replaceAll("\\s+", " ");
 			String code = getVerificationCode(text);
 			if (code == null || !containsAuthenticateUrl(text)) {
-				return new ValidationResult(false, "Verification string not found in PDF.", null, null, null);
+				return new ValidationResult(false, "String de verificação não encontrada no PDF.", null, null, null);
 			}
 
 			// Download authenticity copy and compare
 			byte[] originalBytes = file.getBytes();
 			byte[] downloaded = downloadPdf(code);
 			if (downloaded == null || downloaded.length == 0) {
-				return new ValidationResult(false, "Could not download authenticity PDF for code " + code + ".", null, null, null);
+				return new ValidationResult(false, "Não foi possível baixar o PDF de autenticidade para o código " + code + ".", null, null, null);
 			}
 
 			boolean equal = Arrays.equals(sha256(originalBytes), sha256(downloaded));
 			if (!equal) {
-				return new ValidationResult(false, "PDF content differs from authenticity copy (code: " + code + ").", null, null, null);
+				return new ValidationResult(false, "O conteúdo do PDF difere da cópia de autenticidade (código: " + code + ").", null, null, null);
 			}
-			// Extract user details from the original PDF text
-			// Apenas uns regex burros
+			// Extrai os detalhes do usuário do texto original do PDF
 			String nome = null, matricula = null, curso = null;
 			Matcher nomeMatcherPTBR = Pattern.compile("arquivos, que\\s+([^,]+?)\\s*,").matcher(text);
 			if (nomeMatcherPTBR.find()) {
 				nome = nomeMatcherPTBR.group(1).trim();
 			}
+			final String INVALID_FILE = "Por favor, insira o arquivo PDF do atestado de matrícula em português";
 			if(nome == null){
-				return new ValidationResult(false, "Could not extract name from PDF text. Please insert the correct PDF file", null, null, null);
+				return new ValidationResult(false, "Não foi possível extrair o nome do texto do PDF." + INVALID_FILE, null, null, null);
 			}
-			System.out.println("Nome: " + nome);
 
-			Matcher matriculaMatcherPTBR = Pattern.compile("sob o número\\s+([0-9\\s\\-]{8,})").matcher(text);
+			Matcher matriculaMatcherPTBR = Pattern
+					.compile("sob o n[uú]mero\\s+([0-9\\s\\-]{8,})", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)
+					.matcher(text);
 			if (matriculaMatcherPTBR.find()) {
 				matricula = matriculaMatcherPTBR.group(1).trim();
 			} 
 			if(matricula == null){
-				return new ValidationResult(false, "Could not extract enrollment number from PDF text. Please insert the correct PDF file", null, null, null);
+				return new ValidationResult(false, "Não foi possível extrair a matrícula do texto do PDF." + INVALID_FILE, null, null, null);
 			}
-			System.out.println("Matricula: " + matricula);
+
 			Matcher cursoMatcherPTBR = Pattern.compile("no curso de\\s+([^,]+?)\\s*,").matcher(text);
 			if (cursoMatcherPTBR.find()) {
 				curso = cursoMatcherPTBR.group(1).trim();
 			}
-
 			if(curso == null){
-				return new ValidationResult(false, "Could not extract course from PDF text. Please insert the correct PDF file", null, null, null);
+				return new ValidationResult(false, "Não foi possível extrair o curso do texto do PDF." + INVALID_FILE, null, null, null);
 			}
-			System.out.println("Curso: " + curso);
 			
-			return new ValidationResult(true, "Valid PDF and matches authenticity copy. URL: " + UFSC_AUTHENTICATE_URL + ", code: " + code, nome, matricula, curso);
+			return new ValidationResult(true, "Arquivo PDF válido. URL: " + UFSC_AUTHENTICATE_URL + ", code: " + code, nome, matricula, curso);
 		} catch (IOException e) {
-			return new ValidationResult(false, "Failed to read PDF: " + e.getMessage(), null, null, null);
+			return new ValidationResult(false, "Falha ao ler o PDF: " + e.getMessage(), null, null, null);
 		} catch (Exception e) {
-			return new ValidationResult(false, "Failed to download authenticity PDF: " + e.getMessage(), null, null, null);
+			return new ValidationResult(false, "Falha ao baixar o PDF de autenticidade: " + e.getMessage(), null, null, null);
 		}
 	}
 
+	/**
+	 * Baixa o PDF de autenticidade a partir do código extraído. Faz uma requisição HTTP simulando o formulário web.
+	 * @param code código de verificação extraído do PDF
+	 * @return bytes do PDF baixado
+	 */
 	public static byte[] downloadPdf(String code) throws Exception {
         Map<String,String> params = new HashMap<>();
         params.put("verificaAutForm", "verificaAutForm");
@@ -114,20 +130,15 @@ public class PdfValidationService {
             .build();
 
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        // fazer um metodo especializado
         String cookie_to_post = getCookies(response);
 
-        // Encontra os ids dos campos para fazer o POST
         String response_body = response.body();
-        // Value = CODIGO DO DOCUMENTO
         String first  = "verificaAutForm:" + getCode(response_body, "<td class=\" col2\"><input type=\"text\" name=\"verificaAutForm:");
         params.put(first, code);
         
-        // Value = verificar
         String second  = "verificaAutForm:" + getCode(response_body, "<br /><input type=\"submit\" name=\"verificaAutForm:");
         params.put(second, "Verificar");
 
-        // Esse se trata do value de "javax.faces.ViewState"
         String third  = getCode(response_body, "</div><input type=\"hidden\" name=\"javax.faces.ViewState\" id=\"javax.faces.ViewState\" value=\"");
         params.put("javax.faces.ViewState", third);
         
@@ -138,7 +149,6 @@ public class PdfValidationService {
             .header("Cookie", cookie_to_post)
             .header("accept", "*/*")
             .header("accept-encoding", "gzip, deflate, br, zstd")
-            // .timeout(Duration.ofMillis(1000))
             .POST(HttpRequest.BodyPublishers.ofString(getFormDataAsString(params)))
             .build();
         
@@ -161,6 +171,7 @@ public class PdfValidationService {
         return cookie_to_post;
     }
 
+	 
     private static String getCode(String body, String subString) {
         String ret = "";
 
@@ -187,9 +198,7 @@ public class PdfValidationService {
         return formBodyBuilder.toString();
     }
 
-
 	private static boolean containsAuthenticateUrl(String text) {
-		// Be tolerant to http/https and presence of www
 		return Pattern.compile("https?://(?:www\\.)?cagr\\.ufsc\\.br/autenticidade", Pattern.CASE_INSENSITIVE)
 				.matcher(text)
 				.find();
@@ -200,14 +209,12 @@ public class PdfValidationService {
 		return matcher.find() ? matcher.group(1) : null;
 	}
 
-	// Try the JSF form flow seen in the saved HTML, then known GET endpoints
-
 	private static byte[] sha256(byte[] data) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			return md.digest(data);
 		} catch (Exception e) {
-			return data; // fallback; equality will be raw bytes compare if used
+			return data; // fallback
 		}
 	}
 }

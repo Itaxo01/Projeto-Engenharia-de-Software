@@ -12,15 +12,17 @@ import com.example.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Controlador REST para fornecer dados do usuário autenticado para consumo via DHTML.
+ */
 @RestController
 @RequestMapping("/api")
 public class UserAPIController {
-	/*
-	 * Responsável por intermediar a consulta da web às informações do usuário, para posterior montagem da página DHTML.
-	 * A requisição é feita no JavaScript dessa forma:
-			const res = await fetch('/api/me', { credentials: 'same-origin' });
-			// tratar respostas 401/404
-        	const user = await res.json();
+	/**
+	 * Recurso que retorna dados do usuário logado. Respostas possíveis:
+	 * - 200 com JSON (email, nome, matricula, curso) se autenticado
+	 * - 401 se não houver sessão
+	 * - 404 se o usuário não for encontrado no repositório
 	 */
 	@Autowired
 	private UserRepository userRepository;
@@ -38,11 +40,11 @@ public class UserAPIController {
 		return ResponseEntity.ok(UserDto.from(user));
 	}
 
+	/** DTO exposto pelo endpoint /api/me. */
 	public record UserDto(String email, String nome, String matricula, String curso){
-		// carrega todas as informações exceto a senha.
+		/** Constrói o DTO a partir da entidade {@link com.example.model.User}. */
 		public static UserDto from(User u){
 			return new UserDto(u.getEmail(), u.getNome(), u.getMatricula(), u.getCurso());
 		}
 	}
-
 }

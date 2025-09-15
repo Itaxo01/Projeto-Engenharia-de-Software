@@ -13,23 +13,30 @@ import com.example.service.UserService.QueryResult;
 
 import org.springframework.http.MediaType;
 
-
-
-
-
+/**
+ * Controlador responsável pelo fluxo de registro de novos usuários.
+ */
 @Controller
 public class RegisterController {
 
 	@Autowired
     private UserService userService;
 	
+	/**
+	 * Recebe o formulário de registro, valida o PDF e cria o usuário no repositório.
+	 *
+	 * @param email    email do usuário
+	 * @param password senha em texto claro enviada pelo formulário
+	 * @param pdf      comprovante em PDF para validação
+	 * @param model    modelo para exibir mensagens de erro ao usuário
+	 * @return redirect para "/login" em caso de sucesso ou view "register" com erros
+	 */
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String handleRegister(@RequestParam("email") String email, @RequestParam("password") String password, @RequestParam("pdf") MultipartFile pdf, Model model) {
 		email = UserService.normalizeEmail(email);
-		System.out.println("Register attempt: " + email);
-		System.out.println("PDF received: " + (pdf != null ? pdf.getOriginalFilename() : "null"));
+		System.out.println("Tentativa de registro: " + email);
+		System.out.println("PDF recebido: " + (pdf != null ? pdf.getOriginalFilename() : "null"));
 		
-		// Se isso aqui der erro a gente não sabe o que aconteceu
 		PdfValidationService.ValidationResult valid = PdfValidationService.validate(pdf);
 		if (!valid.valid()) {
 			System.out.println(valid.message());
@@ -39,7 +46,7 @@ public class RegisterController {
 
 		QueryResult userCreation = userService.createUser(email, password, valid.nome(), valid.matricula(), valid.curso());
 		if(userCreation.success()) {
-			System.out.println("User registered successfully: " + email);
+			System.out.println("Usuário registrado com sucesso: " + email);
 			return "redirect:/login";
 		} else {
 			model.addAttribute("error", userCreation.message());
