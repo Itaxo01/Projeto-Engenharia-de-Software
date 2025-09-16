@@ -45,6 +45,13 @@ public class SessionService {
 		return null;
 	}
 
+	public static void updateAdmin(HttpServletRequest request, boolean isAdmin) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.setAttribute("admin", isAdmin);
+		}
+	}
+	
 	/**
 	 * Verifica se o usuario logado é administrador.
 	 * @return true se o usuário for admin, senão não.

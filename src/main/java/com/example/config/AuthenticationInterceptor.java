@@ -1,15 +1,22 @@
 package com.example.config;
 
 import com.example.service.SessionService;
+import com.example.service.UserService;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
 @Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
+	@Autowired
+	private UserService userService;
+	
     // URLs accessible to non-authenticated users
     private static final String[] PUBLIC_URLS = {
         "/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/error"
@@ -32,6 +39,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
         boolean isAuthenticated = SessionService.verifySession(request);
         boolean isAdmin = isAuthenticated && SessionService.currentUserIsAdmin(request);
+		  if(!isAdmin){ 
+			// O usuário pode ter se tornado admin durante a sessão
+				String email = SessionService.getCurrentUser(request);
+				if(email != null) {
+					isAdmin = userService.getAdmin(email);
+					SessionService.updateAdmin(request, isAdmin);
+				}
+		  }
 
         // Check if URL is public
         if (isPublicUrl(requestURI)) {
@@ -60,13 +75,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // Default: require admin authentication
+        // Default: require authentication (Vai ativar na maioria dos endpoints da api)
 		  if (!isAuthenticated) {
 					response.sendRedirect("/login?error=notAuthenticated");
-					return false;
-			}
-			if (!isAdmin) {
-					response.sendRedirect("/dashboard?error=accessDenied");
 					return false;
 			}
 

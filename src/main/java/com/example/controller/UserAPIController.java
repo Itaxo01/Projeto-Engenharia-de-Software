@@ -73,9 +73,13 @@ public class UserAPIController {
 	@PostMapping("/deleteUser")
 	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
 		String email = SessionService.getCurrentUser(request);
+		String currentPassword = body.get("currentPassword");
 		if(email != null) System.out.println("Deleção de conta para: " + email);
 		else return ResponseEntity.status(401).build();
 		try {
+			if(!userService.validateUser(email, currentPassword)) return ResponseEntity.status(406).build();
+			
+			System.out.println("Deletando usuário: " + email);
 			UserService.QueryResult result = userService.deleteUser(email);
 			if(!result.success()) return ResponseEntity.status(400).body(result.message());
 		} catch(Exception e) {

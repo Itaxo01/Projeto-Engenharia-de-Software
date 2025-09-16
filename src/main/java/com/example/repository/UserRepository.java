@@ -71,6 +71,7 @@ public class UserRepository {
 
 	 /** Verifica se uma matrícula já está cadastrada. */
 	public boolean idExists(String id){
+		assert(id != null);
 		return matriculas.containsKey(id);
 	}
 
@@ -90,7 +91,6 @@ public class UserRepository {
         return new ArrayList<User>(users.values());
     }
 
-
 	public Boolean getAdmin(String email){
 		if(!emailExists(email)) return false;
 		return users.get(email).getAdmin();
@@ -108,7 +108,8 @@ public class UserRepository {
 			throw new IllegalArgumentException("Email ou matrícula já cadastrados.");
 		}
 		User user = new User(email, password, nome, matricula, curso);
-		users.put(user.getEmail(), user);
+		users.put(email, user);
+		matriculas.put(matricula, email);
 		saveUsersToFile();
     }
 

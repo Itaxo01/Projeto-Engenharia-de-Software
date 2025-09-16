@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/css/user.css">
 </head>
 <body>
+    <script src="/js/user.js"></script>
+
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
@@ -179,7 +181,10 @@
 				<div class="modal-form">
 				<div class="modal-body">
 					<p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
+					<div></div>
 					<div class="form-group">
+						<label for="deletePassword">Senha Atual:</label>
+						<input type="password" id="confirmDeletePassword" name="deletePassword" required>
 						<label for="deleteConfirmation">Digite "EXCLUIR" para confirmar:</label>
 						<input type="text" id="deleteConfirmation" name="deleteConfirmation" required>
 						<h5 style="text-align: center; color: rgb(136, 37, 37);" id="delete-error-message"></h5>
@@ -193,6 +198,5 @@
         </div>
     </div>
 
-    <script src="/js/user.js"></script>
 </body>
 </html>

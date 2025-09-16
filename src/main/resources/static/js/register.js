@@ -35,8 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		}, 3000);
 	}
 
-	
-
 	emailInput.addEventListener('blur', function() {
 		if(!validateEmail(emailInput.value)){
 			document.getElementById('email-error-message').textContent = 'Email inválido.';
@@ -45,11 +43,37 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
+	passwordInput.addEventListener('input', function() {
+		if (passwordInput.value.length >= 8 && !validatePassword(passwordInput.value)) {
+			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
+		} else if(passwordInput.value.length >= 8 && validatePassword(passwordInput.value)){
+			document.getElementById('password-error-message').textContent = '';
+		}
+		if(confirmPasswordInput.value.length >= 8 && confirmPasswordInput.value !== passwordInput.value){
+			document.getElementById('password-confirm-error-message').textContent = 'As senhas não coincidem';
+		} else if(confirmPasswordInput.value.length >= 8 && confirmPasswordInput.value === passwordInput.value){
+			document.getElementById('password-confirm-error-message').textContent = '';
+		}
+	});
+
 	passwordInput.addEventListener('blur', function() {
 		if (!validatePassword(passwordInput.value)) {
 			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
-		} else {
+		} else if(validatePassword(passwordInput.value)){
 			document.getElementById('password-error-message').textContent = '';
+		}
+		if(confirmPasswordInput.value !== passwordInput.value){
+			document.getElementById('password-confirm-error-message').textContent = 'As senhas não coincidem';
+		} else {
+			document.getElementById('password-confirm-error-message').textContent = '';
+		}
+	});
+
+	confirmPasswordInput.addEventListener('input', function() {
+		if (confirmPasswordInput.value.length >= 8 && confirmPasswordInput.value !== passwordInput.value) {
+			document.getElementById('password-confirm-error-message').textContent = 'As senhas não coincidem';
+		} else if(confirmPasswordInput.value.length >= 8 && confirmPasswordInput.value === passwordInput.value){
+			document.getElementById('password-confirm-error-message').textContent = '';
 		}
 	});
 
