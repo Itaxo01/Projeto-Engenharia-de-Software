@@ -11,12 +11,9 @@ mvn spring-boot:run
 
 ---
 ## Recent changes
-Joguei o que tinha na pasta Java para fora e exclui coisas antigas que não estavam mais sendo usadas
-Por causa da mudança de diretório talvez algo não funcione, mas não notei nada. Pode ser útil fazer uma revisão ainda.
+Página de admin implementada, assim como todas as suas funções
+Usuário agora pode trocar de senha e excluir conta.
+Colocado um interceptor para facilitar o controle do acesso aos endpoints.
 
 ---
 ## TO DO
-Falta o atributo de Usuário e Admin. O primeiro ADMIN será adicionado de forma manual, o resto pode ser configurado ou manualmente ou pelo próprio ADMIN.
-O Admin terá acesso a uma página extra para a manipulação de usuários (Link oculto no html, cada página terá uma pequena request para verificar se o usuário atual é admin e mostrar o link), além de futuras funcionalidades adicionais.
-
-Falta também a funcionalidade do usuário mudar de senha e excluir sua conta.
