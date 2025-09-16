@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
+
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
@@ -16,7 +17,8 @@
             <div class="nav-links">
                 <a href="/dashboard" class="nav-link active">Dashboard</a>
                 <a href="/user" class="nav-link">Perfil</a>
-					 <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
+                <a th:if="${isAdmin}" href="/admin" class="nav-link">Administração</a>
+                <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
             </div>
         </div>
     </nav>

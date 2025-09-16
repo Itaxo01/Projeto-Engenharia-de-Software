@@ -26,14 +26,36 @@ function closeDeleteModal() {
     document.getElementById('deleteConfirmation').value = '';
 }
 
-function confirmDelete() {
+async function confirmDelete() {
     const confirmation = document.getElementById('deleteConfirmation').value;
+	 const errorMessage = document.getElementById('delete-error-message');
     if (confirmation === 'EXCLUIR') {
-        // TODO: Implement account deletion
-        alert('Funcionalidade de exclusão será implementada no backend');
-        closeDeleteModal();
+		const code = await httpPost("/api/deleteUser", JSON.stringify({}));
+		if (code == 401) {
+			alert("Sessão expirada. Por favor refaça login.");
+			document.location.href = "/";
+			return;
+		} else if (code == 400) {
+			errorMessage.textContent = 'Erro ao excluir a conta. Tente novamente.';
+			setTimeout(() => {
+				errorMessage.textContent = '';
+			}, 3000);
+			return;
+		} else if (code == 500) {
+			errorMessage.textContent = 'Erro no servidor. Tente novamente mais tarde.';
+			setTimeout(() => {
+				errorMessage.textContent = '';
+			}, 3000);
+			return;
+		}  
+		alert('Conta excluída com sucesso.');
+		document.location.href = "/";
+		closeDeleteModal();
     } else {
-        alert('Digite "EXCLUIR" para confirmar a exclusão da conta');
+        errorMessage.textContent = 'Digite "EXCLUIR" para confirmar a exclusão da conta';
+        setTimeout(() => {
+            errorMessage.textContent = '';
+        }, 3000);
     }
 }
 
@@ -48,73 +70,115 @@ window.onclick = function(event) {
     });
 }
 
-function httpPost(url, body) {
-    fetch(url, {
+async function httpPost(url, body) {
+    const res = await fetch(url, {
         method: "POST",
         body: body,
         headers: {
             "Content-type": "application/json; charset=UTF-8"
         }
     })
-    .then((response) => response.json())
-    .then((json) => console.log(json))
+
+    return res.status;
 }
 
-// Form validation
-document.addEventListener('DOMContentLoaded', function() {
-    // Password change form validation
-    const passwordForm = document.querySelector('#passwordModal .modal-form');
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            
-            if (newPassword !== confirmNewPassword) {
-                alert('As senhas não coincidem');
-                return;
-            }
-            
-            if (newPassword.length < 6) {
-                alert('A nova senha deve ter pelo menos 6 caracteres');
-                return;
-            }
-            
-            // TODO: Implement password change
+// Reset password form
+function resetPasswordForm() {
+    document.getElementById('currentPassword').value = "";
+    document.getElementById('newPassword').value = "";
+    document.getElementById('confirmNewPassword').value = "";
+    document.getElementById('error-message').value = "";
+}
 
-            httpPost("/api/password", JSON.stringify(
-                {"currentPassword": currentPassword, "newPassword": newPassword}));
-            alert('Funcionalidade de alteração de senha será implementada no backend');
-            closePasswordModal();
-        });
+function validatePassword(password) {
+	// pelo menos 8 caracteres, um caixa alta, um caixa baixa, um número e um símbolo 
+	let t = password.length;
+	if(t < 8) return false;
+	let hasUpper = false;
+	let hasLower = false;
+	let hasNumber = false;
+	let hasSymbol = false;
+	for(let i = 0; i<t; i++){
+		let e = password[i];
+		if(e >= 'A' && e <= 'Z') hasUpper=true;
+		else if(e >= 'a' && e <= 'z') hasLower=true;
+		else if(e >= '0' && e <= '9') hasNumber=true;
+		else hasSymbol=true;
+	};
+	return hasUpper && hasLower && hasNumber && hasSymbol;
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+	const newPassword = document.getElementById('newPassword');
+	const confirmNewPassword = document.getElementById('confirmNewPassword');
+	let backendError = document.getElementById('backend-error-message');
+
+	if(backendError){
+		setTimeout(() => {
+			backendError.textContent = '';
+		}, 3000);
+	}
+
+	newPassword.addEventListener('blur', function() {
+		if (!validatePassword(newPassword.value)) {
+			document.getElementById('new-password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
+		} else {
+			document.getElementById('new-password-error-message').textContent = '';
+		}
+	});
+
+	confirmNewPassword.addEventListener('blur', function() {
+		if (confirmNewPassword.value !== newPassword.value) {
+			document.getElementById('confirm-password-error-message').textContent = 'As senhas não coincidem';
+		} else {
+			document.getElementById('confirm-password-error-message').textContent = '';
+		}
+	});
+});
+
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    const errorMessage = document.getElementById('error-message');
+	 
+	 document.getElementById('current-password-error-message').textContent = '';
+	 document.getElementById('new-password-error-message').textContent = '';
+	 document.getElementById('confirm-password-error-message').textContent = '';
+	 errorMessage.textContent = '';
+
+    if (newPassword && newPassword !== confirmNewPassword) {
+        errorMessage.textContent = 'As senhas não coincidem';
+		  setTimeout(() => {
+				document.getElementById('error-message').textContent = '';
+		  }, 3000);
+		  return;
     }
     
-    // File upload form validation
-    const uploadForm = document.querySelector('#uploadModal .modal-form');
-    if (uploadForm) {
-        uploadForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const fileInput = document.getElementById('newPdf');
-            if (!fileInput.files.length) {
-                alert('Selecione um arquivo PDF');
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            if (file.type !== 'application/pdf') {
-                alert('Selecione apenas arquivos PDF');
-                return;
-            }
-            
-            // TODO: Implement file upload
-            alert('Funcionalidade de upload será implementada no backend');
-            closeUploadModal();
-        });
+    if (!validatePassword(newPassword)) {
+        errorMessage.textContent = 'A nova senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
+		  setTimeout(() => {
+			document.getElementById('error-message').textContent = '';
+		  }, 3000);
+		  return;
     }
-});
+    
+    const code = await httpPost("/api/changePassword", JSON.stringify(
+        {"currentPassword": currentPassword, "newPassword": newPassword}));
+    
+    if (code == 400){
+		errorMessage.textContent = 'Senha atual incorreta.';
+	} else if (code == 401) {
+        alert("Sessão expirada. Por favor refaça login.");
+        document.location.href = "/";
+    } else {
+        alert("Senha alterada com sucesso.")
+        resetPasswordForm();
+        closePasswordModal();
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', async function() {
 	// carrega as informações do usuário

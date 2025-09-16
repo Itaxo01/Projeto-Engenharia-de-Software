@@ -16,7 +16,8 @@
             <div class="nav-links">
                 <a href="/dashboard" class="nav-link">Dashboard</a>
                 <a href="/user" class="nav-link active">Perfil</a>
-  					 <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
+                <a th:if="${isAdmin}" href="/admin" class="nav-link">Administração</a>
+                <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
             </div>
         </div>
     </nav>
@@ -119,19 +120,31 @@
                 <div class="form-group">
                     <label for="currentPassword">Senha Atual</label>
                     <input type="password" id="currentPassword" name="currentPassword" required>
+							<h5 style="text-align: center; color: rgb(136, 37, 37);" id="current-password-error-message"></h5>
                 </div>
                 <div class="form-group">
                     <label for="newPassword">Nova Senha</label>
                     <input type="password" id="newPassword" name="newPassword" required>
+							<h5 style="text-align: center; color: rgb(136, 37, 37);" id="new-password-error-message"></h5>
+
                 </div>
                 <div class="form-group">
                     <label for="confirmNewPassword">Confirmar Nova Senha</label>
                     <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+							<h5 style="text-align: center; color: rgb(136, 37, 37);" id="confirm-password-error-message"></h5>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closePasswordModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Alterar Senha</button>
+                    <button type="button" class="btn-primary" onclick="changePassword()">Alterar Senha</button>
                 </div>
+
+					 <!-- Backend error message display -->
+                <div th:if="${error}" class="alert alert-error">
+                    <h5 style="text-align: center; color: rgb(136, 37, 37);" th:text="${error}" id="backend-error-message"></h5>
+                </div>
+
+					 <!-- Frontend error message (from JavaScript) -->
+					 <h5 style="text-align: center; color: rgb(136, 37, 37);" id="error-message"></h5>
             </form>
         </div>
     </div>
@@ -163,17 +176,20 @@
                 <h3>Confirmar Exclusão</h3>
                 <span class="close" onclick="closeDeleteModal()">&times;</span>
             </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
-                <div class="form-group">
-                    <label for="deleteConfirmation">Digite "EXCLUIR" para confirmar:</label>
-                    <input type="text" id="deleteConfirmation" name="deleteConfirmation" required>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-                <button type="button" class="btn-danger" onclick="confirmDelete()">Excluir Conta</button>
-            </div>
+				<div class="modal-form">
+				<div class="modal-body">
+					<p>Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.</p>
+					<div class="form-group">
+						<label for="deleteConfirmation">Digite "EXCLUIR" para confirmar:</label>
+						<input type="text" id="deleteConfirmation" name="deleteConfirmation" required>
+						<h5 style="text-align: center; color: rgb(136, 37, 37);" id="delete-error-message"></h5>
+					</div>
+				</div>
+					<div class="modal-actions">
+						<button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+						<button type="button" class="btn-danger" onclick="confirmDelete()">Excluir Conta</button>
+					</div>
+				</div>
         </div>
     </div>
 

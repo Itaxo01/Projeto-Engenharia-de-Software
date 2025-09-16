@@ -13,9 +13,10 @@ public class SessionService {
 	 * @param request requisição HTTP
 	 * @param email   email normalizado do usuário
 	 */
-	public static void createSession(HttpServletRequest request, String email){
+	public static void createSession(HttpServletRequest request, String email, boolean isAdmin){
 		HttpSession session = request.getSession();
 		session.setAttribute("email", email);
+		session.setAttribute("admin", isAdmin);
 		session.setMaxInactiveInterval(30*60); // 30 minutos
 		System.out.println("Sessão criada para: " + email);
 	}
@@ -42,6 +43,15 @@ public class SessionService {
 			return (String) session.getAttribute("email");
 		}
 		return null;
+	}
+
+	/**
+	 * Verifica se o usuario logado é administrador.
+	 * @return true se o usuário for admin, senão não.
+	 */
+	public static boolean currentUserIsAdmin(HttpServletRequest request) {
+		boolean isAdmin = (boolean) request.getSession(false).getAttribute("admin");		
+		return isAdmin;
 	}
 
 	/**

@@ -13,6 +13,7 @@ import jakarta.websocket.server.PathParam;
 /**
  * Controlador das rotas de navegação principais (login, registro, dashboard, perfil e detalhes de turma).
  * Basicamente tudo que não possui um controller dedicado.
+ * O Interceptor já verifica a autenticação para essas rotas.
  */
 @Controller
 public class MainController {
@@ -30,11 +31,8 @@ public class MainController {
      */
     @GetMapping("/login")
     public String login(HttpServletRequest request, Model model) {
-      boolean auth = SessionService.verifySession(request);
-		if (!auth) {
-			return "login";
-		}
-		return "dashboard";
+		if (!SessionService.verifySession(request)) return "login";
+		return "redirect:/dashboard";
     }
 
     /**
@@ -42,11 +40,8 @@ public class MainController {
      */
     @GetMapping("/register")
     public String register(HttpServletRequest request, Model model) {
-		boolean auth = SessionService.verifySession(request);
-		if (!auth) {
-			return "register";
-		}
-		return "dashboard";
+		if (!SessionService.verifySession(request)) return "register";
+		return "redirect:/dashboard";
     }
 
     /**
@@ -54,11 +49,8 @@ public class MainController {
      */
     @GetMapping("/dashboard")
     public String dashboard(HttpServletRequest request, Model model) {
-		boolean auth = SessionService.verifySession(request);
-		if (!auth) {
-			return "login";
-		}
-        return "dashboard";
+      model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+      return "dashboard";
     }
 
     /**
@@ -66,23 +58,22 @@ public class MainController {
      */
     @GetMapping("/user")
     public String userProfile(HttpServletRequest request, Model model) {
-		 boolean auth = SessionService.verifySession(request);
-		 if (!auth) {
-			return "login";
-		}
+      model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
 		return "user";
 	}
+
+    @GetMapping("/admin")
+    public String adminPanel(HttpServletRequest request, Model model) {
+      return "admin";
+    }
 
     /**
      * Exibe detalhes da turma via path parameter.
      */
     @GetMapping("/class/{id}")
     public String classDetails(HttpServletRequest request, @PathParam("id") String classId, Model model) {
-        boolean auth = SessionService.verifySession(request);
-		  if (!auth) {
-			return "login";
-		}
-		model.addAttribute("classId", classId);
+		  model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+		  model.addAttribute("classId", classId);
         return "class";
 		}
 
@@ -91,11 +82,8 @@ public class MainController {
      */
     @GetMapping("/class")   
     public String classDetai(HttpServletRequest request, @RequestParam("id") String classId, Model model) {
-      boolean auth = SessionService.verifySession(request);
-		 if (!auth) {
-			return "login";
-		 }  
-		model.addAttribute("classId", classId);
+        model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+		  model.addAttribute("classId", classId);
         return "class";
     }
 }

@@ -9,6 +9,7 @@ public class User {
 	private String nome;
 	private String matricula;
 	private String curso;
+	private boolean isAdmin = false;
 
 	/**
 	 * Construtor completo utilizado pelo serviço/repositório.
@@ -52,5 +53,14 @@ public class User {
 	/** Curso do usuário. */
 	public String getCurso() {
 		return curso;
+	}
+
+	/** Get administrador. */
+	public boolean getAdmin() {
+		return isAdmin;
+	}
+	/** Set administrador. */
+	public void setAdmin(boolean admin) {
+		isAdmin = admin;
 	}
 }

@@ -86,6 +86,22 @@ public class UserRepository {
 		return users.get(email);
 	}
 
+    public List<User> getUsers() {
+        return new ArrayList<User>(users.values());
+    }
+
+
+	public Boolean getAdmin(String email){
+		if(!emailExists(email)) return false;
+		return users.get(email).getAdmin();
+	}
+
+	public void setAdmin(String email, boolean isAdmin){
+		if(!emailExists(email)) return;
+		users.get(email).setAdmin(isAdmin);
+		saveUsersToFile();
+	}
+
 	 /** Cria um novo usuário e salva em users.json. Os possiveis conflitos são resolvidos aqui e também nas classes que chamam a função, para garantir a consistência dos dados. */
     public void createUser(String email, String password, String nome, String matricula, String curso) {
 		if(emailExists(email) || idExists(matricula)){
@@ -99,11 +115,14 @@ public class UserRepository {
 	/** Deleta um usuário e salva em users.json. */
     public void deleteUser(String email){
 		if(!emailExists(email)) return;
+		// Remover a matrícula associada
+		matriculas.remove(users.get(email).getMatricula());
 		users.remove(email);
 		saveUsersToFile();
     }
 
     public void changePassword(String email, String passwordHash) {
         users.get(email).setPassord(passwordHash);
+        saveUsersToFile();
     }
 }

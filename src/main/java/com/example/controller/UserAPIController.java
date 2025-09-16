@@ -27,35 +27,36 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api")
 public class UserAPIController {
+	@Autowired
+	private UserService userService;
+	
 	/**
 	 * Recurso que retorna dados do usuário logado. Respostas possíveis:
 	 * - 200 com JSON (email, nome, matricula, curso) se autenticado
 	 * - 401 se não houver sessão
 	 * - 404 se o usuário não for encontrado no repositório
 	 */
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private UserService userService;
-
 	@GetMapping("/me")
 	public ResponseEntity<UserDto> me(HttpServletRequest request) {
 		String email = SessionService.getCurrentUser(request);
 		if(email == null){
 			return ResponseEntity.status(401).build();
 		}
-		User user = userRepository.getUser(email);
+		User user = userService.getUser(email);
 		if(user == null){
 			return ResponseEntity.status(404).build();
 		}
+		
 		return ResponseEntity.ok(UserDto.from(user));
 	}
 
-	@PostMapping("/password")
+	/** Troca a senha do usuário logado.
+	 */
+	@PostMapping("/changePassword")
 	public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody Map<String,String> body) {
 		String email = SessionService.getCurrentUser(request);
-		System.out.println(body.get("currentPassword") + " "+body.get("newPassword"));
+		// System.out.println(body.get("currentPassword") + " "+body.get("newPassword"));
+		if(email != null) System.out.println("Troca de senha para: " + email);
 		try {
 			userService.changePassword(email, body.get("currentPassword"), body.get("newPassword"));
 		} catch(Exception e) {
@@ -65,6 +66,22 @@ public class UserAPIController {
 				return ResponseEntity.status(401).build();
 			return ResponseEntity.status(500).build();
 		}
+		return ResponseEntity.ok("Sucesso");
+	}
+	/** Deleta a conta do usuário logado.
+	*/
+	@PostMapping("/deleteUser")
+	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
+		String email = SessionService.getCurrentUser(request);
+		if(email != null) System.out.println("Deleção de conta para: " + email);
+		else return ResponseEntity.status(401).build();
+		try {
+			UserService.QueryResult result = userService.deleteUser(email);
+			if(!result.success()) return ResponseEntity.status(400).body(result.message());
+		} catch(Exception e) {
+			return ResponseEntity.status(500).build();
+		}
+		SessionService.deleteSession(request);
 		return ResponseEntity.ok("Sucesso");
 	}
 

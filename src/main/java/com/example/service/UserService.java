@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.repository.UserRepository;
+import com.example.model.User;
+import java.util.List;
 
 /**
  * Camada de serviço para regras de negócio relacionadas a usuários. A modificação do banco de dados é feita pelo repository, aqui há somente a validação e ponte entre o controller e o repository.
@@ -55,6 +57,24 @@ public class UserService {
         return HashingService.verifyPassword(password, storedHash);
     }
 
+	 public User getUser(String email){
+		if(!userRepository.emailExists(email)) return null;
+		return userRepository.getUser(email);
+	 }
+	public List<User> getUsers() {
+		return userRepository.getUsers();
+	}
+	 public boolean toggleAdmin(String email){
+		if(!userRepository.emailExists(email)) return false;
+		boolean currentAdmin = userRepository.getAdmin(email);
+		userRepository.setAdmin(email, !currentAdmin);
+		return true;
+}
+
+
+	 public boolean getAdmin(String email){
+		return userRepository.getAdmin(email);
+	 }
 	/**
 	 * Normaliza emails (trim, lower-case, remove pontos/mais do Gmail).
 	 */
@@ -75,6 +95,7 @@ public class UserService {
 		}
 		return email;
 	 }
+
 
 	/**
 	 * Altera senha de usuário

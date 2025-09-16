@@ -40,7 +40,7 @@ public class LoginController {
 		
 		System.out.println("Autenticação " + (authenticated ? "sucedida" : "falhou") + " para " + email);
 		if(authenticated) {
-			SessionService.createSession(request, email);
+			SessionService.createSession(request, email, userService.getAdmin(email));
 			return "redirect:/dashboard";
 		} else {
 			model.addAttribute("error", "Email ou senha inválidos.");
