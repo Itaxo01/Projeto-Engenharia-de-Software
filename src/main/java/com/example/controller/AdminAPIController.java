@@ -15,7 +15,6 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.model.User;
-import com.example.repository.UserRepository;
 import com.example.service.SessionService;
 import com.example.service.UserService;
 

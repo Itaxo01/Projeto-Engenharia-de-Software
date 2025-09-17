@@ -11,8 +11,7 @@ public class AcademicSystemApplication {
 
     /**
      * Inicializa a aplicação Spring Boot.
-     *
-     * @param args argumentos de linha de comando
+     * @param args argumentos de linha de comando (Atualmente não são utilizados)
      */
     public static void main(String[] args) {
         SpringApplication.run(AcademicSystemApplication.class, args);

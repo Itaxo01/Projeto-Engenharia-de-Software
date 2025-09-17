@@ -65,7 +65,7 @@ public class SessionService {
 		String session = getCurrentUser(request);
 		if (session == null) return false;
 		try {
-			return !session.isEmpty();
+			return (!session.isEmpty() && userService.getUser(session) != null);
 		} catch(Exception e) {
 			return false;
 		}
