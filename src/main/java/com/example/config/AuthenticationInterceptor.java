@@ -14,9 +14,9 @@ import org.springframework.lang.NonNull;
 @Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-	@Autowired
-	private UserService userService;
-	
+	 @Autowired
+	 private SessionService sessionService;
+
     // URLs accessible to non-authenticated users
     private static final String[] PUBLIC_URLS = {
         "/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/error"
@@ -37,16 +37,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                            @NonNull Object handler) throws Exception {
         
         String requestURI = request.getRequestURI();
-        boolean isAuthenticated = SessionService.verifySession(request);
-        boolean isAdmin = isAuthenticated && SessionService.currentUserIsAdmin(request);
-		  if(!isAdmin){ 
-			// O usuário pode ter se tornado admin durante a sessão
-				String email = SessionService.getCurrentUser(request);
-				if(email != null) {
-					isAdmin = userService.getAdmin(email);
-					SessionService.updateAdmin(request, isAdmin);
-				}
-		  }
+        boolean isAuthenticated = sessionService.verifySession(request);
+        boolean isAdmin = isAuthenticated && sessionService.currentUserIsAdmin(request);
 
         // Check if URL is public
         if (isPublicUrl(requestURI)) {

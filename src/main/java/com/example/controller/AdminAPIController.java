@@ -33,11 +33,13 @@ public class AdminAPIController {
 	
 	@Autowired
 	private UserService userService;
-	
+	@Autowired
+	private SessionService sessionService;
+
 	@GetMapping("/users")
 	public ResponseEntity<ArrayList<UserDto>> getUsers(HttpServletRequest request) {
-		boolean auth = SessionService.verifySession(request);
-		if (!auth || !SessionService.currentUserIsAdmin(request)) {
+		boolean auth = sessionService.verifySession(request);
+		if (!auth || !sessionService.currentUserIsAdmin(request)) {
 			return ResponseEntity.status(403).build();
 		}
 
@@ -51,8 +53,8 @@ public class AdminAPIController {
 	}
 	@PostMapping("/toggle-admin")
 	public ResponseEntity<String> toggleAdmin(HttpServletRequest request, @RequestBody Map<String,String> body) {
-		boolean auth = SessionService.verifySession(request);
-		if (!auth || !SessionService.currentUserIsAdmin(request)) {
+		boolean auth = sessionService.verifySession(request);
+		if (!auth || !sessionService.currentUserIsAdmin(request)) {
 			return ResponseEntity.status(403).build();
 		}
 		String email = body.get("email");
@@ -70,8 +72,8 @@ public class AdminAPIController {
 
 	@PostMapping("/delete-user")
 	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
-		boolean auth = SessionService.verifySession(request);
-		if (!auth || !SessionService.currentUserIsAdmin(request)) {
+		boolean auth = sessionService.verifySession(request);
+		if (!auth || !sessionService.currentUserIsAdmin(request)) {
 			return ResponseEntity.status(403).build();
 		}
 		String email = body.get("email");

@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,9 @@ import jakarta.websocket.server.PathParam;
 @Controller
 public class MainController {
 
+	@Autowired
+	private SessionService sessionService;
+
     /**
      * Redireciona a raiz para a tela de login. A verificação do login será feita lá. 
      */
@@ -31,7 +35,7 @@ public class MainController {
      */
     @GetMapping("/login")
     public String login(HttpServletRequest request, Model model) {
-		if (!SessionService.verifySession(request)) return "login";
+		if (!sessionService.verifySession(request)) return "login";
 		return "redirect:/dashboard";
     }
 
@@ -40,7 +44,7 @@ public class MainController {
      */
     @GetMapping("/register")
     public String register(HttpServletRequest request, Model model) {
-		if (!SessionService.verifySession(request)) return "register";
+		if (!sessionService.verifySession(request)) return "register";
 		return "redirect:/dashboard";
     }
 
@@ -49,7 +53,7 @@ public class MainController {
      */
     @GetMapping("/dashboard")
     public String dashboard(HttpServletRequest request, Model model) {
-      model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+      model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
       return "dashboard";
     }
 
@@ -58,7 +62,7 @@ public class MainController {
      */
     @GetMapping("/user")
     public String userProfile(HttpServletRequest request, Model model) {
-      model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+      model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		return "user";
 	}
 
@@ -72,7 +76,7 @@ public class MainController {
      */
     @GetMapping("/class/{id}")
     public String classDetails(HttpServletRequest request, @PathParam("id") String classId, Model model) {
-		  model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+		  model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		  model.addAttribute("classId", classId);
         return "class";
 		}
@@ -82,7 +86,7 @@ public class MainController {
      */
     @GetMapping("/class")   
     public String classDetai(HttpServletRequest request, @RequestParam("id") String classId, Model model) {
-        model.addAttribute("isAdmin", SessionService.currentUserIsAdmin(request));
+        model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		  model.addAttribute("classId", classId);
         return "class";
     }

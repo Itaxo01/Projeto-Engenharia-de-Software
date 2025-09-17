@@ -29,7 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UserAPIController {
 	@Autowired
 	private UserService userService;
-	
+	@Autowired
+	private SessionService sessionService;
 	/**
 	 * Recurso que retorna dados do usuário logado. Respostas possíveis:
 	 * - 200 com JSON (email, nome, matricula, curso) se autenticado
@@ -38,7 +39,7 @@ public class UserAPIController {
 	 */
 	@GetMapping("/me")
 	public ResponseEntity<UserDto> me(HttpServletRequest request) {
-		String email = SessionService.getCurrentUser(request);
+		String email = sessionService.getCurrentUser(request);
 		if(email == null){
 			return ResponseEntity.status(401).build();
 		}
@@ -54,7 +55,7 @@ public class UserAPIController {
 	 */
 	@PostMapping("/changePassword")
 	public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody Map<String,String> body) {
-		String email = SessionService.getCurrentUser(request);
+		String email = sessionService.getCurrentUser(request);
 		// System.out.println(body.get("currentPassword") + " "+body.get("newPassword"));
 		if(email != null) System.out.println("Troca de senha para: " + email);
 		try {
@@ -72,7 +73,7 @@ public class UserAPIController {
 	*/
 	@PostMapping("/deleteUser")
 	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
-		String email = SessionService.getCurrentUser(request);
+		String email = sessionService.getCurrentUser(request);
 		String currentPassword = body.get("currentPassword");
 		if(email != null) System.out.println("Deleção de conta para: " + email);
 		else return ResponseEntity.status(401).build();
@@ -85,7 +86,7 @@ public class UserAPIController {
 		} catch(Exception e) {
 			return ResponseEntity.status(500).build();
 		}
-		SessionService.deleteSession(request);
+		sessionService.deleteSession(request);
 		return ResponseEntity.ok("Sucesso");
 	}
 

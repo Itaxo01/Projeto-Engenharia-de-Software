@@ -113,7 +113,6 @@ async function fetchAndDisplayUsers() {
 					deleteButton.disabled = true;
 					// toggleButton.style.display = 'none';
 					// deleteButton.style.display = 'none';
-
 				}
 				toggleButton.type = 'button';
 				toggleButton.onclick = async (event) => {
@@ -124,6 +123,7 @@ async function fetchAndDisplayUsers() {
 						// Refresh the user list to reflect changes
 						typeSpan.className = !user.admin ? 'user-type admin' : 'user-type user';
 						typeSpan.textContent = !user.admin ? 'Admin' : 'Usuário';
+						toggleButton.textContent = !user.admin ? 'Remover Admin' : 'Tornar Admin';
 						user.admin = !user.admin; // Update local state
 						// fetchAndDisplayUsers();
 					} else if (code === 400) {

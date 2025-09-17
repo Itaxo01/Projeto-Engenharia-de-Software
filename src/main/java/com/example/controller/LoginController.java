@@ -21,6 +21,8 @@ public class LoginController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private SessionService sessionService;
 	
 	/**
 	 * Processa o formulário de login, valida as credenciais e cria a sessão.
@@ -40,7 +42,7 @@ public class LoginController {
 		
 		System.out.println("Autenticação " + (authenticated ? "sucedida" : "falhou") + " para " + email);
 		if(authenticated) {
-			SessionService.createSession(request, email, userService.getAdmin(email));
+			sessionService.createSession(request, email, userService.getAdmin(email));
 			return "redirect:/dashboard";
 		} else {
 			model.addAttribute("error", "Email ou senha inválidos.");

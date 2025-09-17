@@ -2,21 +2,26 @@ package com.example.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.example.service.UserService;
 
 /**
  * Serviço utilitário para manipulação de sessão HTTP do usuário autenticado.
  */
+@Service
 public class SessionService {
-	
+	@Autowired
+	private UserService userService;
+
 	/**
 	 * Cria (ou reutiliza) uma sessão e armazena o email do usuário.
 	 * @param request requisição HTTP
 	 * @param email   email normalizado do usuário
 	 */
-	public static void createSession(HttpServletRequest request, String email, boolean isAdmin){
+	public void createSession(HttpServletRequest request, String email, boolean isAdmin){
 		HttpSession session = request.getSession();
 		session.setAttribute("email", email);
-		session.setAttribute("admin", isAdmin);
 		session.setMaxInactiveInterval(30*60); // 30 minutos
 		System.out.println("Sessão criada para: " + email);
 	}
@@ -24,7 +29,7 @@ public class SessionService {
 	/**
 	 * Invalida a sessão atual, removendo todos os atributos.
 	 */
-	public static void deleteSession(HttpServletRequest request) {
+	public void deleteSession(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
 		if (session != null) {
 			String email = (String) session.getAttribute("email");
@@ -37,7 +42,7 @@ public class SessionService {
 	 * Obtém o email do usuário logado a partir da sessão.
 	 * @return email ou null se não autenticado
 	 */
-	public static String getCurrentUser(HttpServletRequest request) {
+	public String getCurrentUser(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
 		if (session != null) {
 			return (String) session.getAttribute("email");
@@ -45,26 +50,18 @@ public class SessionService {
 		return null;
 	}
 
-	public static void updateAdmin(HttpServletRequest request, boolean isAdmin) {
-		HttpSession session = request.getSession(false);
-		if (session != null) {
-			session.setAttribute("admin", isAdmin);
-		}
-	}
-	
 	/**
 	 * Verifica se o usuario logado é administrador.
 	 * @return true se o usuário for admin, senão não.
 	 */
-	public static boolean currentUserIsAdmin(HttpServletRequest request) {
-		boolean isAdmin = (boolean) request.getSession(false).getAttribute("admin");		
-		return isAdmin;
+	public boolean currentUserIsAdmin(HttpServletRequest request) {
+		return userService.getAdmin(getCurrentUser(request));
 	}
 
 	/**
 	 * Verifica se existe sessão válida para o usuário atual.
 	 */
-	public static boolean verifySession(HttpServletRequest request) {
+	public boolean verifySession(HttpServletRequest request) {
 		String session = getCurrentUser(request);
 		if (session == null) return false;
 		try {
