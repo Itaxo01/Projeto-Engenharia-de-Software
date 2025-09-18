@@ -11,9 +11,7 @@ mvn spring-boot:run
 
 ---
 ## Recent changes
-Página de admin implementada, assim como todas as suas funções
-Usuário agora pode trocar de senha e excluir conta.
-Colocado um interceptor para facilitar o controle do acesso aos endpoints.
+Acabei de tirar alguns arquivos importantes do git, como os usuários e atestados de matricula. Tive que alterar o histórico dos commits para tirar os arquivos de lá também. Pode ter dado algo de errado mas aparentemente não, qualquer coisa tenho um backup.
 
 ---
 ## TO DO
