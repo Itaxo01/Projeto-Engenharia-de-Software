@@ -52,4 +52,4 @@ buildNumber.properties
 ## VSCODE
 
 .vscode
-/src/main/java/com/example/users.json
+/src/main/resources/users.json 
