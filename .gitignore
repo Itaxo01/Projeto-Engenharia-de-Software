@@ -27,6 +27,8 @@
 hs_err_pid*
 replay_pid*
 
+Testes/
+.pdf
 ### Maven ###
 target/
 pom.xml.tag
