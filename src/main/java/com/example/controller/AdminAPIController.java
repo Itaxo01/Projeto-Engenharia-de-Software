@@ -91,4 +91,11 @@ public class AdminAPIController {
 			return new UserDto(u.getEmail(), u.getNome(), u.getMatricula(), u.getCurso(), u.getAdmin());
 		}
 	}
+	@PostMapping("/update-course-database")
+	public ResponseEntity<String> updateCourseDatabase(HttpServletRequest request, @RequestBody Map<String,String> body) {
+		boolean auth = sessionService.verifySession(request);
+		if (!auth || !sessionService.currentUserIsAdmin(request)) {
+			return ResponseEntity.status(403).build();
+		}
+	}
 }
