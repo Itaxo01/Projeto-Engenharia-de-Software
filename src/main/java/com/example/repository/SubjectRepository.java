@@ -9,7 +9,7 @@ import com.example.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Repository
-public class CourseRepository {
+public class SubjectRepository {
 	/*
 	 * Repositório para o controle do banco de dados de cursos.
 	 * Responsável por realizar operações de CRUD na tabela de cursos.
