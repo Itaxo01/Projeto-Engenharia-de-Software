@@ -1,44 +1,75 @@
 package com.example.model;
 
+import java.util.List;
 import java.util.ArrayList;
+import jakarta.persistence.*;
 
 /**
- * Entidade de domínio que representa um professor cadastrado no sistema.
+ * Entidade JPA que representa um professor cadastrado no sistema.
  */
+@Entity
+@Table(name = "professores")
 public class Professor {
-	private String nome = null;
-	private String ID_LATTES = null; // Identificador único do professor na plataforma Lattes, já que o nome pode se repetir.
-	private Avaliacao avaliacao = new Avaliacao();
+	@Id
+	private String ID_LATTES; // Identificador único do professor na plataforma Lattes, já que o nome pode se repetir.
 
+	@Column(nullable = false)
+	private String nome;
+	
+	// Relacionamento Many-to-Many com Disciplina
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+	@JoinTable(
+		name = "professor_disciplina",
+		joinColumns = @JoinColumn(name = "professor_id"),
+		inverseJoinColumns = @JoinColumn(name = "disciplina_id")
+	)
+	private List<Disciplina> disciplinas = new ArrayList<>();
+	
+	// Relacionamento com avaliações
+	@OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Avaliacao> avaliacoes = new ArrayList<>();
+	
 	/** Construtor completo utilizado pelo serviço/repositório. */
 	public Professor(String nome, String ID_LATTES) {
 		this.nome = nome;
 		this.ID_LATTES = ID_LATTES;
 	}
 
-	/** Construtor padrão necessário para (de)serialização JSON. */
+	/** Construtor padrão necessário para JPA. */
 	public Professor(){}
 	
 	/** Nome do professor. */
-	public String getNome() {
-		return nome;
-	}
-	/** ID Lattes do professor. */
-	public String getID_LATTES() {
-		return ID_LATTES;
-	}
+	public String getNome() {return nome;}
+	public void setNome(String nome) {this.nome = nome;}
 
-	/** Avaliações do professor. */
-	public void addAvaliacao(int nota) {
-		this.avaliacao.addAvaliacao(nota);
+	/** ID Lattes do professor. */
+	public String getID_LATTES() {return ID_LATTES;}
+	public void setID_LATTES(String iD_LATTES) {ID_LATTES = iD_LATTES;}
+	
+	public List<Disciplina> getDisciplinas() {
+		return disciplinas;
 	}
-	public double getMedia() {
-		return this.avaliacao.getMedia();
+	
+	public void setDisciplinas(List<Disciplina> disciplinas) {
+		this.disciplinas = disciplinas;
 	}
-	public int getCounter() {
-		return this.avaliacao.getCounter();
+	
+	public List<Avaliacao> getAvaliacoes() {
+		return avaliacoes;
 	}
-	public void addComentario(Comentario comentario) {
-		this.avaliacao.addComentario(comentario);
+	
+	public void setAvaliacoes(List<Avaliacao> avaliacoes) {
+		this.avaliacoes = avaliacoes;
+	}
+	
+	// Helper methods
+	public void addDisciplina(Disciplina disciplina) {
+		this.disciplinas.add(disciplina);
+		disciplina.getProfessores().add(this);
+	}
+	
+	public void removeDisciplina(Disciplina disciplina) {
+		this.disciplinas.remove(disciplina);
+		disciplina.getProfessores().remove(this);
 	}
 }

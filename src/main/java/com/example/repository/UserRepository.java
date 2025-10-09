@@ -1,5 +1,6 @@
 package com.example.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -13,117 +14,78 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Repositório em memória com persistência em arquivo JSON para usuários.
+ * Repositório em memória com persistência para usuários. Utiliza JPA para operações no banco de dados, as operações aqui são apenas para manter a interface consistente com o restante do código.
+ * O id principal é o email, matrícula é única.
  */
 @Repository
 public class UserRepository {
+    @Autowired
+	 private UserJpaRepository jpaRepository;
     
-    private final Map<String, User> users = new ConcurrentHashMap<>(); // Associa um email a um usuário
-    private final Map<String, String> matriculas = new ConcurrentHashMap<>(); // Associa uma matrícula a um email
-    private final String USERS_JSON = "src/main/resources/users.json";
-    private final ObjectMapper mapper = new ObjectMapper();
+    public boolean emailExists(String email) { return jpaRepository.existsById(email); }
 
-    /**
-     * Carrega usuários de users.json ao iniciar a aplicação.
-     */
-    @PostConstruct
-    public void loadUsersFromFile() {
-        try {
-            Path path = Paths.get(USERS_JSON);
-            if (Files.exists(path)) {
-                Map<String, User> node = mapper.readValue(Files.readString(path), new TypeReference<Map<String,User>>() {});
-                users.putAll(node);
-					 users.forEach((mail, user) -> 
-					 	matriculas.put(user.getMatricula(), mail)
-					 );
-					 System.out.println("Usuários carregados: " + users.size());
-				} else {
-					System.err.println("Erro ao carregar usuários: " + "Arquivo users.json não encontrado, iniciando com uma lista de usuários vazia.");
-            }
-        } catch (IOException e) {
-            System.err.println("Erro ao carregar usuários: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Salva usuários em users.json após qualquer modificação. Isso obviamente é lento e pode gerar erros de concorrência, mas é ok enquanto não migramos para um banco de dados real.
-     */
-    private void saveUsersToFile() {
-        try {
-            Path path = Paths.get(USERS_JSON);
-            if (path.getParent() != null) {
-                Files.createDirectories(path.getParent());
-            }
-
-            String tmp = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(users);
-            Path tmpPath = path.resolveSibling(path.getFileName().toString() + ".tmp");
-            Files.writeString(tmpPath, tmp, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            Files.move(tmpPath, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException e) {
-            System.err.println("Falha ao salvar users.json: " + e.getMessage());
-        }
-    }
-    
-	 /** Verifica se um email já está cadastrado. */
-    public boolean emailExists(String email) {
-        return email != null && users.containsKey(email);
-    }
-
-	 /** Verifica se uma matrícula já está cadastrada. */
-	public boolean idExists(String id){
-		assert(id != null);
-		return matriculas.containsKey(id);
-	}
+	public boolean idExists(String id){ return jpaRepository.existsByMatricula(id); }
 
 	/** Retorna a senha (já em hash) de um usuário. */
-    public String getPassword(String email){
-        User u = users.get(email);
-        return u != null ? u.getPassword() : null;
-    }
+    public String getPassword(String email){ return jpaRepository.findById(email).map(User::getPassword).orElse(null); }
 
 	/** Retorna o usuário associado ao email, ou null se não existir. */
-	public User getUser(String email){
-		if(!emailExists(email)) return null;
-		return users.get(email);
-	}
+	public User getUser(String email){ return jpaRepository.findById(email).orElse(null); }
 
-    public List<User> getUsers() {
-        return new ArrayList<User>(users.values());
-    }
+   public List<User> getUsers() { return jpaRepository.findAll(); }
 
-	public Boolean getAdmin(String email){
-		if(!emailExists(email)) return false;
-		return users.get(email).getAdmin();
-	}
+	public Boolean getAdmin(String email){ return jpaRepository.findById(email).map(User::getAdmin).orElse(false); }
 
 	public void setAdmin(String email, boolean isAdmin){
-		if(!emailExists(email)) return;
-		users.get(email).setAdmin(isAdmin);
-		saveUsersToFile();
+		jpaRepository.findById(email).ifPresent(user -> {
+			user.setAdmin(isAdmin);
+			jpaRepository.save(user);
+		});
 	}
 
-	 /** Cria um novo usuário e salva em users.json. Os possiveis conflitos são resolvidos aqui e também nas classes que chamam a função, para garantir a consistência dos dados. */
-    public void createUser(String email, String password, String nome, String matricula, String curso) {
-		if(emailExists(email) || idExists(matricula)){
-			throw new IllegalArgumentException("Email ou matrícula já cadastrados.");
+	public void createUser(String email, String password, String nome, String matricula, String curso){
+		if (emailExists(email) || idExists(matricula)) {
+			throw new IllegalArgumentException("Email ou matrícula já registrados.");
 		}
-		User user = new User(email, password, nome, matricula, curso);
-		users.put(email, user);
-		matriculas.put(matricula, email);
-		saveUsersToFile();
-    }
+
+		User u = new User(email, password, nome, matricula, curso);
+		jpaRepository.save(u);
+	}
 
 	/** Deleta um usuário e salva em users.json. */
     public void deleteUser(String email){
-		if(!emailExists(email)) return;
-		// Remover a matrícula associada
-		matriculas.remove(users.get(email).getMatricula());
-		users.remove(email);
-		saveUsersToFile();
+		jpaRepository.deleteById(email);
     }
 
     public void changePassword(String email, String passwordHash) {
-        users.get(email).setPassord(passwordHash);
-        saveUsersToFile();
+		jpaRepository.findById(email).ifPresent(user -> {
+			user.setPassword(passwordHash);
+			jpaRepository.save(user);
+		});
+    }
+
+	 @PostConstruct
+    public void migrateFromJsonIfNeeded() {
+        if (jpaRepository.count() == 0) {
+            loadUsersFromFile(); // Sua lógica existente de carregar JSON
+        }
+    }
+    
+    private void loadUsersFromFile() {
+        // Sua lógica existente, mas salve no JPA:
+        try {
+            Path path = Paths.get("src/main/resources/users.json");
+            if (Files.exists(path)) {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, User> users = mapper.readValue(
+                    Files.readString(path), 
+                    new TypeReference<Map<String, User>>() {}
+                );
+                jpaRepository.saveAll(users.values());
+                System.out.println("Migrados " + users.size() + " usuários para o banco");
+            }
+        } catch (Exception e) {
+            System.err.println("Erro na migração: " + e.getMessage());
+        }
     }
 }

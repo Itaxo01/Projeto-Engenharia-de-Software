@@ -8,6 +8,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -29,9 +31,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     // URLs that require admin privileges
     private static final String[] ADMIN_URLS = {
-        "/admin", "/admin/**", "/api/admin/**"
+        "/admin", "/admin/**", "/api/admin/**", "/h2-console", "/h2-console/**"
     };
-
+	
+	 // Development-only URLs (super admin access)
+    private static final String[] DEV_ADMIN_URLS = {
+        "/h2-console", "/h2-console/**"
+    };
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, 
                            @NonNull Object handler) throws Exception {
@@ -42,6 +48,19 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         // Check if URL is public
         if (isPublicUrl(requestURI)) {
+            return true;
+        }
+
+		  if (isDevAdminUrl(requestURI)) {
+            // Only allow in development profile AND super admin
+            if (!isDevelopmentMode()) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return false;
+            }
+            if (!isAuthenticated || !isSuperAdmin(request)) {
+                response.sendRedirect("/login?error=superAdminRequired");
+                return false;
+            }
             return true;
         }
 
@@ -86,6 +105,23 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private boolean isAdminUrl(String uri) {
         return matchesPattern(uri, ADMIN_URLS);
+    }
+	 private boolean isDevAdminUrl(String uri) {
+        return matchesPattern(uri, DEV_ADMIN_URLS);
+    }
+
+    private boolean isDevelopmentMode() {
+        // Check if running in development profile
+        String[] activeProfiles = System.getProperty("spring.profiles.active", "").split(",");
+        return Arrays.asList(activeProfiles).contains("dev") || 
+               Arrays.asList(activeProfiles).contains("development");
+    }
+
+    private boolean isSuperAdmin(HttpServletRequest request) {
+        String userEmail = sessionService.getCurrentUser(request);
+        // Only specific emails can access H2 console
+        return userEmail != null && 
+               ("kauanfank@gmail.com".equals(userEmail));
     }
 
     private boolean matchesPattern(String uri, String[] patterns) {

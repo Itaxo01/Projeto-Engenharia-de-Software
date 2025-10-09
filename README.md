@@ -11,7 +11,7 @@ mvn spring-boot:run
 
 ---
 ## Recent changes
-Acabei de tirar alguns arquivos importantes do git, como os usuários e atestados de matricula. Tive que alterar o histórico dos commits para tirar os arquivos de lá também. Pode ter dado algo de errado mas aparentemente não, qualquer coisa tenho um backup.
+Fiz o JPA de algumas classes e fiquei com preguiça e mandei a IA fazer o resto. Não revisei ainda, tem erros, precisa revisar. No momento não está compilando, qualquer coisa da pra voltar com um commit antigo.
 
 ---
 ## TO DO
