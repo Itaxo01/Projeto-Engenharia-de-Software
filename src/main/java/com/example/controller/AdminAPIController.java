@@ -15,13 +15,14 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.model.User;
+import com.example.scrapper.DisciplinaScrapper;
 import com.example.service.SessionService;
 import com.example.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Controlador REST para fornecer os métodos para o usuário administrador.
@@ -34,6 +35,8 @@ public class AdminAPIController {
 	private UserService userService;
 	@Autowired
 	private SessionService sessionService;
+	@Autowired
+	private DisciplinaScrapper disciplinaScrapper;
 
 	@GetMapping("/users")
 	public ResponseEntity<ArrayList<UserDto>> getUsers(HttpServletRequest request) {
@@ -82,6 +85,66 @@ public class AdminAPIController {
 			return ResponseEntity.ok("Conta deletada com sucesso.");
 		} catch (Exception e) {
 			return ResponseEntity.status(500).body("Erro ao deletar conta.");
+		}
+	}
+
+	/**
+	 * Endpoint para obter status do scrapper de disciplinas
+	 */
+	@GetMapping("/scrapper/status")
+	public ResponseEntity<?> getScrapperStatus(HttpServletRequest request) {
+		boolean auth = sessionService.verifySession(request);
+		if (!auth || !sessionService.currentUserIsAdmin(request)) {
+			return ResponseEntity.status(403).build();
+		}
+		
+		// System.out.println(sessionService.getCurrentUser(request) + " solicitou status do scrapper");
+		try {
+			var status = disciplinaScrapper.getStatus();
+			return ResponseEntity.ok(status);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Erro ao obter status do scrapper: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Endpoint para executar scrapping de disciplinas
+	 */
+	@PostMapping("/scrapper/execute")
+	public ResponseEntity<String> executeScrapper(HttpServletRequest request, @RequestBody Map<String,String> body) {
+		boolean auth = sessionService.verifySession(request);
+		if (!auth || !sessionService.currentUserIsAdmin(request)) {
+			return ResponseEntity.status(403).build();
+		}
+		// System.out.println(sessionService.getCurrentUser(request) + " solicitou execução do scrapper");
+		
+		String cagrUsername = body.get("cagrUsername");
+		String cagrPassword = body.get("cagrPassword");
+		
+		if (cagrUsername == null || cagrUsername.trim().isEmpty() || 
+			cagrPassword == null || cagrPassword.trim().isEmpty()) {
+			return ResponseEntity.status(400).body("Usuário e senha do CAGR são obrigatórios.");
+		}
+		
+		try {
+			// Obter nome do usuário atual para rastreamento
+			String currentUserEmail = sessionService.getCurrentUser(request);
+			String adminName = currentUserEmail != null ? currentUserEmail : "Administrador";
+			
+			// Executa em thread separada para não bloquear a requisição
+			new Thread(() -> {
+				try {
+					disciplinaScrapper.executarScraping(cagrUsername.trim(), cagrPassword.trim(), adminName);
+				} catch (Exception e) {
+					System.err.println("Erro durante scraping executado por " + adminName + ": " + e.getMessage());
+				}
+			}).start();
+			
+			return ResponseEntity.ok("Scrapping iniciado com sucesso. Verifique o status para acompanhar o progresso.");
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Erro ao iniciar scrapping: " + e.getMessage());
 		}
 	}
 

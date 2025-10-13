@@ -193,7 +193,190 @@ async function fetchAndDisplayUsers() {
 	}
 }
 
+// Scrapper functions
+function showCredentialsModal() {
+	const modal = document.getElementById('credentials-modal');
+	modal.style.display = 'block';
+	
+	// Focus on username field
+	setTimeout(() => {
+		document.getElementById('cagr-username').focus();
+	}, 100);
+}
 
-// Call the function on page load
-window.addEventListener('DOMContentLoaded', fetchAndDisplayUsers);
+function hideCredentialsModal() {
+	const modal = document.getElementById('credentials-modal');
+	modal.style.display = 'none';
+	
+	// Clear form
+	document.getElementById('credentials-form').reset();
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', (event) => {
+	const modal = document.getElementById('credentials-modal');
+	if (event.target === modal) {
+		hideCredentialsModal();
+	}
+});
+
+async function executeScrapper() {
+	const form = document.getElementById('credentials-form');
+	const formData = new FormData(form);
+	const submitButton = form.querySelector('button[type="submit"]');
+	const originalText = submitButton.textContent;
+	
+	try {
+		submitButton.disabled = true;
+		submitButton.textContent = 'Executando...';
+		
+		const credentials = {
+			cagrUsername: formData.get('cagrUsername'),
+			cagrPassword: formData.get('cagrPassword')
+		};
+		
+		const response = await fetch('/api/admin/scrapper/execute', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(credentials),
+			credentials: 'same-origin'
+		});
+		
+		if (response.status === 200) {
+			const message = await response.text();
+			alert('Sucesso: ' + message);
+			hideCredentialsModal();
+			// Refresh status after starting scrapper
+			setTimeout(refreshScrapperStatus, 1000);
+		} else if (response.status === 400) {
+			const error = await response.text();
+			alert('Erro: ' + error);
+		} else if (response.status === 409) {
+			const error = await response.text();
+			alert('Aviso: ' + error);
+		} else if (response.status === 403) {
+			alert('Erro: Acesso negado. Você precisa ser administrador.');
+		} else if (response.status === 401) {
+			alert('Sessão expirada. Por favor refaça login.');
+			document.location.href = '/login?error=notAuthenticated';
+		} else {
+			const error = await response.text();
+			alert('Erro: ' + error);
+		}
+	} catch (error) {
+		console.error('Error executing scrapper:', error);
+		alert('Erro ao executar scrapper. Tente novamente.');
+	} finally {
+		submitButton.disabled = false;
+		submitButton.textContent = originalText;
+	}
+}
+
+async function refreshScrapperStatus() {
+	try {
+		const response = await fetch('/api/admin/scrapper/status', {
+			credentials: 'same-origin'
+		});
+		
+		if (!response.ok) {
+			if (response.status === 403) {
+				throw new Error('Acesso negado');
+			} else if (response.status === 401) {
+				document.location.href = '/login?error=notAuthenticated';
+				return;
+			}
+			throw new Error('Erro ao obter status');
+		}
+		
+		const status = await response.json();
+		displayScrapperStatus(status);
+		
+	} catch (error) {
+		console.error('Error fetching scrapper status:', error);
+		const statusDiv = document.getElementById('scrapper-status');
+		statusDiv.innerHTML = `
+			<div class="status-error">
+				<span class="error-icon">⚠️</span>
+				Erro ao carregar status: ${error.message}
+			</div>
+		`;
+	}
+}
+
+function displayScrapperStatus(status) {
+	const statusDiv = document.getElementById('scrapper-status');
+	
+	// Format dates
+	const formatDate = (dateString) => {
+		if (!dateString) return 'Nunca';
+		const date = new Date(dateString);
+		return date.toLocaleString('pt-BR');
+	};
+	
+	const executando = status.executando ? 'Sim' : 'Não';
+	const statusClass = status.executando ? 'status-running' : 'status-idle';
+	const statusIcon = status.executando ? '🔄' : '✅';
+	
+	statusDiv.innerHTML = `
+		<div class="status-card ${statusClass}">
+			<div class="status-header">
+				<span class="status-icon">${statusIcon}</span>
+				<h3>Status do Scrapper</h3>
+			</div>
+			
+			<div class="status-details">
+				<div class="status-item">
+					<label>Em execução:</label>
+					<span class="status-value ${status.executando ? 'running' : 'idle'}">${executando}</span>
+				</div>
+				
+				<div class="status-item">
+					<label>Última execução:</label>
+					<span class="status-value">${formatDate(status.ultimaExecucao)}</span>
+				</div>
+				
+				<div class="status-item">
+					<label>Último sucesso:</label>
+					<span class="status-value">${formatDate(status.ultimoSucesso)}</span>
+				</div>
+				
+				<div class="status-item">
+					<label>Disciplinas capturadas:</label>
+					<span class="status-value">${status.disciplinasCapturadas || 0}</span>
+				</div>
+				
+				<div class="status-item">
+					<label>Professores capturados:</label>
+					<span class="status-value">${status.professoresCapturados || 0}</span>
+				</div>
+				
+				<div class="status-item">
+					<label>Último administrador:</label>
+					<span class="status-value">${status.ultimoAdministrador || 'N/A'}</span>
+				</div>
+				
+				${status.ultimoErro ? `
+				<div class="status-item error">
+					<label>Último erro:</label>
+					<span class="status-value error">${status.ultimoErro}</span>
+				</div>
+				` : ''}
+			</div>
+		</div>
+	`;
+}
+
+// Call the functions on page load
+window.addEventListener('DOMContentLoaded', () => {
+	fetchAndDisplayUsers();
+	refreshScrapperStatus();
+	
+	// Add form submit listener
+	document.getElementById('credentials-form').addEventListener('submit', (event) => {
+		event.preventDefault();
+		executeScrapper();
+	});
+});
 

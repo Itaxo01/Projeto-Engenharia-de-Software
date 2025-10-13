@@ -44,7 +44,61 @@
             </div>
 
         </div>
+
+        <div class="scrapper-section">
+            <div class="section-header">
+                <h2>Scrapper de Disciplinas</h2>
+                <p>Importe disciplinas e professores do sistema CAGR/UFSC</p>
+            </div>
+            
+            <div class="scrapper-controls">
+                <button id="execute-scrapper-btn" class="btn btn-primary" onclick="showCredentialsModal()">
+                    Executar Scrapping
+                </button>
+                <button id="refresh-status-btn" class="btn btn-secondary" onclick="refreshScrapperStatus()">
+                    Atualizar Status
+                </button>
+            </div>
+            
+            <div class="scrapper-status" id="scrapper-status">
+                <div class="status-loading">Carregando status...</div>
+            </div>
+        </div>
     </div>
+    
+    <!-- Modal para credenciais CAGR -->
+    <div id="credentials-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Credenciais CAGR/UFSC</h3>
+                <span class="close" onclick="hideCredentialsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Insira suas credenciais do sistema CAGR para executar o scrapping:</p>
+                <form id="credentials-form">
+                    <div class="form-group">
+                        <label for="cagr-username">Usuário CAGR:</label>
+                        <input type="text" id="cagr-username" name="cagrUsername" required 
+                               placeholder="Seu usuário do CAGR">
+                    </div>
+                    <div class="form-group">
+                        <label for="cagr-password">Senha CAGR:</label>
+                        <input type="password" id="cagr-password" name="cagrPassword" required 
+                               placeholder="Sua senha do CAGR">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="hideCredentialsModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Executar Scrapping
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <script src="/js/admin.js"></script>
 </body>
 </html>

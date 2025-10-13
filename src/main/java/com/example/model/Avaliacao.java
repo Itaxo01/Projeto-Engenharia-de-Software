@@ -4,8 +4,16 @@ import java.util.ArrayList;
 import jakarta.persistence.*;
 
 /**
- * Entidade JPA que representa uma avaliação cadastrada no sistema.
- * Representa uma nota de 1 a 5 dada por um usuário para um professor em uma disciplina específica.
+ * Entidade JPA que representa uma avaliação cadastrada no sistema. Essa tabela é atualmente usada para quase todas as queries do sistema.
+ * <p>Uma avaliação contém os seguintes atributos principais:</p>
+ * <ul>
+ *   <li>{@link #nota} - Nota dada pelo usuário (1 a 5). Use -1 para indicar que a nota não foi definida</li>
+ *   <li>{@link #professorId} - ID do professor avaliado. Pode ser nulo se a avaliação for apenas da disciplina</li>
+ *   <li>{@link #disciplinaCodigo} - Código da disciplina avaliada</li>
+ *   <li>{@link #userEmail} - Email do usuário que fez a avaliação</li>
+ *   <li>{@link #comentario} - Comentário principal associado à avaliação (opcional)</li>
+ *   <li>{@link #createdAt} - Timestamp de quando a avaliação foi criada</li>
+ * </ul>
  */
 @Entity
 @Table(name = "avaliacoes")
@@ -14,116 +22,155 @@ public class Avaliacao {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "professor_id", nullable = false)
-	private Professor professor;
+	@Column(name = "professor_id", nullable = true)
+	private String professorId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "disciplina_id", nullable = false)
-	private Disciplina disciplina;
+	@Column(name = "disciplina_codigo", nullable = false)
+	private String disciplinaCodigo;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_email", nullable = false)
-	private User user;
+	@Column(name = "user_email", nullable = false)
+	private String userEmail;
 
-	@Column(nullable = false)
+	@Column(name = "nota", nullable = true)
 	private Integer nota;
 
 	@Column(name = "created_at")
 	private java.time.Instant createdAt = java.time.Instant.now();
 
-	// Relacionamento com comentários
-	@OneToMany(mappedBy = "avaliacao", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private java.util.List<Comentario> comentarios = new ArrayList<>();
+	// Comentário principal da avaliação
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "comentario_id")
+	private Comentario comentario;
 
 	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Avaliacao(Integer nota, Professor professor, Disciplina disciplina, User user) {
+	public Avaliacao(Integer nota, String professorId, String disciplinaCodigo, String userEmail) {
 		this.nota = nota;
-		this.professor = professor;
-		this.disciplina = disciplina;
-		this.user = user;
+		this.professorId = professorId;
+		this.disciplinaCodigo = disciplinaCodigo;
+		this.userEmail = userEmail;
 	}
+
+	/** Construtor completo com comentário. */
+	public Avaliacao(Integer nota, String professorId, String disciplinaCodigo, String userEmail, Comentario comentario) {
+		this.nota = nota;
+		this.professorId = professorId;
+		this.disciplinaCodigo = disciplinaCodigo;
+		this.userEmail = userEmail;
+		this.comentario = comentario;
+		if (comentario != null) {
+			comentario.setAvaliacao(this);
+		}
+	}
+
+	/** Construtor para comentário sem nota. */
+	public Avaliacao(String professorId, String disciplinaCodigo, String userEmail, Comentario comentario) {
+		this.professorId = professorId;
+		this.disciplinaCodigo = disciplinaCodigo;
+		this.userEmail = userEmail;
+		this.nota = -1; // Indica que a nota não foi definida
+		this.comentario = comentario;
+	}
+	
+	/* Construtor para a avaliação sem nota da disciplina*/
+	public Avaliacao(String disciplinaCodigo, String userEmail, Comentario comentario) {
+		this.disciplinaCodigo = disciplinaCodigo;
+		this.userEmail = userEmail;
+		this.nota = -1; // Indica que a nota não foi definida
+		this.comentario = comentario;
+	}
+
+	/* Construtor para a avaliação com nota da disciplina*/
+	public Avaliacao(String disciplinaCodigo, String userEmail, Integer nota, Comentario comentario) {
+		this.disciplinaCodigo = disciplinaCodigo;
+		this.userEmail = userEmail;
+		this.nota = nota;
+		this.comentario = comentario;
+	}
+
 
 	/** Construtor padrão necessário para JPA. */
 	public Avaliacao(){}
 
-	// Getters and Setters
+		// Getters and Setters
 	public Long getId() { 
-		return id;
+		return id; 
 	}
 	
 	public void setId(Long id) { 
-		this.id = id;
+		this.id = id; 
 	}
 
-	public Professor getProfessor() { 
-		return professor;
-	}
-	
-	public void setProfessor(Professor professor) { 
-		this.professor = professor; 
+	public String getProfessorId() { return professorId; }
+	public void setProfessorId(String professorId) { this.professorId = professorId; }
+
+	public String getDisciplinaCodigo() { return disciplinaCodigo; }
+	public void setDisciplinaCodigo(String disciplinaCodigo) { this.disciplinaCodigo = disciplinaCodigo; }
+
+	public String getUserEmail() { return userEmail; }
+	public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+	public Integer getNota() { return nota; }
+	public void setNota(Integer nota) { this.nota = nota; }
+
+	public java.time.Instant getCreatedAt() { return createdAt; }
+	public void setCreatedAt(java.time.Instant createdAt) { this.createdAt = createdAt; }
+
+	public Comentario getComentario() { return comentario; }
+	public void setComentario(Comentario comentario) { 
+		this.comentario = comentario;
+		if (comentario != null) {
+			comentario.setAvaliacao(this);
+		}
 	}
 
-	public Disciplina getDisciplina() { 
-		return disciplina;
-	}
-	
-	public void setDisciplina(Disciplina disciplina) { 
-		this.disciplina = disciplina; 
+	// Métodos auxiliares para comentário principal
+	public boolean hasComentario() {
+		return comentario != null && comentario.getTexto() != null && !comentario.getTexto().trim().isEmpty();
 	}
 
-	public User getUser() { 
-		return user;
-	}
-	
-	public void setUser(User user) { 
-		this.user = user; 
-	}
-	
-	public Integer getNota() { 
-		return nota;
-	}
-	
-	public void setNota(Integer nota) { 
-		this.nota = nota;
+	public boolean hasComentariosAninhados() {
+		return comentario != null && comentario.getFilhos() != null && !comentario.getFilhos().isEmpty();
 	}
 
-	public java.time.Instant getCreatedAt() {
-		return createdAt;
+	public int getTotalComentarios() {
+		if (comentario == null) return 0;
+		return contarComentarios(comentario);
 	}
 
-	public void setCreatedAt(java.time.Instant createdAt) {
-		this.createdAt = createdAt;
+	private int contarComentarios(Comentario comentario) {
+		int total = 1; // o próprio comentário
+		if (comentario.getFilhos() != null) {
+			for (Comentario filho : comentario.getFilhos()) {
+				total += contarComentarios(filho);
+			}
+		}
+		return total;
 	}
 
-	public java.util.List<Comentario> getComentarios() {
-		return comentarios;
-	}
-
-	public void setComentarios(java.util.List<Comentario> comentarios) {
-		this.comentarios = comentarios;
-	}
-
-	// Helper methods
-	public void addComentario(Comentario comentario) {
-		this.comentarios.add(comentario);
-		comentario.setAvaliacao(this);
-	}
-
-	public void removeComentario(Comentario comentario) {
-		this.comentarios.remove(comentario);
-		comentario.setAvaliacao(null);
+	public void clearComentario() {
+		if (this.comentario != null) {
+			this.comentario.setAvaliacao(null);
+		}
+		this.comentario = null;
 	}
 
 	@Override
 	public String toString() {
+		String comentarioTexto = null;
+		if (comentario != null && comentario.getTexto() != null) {
+			String texto = comentario.getTexto();
+			comentarioTexto = texto.length() > 50 ? texto.substring(0, 50) + "..." : texto;
+		}
+		
 		return "Avaliacao{" +
 				"id=" + id +
 				", nota=" + nota +
-				", professor=" + (professor != null ? professor.getNome() : "null") +
-				", disciplina=" + (disciplina != null ? disciplina.getNome() : "null") +
-				", user=" + (user != null ? user.getEmail() : "null") +
+				", professorId='" + professorId + '\'' +
+				", disciplinaCodigo='" + disciplinaCodigo + '\'' +
+				", userEmail='" + userEmail + '\'' +
+				", comentario='" + (comentarioTexto != null ? comentarioTexto : "null") + '\'' +
 				", createdAt=" + createdAt +
+				", totalComentarios=" + getTotalComentarios() +
 				'}';
 	}
 }

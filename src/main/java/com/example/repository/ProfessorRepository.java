@@ -4,6 +4,7 @@ import com.example.model.Professor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class ProfessorRepository {
     /**
      * Busca professores por nome (busca parcial).
      */
-    public List<Professor> findByNome(String nome) {
+    public ArrayList<Professor> findByNome(String nome) {
         return professorJpaRepository.findByNomeContainingIgnoreCase(nome);
     }
     
@@ -55,7 +56,7 @@ public class ProfessorRepository {
     /**
      * Busca professores que lecionam uma disciplina específica.
      */
-    public List<Professor> findByDisciplina(String codigoDisciplina) {
+    public ArrayList<Professor> findByDisciplina(String codigoDisciplina) {
         return professorJpaRepository.findByDisciplinaCodigo(codigoDisciplina);
     }
     

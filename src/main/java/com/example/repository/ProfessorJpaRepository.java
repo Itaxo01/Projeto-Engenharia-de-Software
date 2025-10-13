@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -17,7 +17,7 @@ public interface ProfessorJpaRepository extends JpaRepository<Professor, String>
     /**
      * Busca professores por nome (case insensitive).
      */
-    List<Professor> findByNomeContainingIgnoreCase(String nome);
+    ArrayList<Professor> findByNomeContainingIgnoreCase(String nome);
     
     /**
      * Busca professor por nome exato.
@@ -28,7 +28,7 @@ public interface ProfessorJpaRepository extends JpaRepository<Professor, String>
      * Busca professores por disciplina.
      */
     @Query("SELECT p FROM Professor p JOIN p.disciplinas d WHERE d.codigo = :codigoDisciplina")
-    List<Professor> findByDisciplinaCodigo(@Param("codigoDisciplina") String codigoDisciplina);
+    ArrayList<Professor> findByDisciplinaCodigo(@Param("codigoDisciplina") String codigoDisciplina);
     
     /**
      * Busca professor com suas disciplinas carregadas.

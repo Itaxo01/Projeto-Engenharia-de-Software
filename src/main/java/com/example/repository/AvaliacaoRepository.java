@@ -7,6 +7,7 @@ import com.example.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,36 +45,37 @@ public class AvaliacaoRepository {
     /**
      * Busca avaliações por professor.
      */
-    public List<Avaliacao> findByProfessor(Professor professor) {
-        return avaliacaoJpaRepository.findByProfessor(professor);
+    public ArrayList<Avaliacao> findByProfessor(Professor professor) {
+        return avaliacaoJpaRepository.findByProfessorId(professor.getID_LATTES());
     }
     
     /**
      * Busca avaliações por disciplina.
      */
-    public List<Avaliacao> findByDisciplina(Disciplina disciplina) {
-        return avaliacaoJpaRepository.findByDisciplina(disciplina);
+    public ArrayList<Avaliacao> findByDisciplina(Disciplina disciplina) {
+        return avaliacaoJpaRepository.findByDisciplinaCodigo(disciplina.getCodigo());
     }
     
     /**
      * Busca avaliações por usuário.
      */
-    public List<Avaliacao> findByUser(User user) {
-        return avaliacaoJpaRepository.findByUser(user);
+    public ArrayList<Avaliacao> findByUser(User user) {
+        return avaliacaoJpaRepository.findByUserEmail(user.getEmail());
     }
     
     /**
      * Busca avaliações por professor e disciplina.
      */
-    public List<Avaliacao> findByProfessorAndDisciplina(Professor professor, Disciplina disciplina) {
-        return avaliacaoJpaRepository.findByProfessorAndDisciplina(professor, disciplina);
+    public ArrayList<Avaliacao> findByProfessorAndDisciplina(Professor professor, Disciplina disciplina) {
+        return avaliacaoJpaRepository.findByProfessorIdAndDisciplinaCodigo(professor.getID_LATTES(), disciplina.getCodigo());
     }
     
     /**
      * Busca avaliação específica de um usuário.
      */
     public Optional<Avaliacao> findByProfessorAndDisciplinaAndUser(Professor professor, Disciplina disciplina, User user) {
-        return avaliacaoJpaRepository.findByProfessorAndDisciplinaAndUser(professor, disciplina, user);
+        return avaliacaoJpaRepository.findByProfessorIdAndDisciplinaCodigoAndUserEmail(
+                professor.getID_LATTES(), disciplina.getCodigo(), user.getEmail());
     }
     
     /**
@@ -93,21 +95,21 @@ public class AvaliacaoRepository {
     /**
      * Busca avaliações por nota.
      */
-    public List<Avaliacao> findByNota(Integer nota) {
+    public ArrayList<Avaliacao> findByNota(Integer nota) {
         return avaliacaoJpaRepository.findByNota(nota);
     }
     
     /**
      * Busca avaliações com nota maior ou igual.
      */
-    public List<Avaliacao> findByNotaMaiorOuIgual(Integer nota) {
+    public ArrayList<Avaliacao> findByNotaMaiorOuIgual(Integer nota) {
         return avaliacaoJpaRepository.findByNotaGreaterThanEqual(nota);
     }
     
     /**
      * Busca avaliações com nota menor ou igual.
      */
-    public List<Avaliacao> findByNotaMenorOuIgual(Integer nota) {
+    public ArrayList<Avaliacao> findByNotaMenorOuIgual(Integer nota) {
         return avaliacaoJpaRepository.findByNotaLessThanEqual(nota);
     }
     
@@ -129,21 +131,14 @@ public class AvaliacaoRepository {
      * Conta avaliações por professor.
      */
     public long countByProfessor(Professor professor) {
-        return avaliacaoJpaRepository.countByProfessor(professor);
+        return avaliacaoJpaRepository.countByProfessorId(professor.getID_LATTES());
     }
     
     /**
      * Conta avaliações por disciplina.
      */
     public long countByDisciplina(Disciplina disciplina) {
-        return avaliacaoJpaRepository.countByDisciplina(disciplina);
-    }
-    
-    /**
-     * Busca avaliação com seus comentários carregados.
-     */
-    public Optional<Avaliacao> findByIdWithComentarios(Long id) {
-        return avaliacaoJpaRepository.findByIdWithComentarios(id);
+        return avaliacaoJpaRepository.countByDisciplinaCodigo(disciplina.getCodigo());
     }
     
     /**
@@ -158,5 +153,47 @@ public class AvaliacaoRepository {
      */
     public long count() {
         return avaliacaoJpaRepository.count();
+    }
+    
+    /**
+     * Busca avaliações que possuem comentário principal.
+     */
+    public ArrayList<Avaliacao> findAvaliacoesComComentario() {
+        return avaliacaoJpaRepository.findAvaliacoesComComentario();
+    }
+    
+    /**
+     * Busca avaliações sem comentário principal.
+     */
+    public ArrayList<Avaliacao> findAvaliacoesSemComentario() {
+        return avaliacaoJpaRepository.findAvaliacoesSemComentario();
+    }
+    
+    /**
+     * Busca avaliações com comentário por professor e disciplina.
+     */
+    public ArrayList<Avaliacao> findByProfessorAndDisciplinaComComentario(Professor professor, Disciplina disciplina) {
+        return avaliacaoJpaRepository.findByProfessorAndDisciplinaComComentario(professor.getID_LATTES(), disciplina.getCodigo());
+    }
+    
+    /**
+     * Busca avaliações por palavra-chave no comentário.
+     */
+    public ArrayList<Avaliacao> findByComentarioContendo(String palavra) {
+        return avaliacaoJpaRepository.findByComentarioTextoContaining(palavra);
+    }
+    
+    /**
+     * Conta avaliações com comentário de um professor.
+     */
+    public long countAvaliacoesComComentarioByProfessor(Professor professor) {
+        return avaliacaoJpaRepository.countAvaliacoesComComentarioByProfessor(professor.getID_LATTES());
+    }
+    
+    /**
+     * Busca avaliação com seu comentário carregado.
+     */
+    public Optional<Avaliacao> findByIdWithComentario(Long id) {
+        return avaliacaoJpaRepository.findByIdWithComentario(id);
     }
 }

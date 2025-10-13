@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 /**
  * Repositório em memória com persistência para usuários. Utiliza JPA para operações no banco de dados, as operações aqui são apenas para manter a interface consistente com o restante do código.

@@ -4,6 +4,14 @@ import jakarta.persistence.*;
 
 /**
  * Entidade de domínio que representa um usuário cadastrado no sistema. Utilizada para o manejo dos dados
+ * <ul>
+ * <li> {@link #email} Email do usuário (chave de login).</li
+ * <li> {@link #password} Hash da senha armazenado.</li>
+ * <li> {@link #nome} Nome completo do usuário extraído do PDF.</li
+ * <li> {@link #matricula} Matrícula estudantil (ID).</li>
+ * <li> {@link #curso} Curso do usuário.</li>
+ * <li> {@link #isAdmin} Indica se o usuário é um administrador do sistema.</li>
+ * </ul>
  */
 @Entity
 @Table(name = "users")

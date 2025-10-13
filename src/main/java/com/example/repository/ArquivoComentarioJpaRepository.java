@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -18,12 +18,12 @@ public interface ArquivoComentarioJpaRepository extends JpaRepository<ArquivoCom
     /**
      * Busca arquivos por comentário.
      */
-    List<ArquivoComentario> findByComentario(Comentario comentario);
+    ArrayList<ArquivoComentario> findByComentario(Comentario comentario);
     
     /**
      * Busca arquivos por ID do comentário.
      */
-    List<ArquivoComentario> findByComentarioId(Long comentarioId);
+    ArrayList<ArquivoComentario> findByComentarioId(Long comentarioId);
     
     /**
      * Busca arquivo pelo nome único do arquivo.
@@ -38,18 +38,18 @@ public interface ArquivoComentarioJpaRepository extends JpaRepository<ArquivoCom
     /**
      * Busca arquivos por tipo MIME.
      */
-    List<ArquivoComentario> findByTipoMime(String tipoMime);
+    ArrayList<ArquivoComentario> findByTipoMime(String tipoMime);
     
     /**
      * Busca arquivos com tamanho maior que o especificado.
      */
     @Query("SELECT a FROM ArquivoComentario a WHERE a.tamanho > :tamanho")
-    List<ArquivoComentario> findByTamanhoGreaterThan(@Param("tamanho") Long tamanho);
+    ArrayList<ArquivoComentario> findByTamanhoGreaterThan(@Param("tamanho") Long tamanho);
     
     /**
      * Busca arquivos por nome original (busca parcial).
      */
-    List<ArquivoComentario> findByNomeOriginalContainingIgnoreCase(String nomeOriginal);
+    ArrayList<ArquivoComentario> findByNomeOriginalContainingIgnoreCase(String nomeOriginal);
     
     /**
      * Conta total de arquivos por comentário.

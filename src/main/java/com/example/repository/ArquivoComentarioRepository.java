@@ -5,6 +5,7 @@ import com.example.model.Comentario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,14 +43,14 @@ public class ArquivoComentarioRepository {
     /**
      * Busca arquivos por comentário.
      */
-    public List<ArquivoComentario> findByComentario(Comentario comentario) {
+    public ArrayList<ArquivoComentario> findByComentario(Comentario comentario) {
         return arquivoComentarioJpaRepository.findByComentario(comentario);
     }
     
     /**
      * Busca arquivos por ID do comentário.
      */
-    public List<ArquivoComentario> findByComentarioId(Long comentarioId) {
+    public ArrayList<ArquivoComentario> findByComentarioId(Long comentarioId) {
         return arquivoComentarioJpaRepository.findByComentarioId(comentarioId);
     }
     
@@ -70,21 +71,21 @@ public class ArquivoComentarioRepository {
     /**
      * Busca arquivos por tipo MIME.
      */
-    public List<ArquivoComentario> findByTipoMime(String tipoMime) {
+    public ArrayList<ArquivoComentario> findByTipoMime(String tipoMime) {
         return arquivoComentarioJpaRepository.findByTipoMime(tipoMime);
     }
     
     /**
      * Busca arquivos por nome original (busca parcial).
      */
-    public List<ArquivoComentario> findByNomeOriginal(String nomeOriginal) {
+    public ArrayList<ArquivoComentario> findByNomeOriginal(String nomeOriginal) {
         return arquivoComentarioJpaRepository.findByNomeOriginalContainingIgnoreCase(nomeOriginal);
     }
     
     /**
      * Busca arquivos com tamanho maior que o especificado.
      */
-    public List<ArquivoComentario> findByTamanhoMaiorQue(Long tamanho) {
+    public ArrayList<ArquivoComentario> findByTamanhoMaiorQue(Long tamanho) {
         return arquivoComentarioJpaRepository.findByTamanhoGreaterThan(tamanho);
     }
     

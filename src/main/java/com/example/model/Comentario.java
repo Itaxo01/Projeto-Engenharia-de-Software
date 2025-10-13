@@ -3,15 +3,32 @@ package com.example.model;
 import java.util.ArrayList;
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.List;
+import java.util.ArrayList;
 import com.example.model.ArquivoComentario;
 
 /**
  * Entidade de domínio que representa um comentário feito por um usuário em uma avaliação.
+ * <p>Um comentário pode ter arquivos anexados e pode ser uma resposta a outro comentário.</p>
+ * <p>Um comentário pode ter várias respostas, formando uma árvore de comentários.</p>
+ * <ul>
+ * <li>{@link #usuario} Usuário que fez o comentário.</li>
+ * <li>{@link #texto} Texto do comentário.</li>
+ * <li>{@link #createdAt} Timestamp de quando o comentário foi criado.</li>
+ * <li>{@link #avaliacao} Avaliação à qual o comentário principal está associado (pode ser nulo para respostas).</li>
+ * <li>{@link #arquivos} Lista de arquivos anexados ao comentário.</li>
+ * <li>{@link #pai} Comentário pai, se este comentário for uma resposta.</li>
+ * <li>{@link #filhos} Lista de respostas a este comentário.</li>
+ * <li>{@link #upVotes} Número de votos positivos no comentário.</li>
+ * <li>{@link #downVotes} Número de votos negativos no comentário.</li>
+ * </ul>
  */
 
 @Entity
-@Table(name = "comentarios")
+@Table(name = "comentarios", indexes = {
+	@Index(name = "idx_pai_id", columnList = "pai_id"),
+	@Index(name = "idx_user_created", columnList = "user_email, created_at"),
+	@Index(name = "idx_created", columnList = "created_at")
+})
 public class Comentario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,20 +50,21 @@ public class Comentario {
 	@Column(name = "created_at")
 	private Instant createdAt = Instant.now();
 
-	// Relacionamento com avaliação
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "avaliacao_id")
+	// Relacionamento com avaliação (comentário raiz)
+	@OneToOne(mappedBy = "comentario", fetch = FetchType.LAZY)
 	private Avaliacao avaliacao;
 
 	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<ArquivoComentario> arquivos = new ArrayList<>();
+	private ArrayList<ArquivoComentario> arquivos = new ArrayList<>();
 
+	// Relacionamento autoreferencial - comentário pai
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pai_id")
 	private Comentario pai;
 
+	// Relacionamento autoreferencial - comentários filhos
 	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Comentario> respostas = new ArrayList<>();
+	private ArrayList<Comentario> filhos = new ArrayList<>();
 
 	public Comentario(){}
 
@@ -76,14 +94,14 @@ public class Comentario {
 	public Instant getCreatedAt() { return createdAt; }
 	public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-	public List<ArquivoComentario> getArquivos() { return arquivos; }
-	public void setArquivos(List<ArquivoComentario> arquivos) { this.arquivos = arquivos; }
+	public ArrayList<ArquivoComentario> getArquivos() { return arquivos; }
+	public void setArquivos(ArrayList<ArquivoComentario> arquivos) { this.arquivos = arquivos; }
 
 	public Comentario getPai() { return pai; }
 	public void setPai(Comentario pai) { this.pai = pai; }
 
-	public List<Comentario> getRespostas() { return respostas; }
-	public void setRespostas(List<Comentario> respostas) { this.respostas = respostas; }
+	public ArrayList<Comentario> getFilhos() { return filhos; }
+	public void setFilhos(ArrayList<Comentario> filhos) { this.filhos = filhos; }
 
 	public Avaliacao getAvaliacao() { return avaliacao; }
 	public void setAvaliacao(Avaliacao avaliacao) { this.avaliacao = avaliacao; }
@@ -95,9 +113,9 @@ public class Comentario {
 	public void setDownVotes(Integer downVotes) { this.downVotes = downVotes; }
 
 	// Métodos de conveniência
-	public void addResposta(Comentario resposta) {
-		respostas.add(resposta);
-		resposta.setPai(this);
+	public void addFilho(Comentario filho) {
+		filhos.add(filho);
+		filho.setPai(this);
 	}
 
 	public void addArquivo(ArquivoComentario arquivo) {
@@ -110,7 +128,19 @@ public class Comentario {
 	}
 
 	public boolean isComentarioPrincipal() {
-		return pai == null;
+		return pai == null && avaliacao != null;
+	}
+
+	public boolean isComentarioAninhado() {
+		return pai != null;
+	}
+
+	public Comentario getComentarioRaiz() {
+		Comentario atual = this;
+		while (atual.getPai() != null) {
+			atual = atual.getPai();
+		}
+		return atual;
 	}
 
 	public int getNivelProfundidade() {
@@ -121,5 +151,21 @@ public class Comentario {
 			atual = atual.getPai();
 		}
 		return nivel;
+	}
+
+	public int contarFilhosRecursivo() {
+		int total = filhos.size();
+		for (Comentario filho : filhos) {
+			total += filho.contarFilhosRecursivo();
+		}
+		return total;
+	}
+
+	public boolean hasFilhos() {
+		return filhos != null && !filhos.isEmpty();
+	}
+
+	public boolean hasArquivos() {
+		return arquivos != null && !arquivos.isEmpty();
 	}
 }
