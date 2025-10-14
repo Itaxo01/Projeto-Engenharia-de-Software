@@ -34,12 +34,12 @@
 
     <div class="class-container">
         <div class="breadcrumb">
-            <a href="/dashboard">Dashboard</a> > <span>INE5402 - Programação Orientada a Objetos I</span>
+            <a href="/dashboard">Dashboard</a> > <span><span th:text="${disciplina.codigo}">INE5402</span> - <span th:text="${disciplina.nome}">Programação Orientada a Objetos I</span></span>
         </div>
 
         <div class="class-header">
             <div class="class-info">
-                <h1>INE5402 - Programação Orientada a Objetos I</h1>
+                <h1><span th:text="${disciplina.codigo}">INE5402</span> - <span th:text="${disciplina.nome}">Programação Orientada a Objetos I</span></h1>
                 <div class="class-meta">
                     <span class="class-credits">4 Créditos</span>
                     <span class="class-department">Departamento de Informática e Estatística</span>
@@ -74,13 +74,13 @@
             <div class="teachers-section">
                 <h2>Professores</h2>
                 <div class="teachers-grid">
-                    <div class="teacher-card">
+                    <div th:each="professor : ${professors}" th:object="${professor}" class="teacher-card">
                         <div class="teacher-info">
                             <div class="teacher-avatar">
                                 <span>JS</span>
                             </div>
                             <div class="teacher-details">
-                                <h3>Prof. João Silva</h3>
+                                <h3>Prof. <span th:text="${professor.nome}">Nome do professor</span></h3>
                                 <p>Doutor em Ciência da Computação</p>
                             </div>
                         </div>
@@ -93,30 +93,7 @@
                                 <span class="star">★</span>
                                 <span class="rating-value">4.2</span>
                             </div>
-                            <span class="rating-count">(24 avaliações)</span>
-                        </div>
-                    </div>
-                    
-                    <div class="teacher-card">
-                        <div class="teacher-info">
-                            <div class="teacher-avatar">
-                                <span>MS</span>
-                            </div>
-                            <div class="teacher-details">
-                                <h3>Prof. Maria Santos</h3>
-                                <p>Doutora em Engenharia de Software</p>
-                            </div>
-                        </div>
-                        <div class="teacher-rating">
-                            <div class="rating-stars">
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="rating-value">4.8</span>
-                            </div>
-                            <span class="rating-count">(31 avaliações)</span>
+                            <span class="rating-count">(<span th:text="${professor.numeroAvaliacoes}">0</span> avaliações)</span>
                         </div>
                     </div>
                 </div>

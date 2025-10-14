@@ -4,12 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
 
 /**
  * Controlador das rotas de navegação principais (login, registro, dashboard, perfil e detalhes de turma).
@@ -63,31 +61,11 @@ public class MainController {
     @GetMapping("/user")
     public String userProfile(HttpServletRequest request, Model model) {
       model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-		return "user";
-	}
+		  return "user";
+	  }
 
     @GetMapping("/admin")
     public String adminPanel(HttpServletRequest request, Model model) {
       return "admin";
-    }
-
-    /**
-     * Exibe detalhes da turma via path parameter.
-     */
-    @GetMapping("/class/{id}")
-    public String classDetails(HttpServletRequest request, @PathParam("id") String classId, Model model) {
-		  model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-		  model.addAttribute("classId", classId);
-        return "class";
-		}
-
-    /**
-     * Exibe detalhes da turma via query string (?id=...).
-     */
-    @GetMapping("/class")   
-    public String classDetai(HttpServletRequest request, @RequestParam("id") String classId, Model model) {
-        model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-		  model.addAttribute("classId", classId);
-        return "class";
     }
 }

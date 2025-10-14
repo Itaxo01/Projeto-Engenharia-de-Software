@@ -34,7 +34,7 @@ public class Professor {
 	// private Set<Disciplina> disciplinas = new HashSet<>();
 
 	// Relacionamento One-to-Many com Avaliacao  
-	@OneToMany(mappedBy = "professorId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "professorId", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<Avaliacao> avaliacoes = new ArrayList<>();
 	
 	/** Construtor padrão necessário para JPA. */
@@ -102,4 +102,13 @@ public class Professor {
                 ", nome='" + nome + '\'' +
                 '}';
     }
+
+	/**
+	 * Record para representar um resumo(página de disciplina) do professor.
+	 */
+	public record ProfessorResumo(String nome, String ID_LATTES, int numeroAvaliacoes) {
+		public static ProfessorResumo from(Professor professor) {
+			return new ProfessorResumo(professor.getNome(), professor.getID_LATTES(), professor.getAvaliacoes().size());
+		}
+	}
 }

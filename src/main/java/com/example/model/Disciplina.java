@@ -1,8 +1,10 @@
 package com.example.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -12,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 /**
@@ -45,8 +48,8 @@ public class Disciplina {
 	 private Set<String> professores = new HashSet<>();
     
    //  // Relacionamento One-to-Many com Avaliacao
-   //  @OneToMany(mappedBy = "disciplinaCodigo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-   //  private ArrayList<Avaliacao> avaliacoes = new ArrayList<>();
+    // @OneToMany(mappedBy = "disciplinaCodigo", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    // private ArrayList<Avaliacao> avaliacoes = new ArrayList<>();
     
     /**
      * Construtor completo utilizado pelo serviço/repositório.
@@ -83,13 +86,13 @@ public class Disciplina {
 	 }
 
    //  /** Lista de avaliações desta disciplina. */
-   //  public ArrayList<Avaliacao> getAvaliacoes() { 
+    // public ArrayList<Avaliacao> getAvaliacoes() { 
 	// 	if(avaliacoes == null) {
 	// 		avaliacoes = new ArrayList<>();
 	// 	}
 	// 	return avaliacoes;
 	// }
-   //  public void setAvaliacoes(ArrayList<Avaliacao> avaliacoes) { 
+    // public void setAvaliacoes(ArrayList<Avaliacao> avaliacoes) { 
 	// 	this.avaliacoes = avaliacoes != null ? avaliacoes : new ArrayList<>();
 	// }
 
