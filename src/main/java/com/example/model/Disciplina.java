@@ -23,22 +23,21 @@ public class Disciplina {
     @Column(name = "codigo", nullable = false, unique = true, length = 20)
     private String codigo;
     
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 300)
     private String nome;
 
 
-	 // Relacionamento Many-to-Many com Professor
-	 @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "professor_disciplina",
-        joinColumns = @JoinColumn(name = "disciplina_id"),
-        inverseJoinColumns = @JoinColumn(name = "professor_id")
-    )
-    private Set<Professor> professores = new HashSet<>();
+	 @ElementCollection(fetch = FetchType.EAGER)
+	 @CollectionTable(
+		  name = "professor_disciplina",
+		  joinColumns = @JoinColumn(name = "disciplina_id")
+	 )
+	 @Column(name = "professor_id")
+	 private Set<String> professores = new HashSet<>();
     
-    // Relacionamento One-to-Many com Avaliacao
-    @OneToMany(mappedBy = "disciplinaCodigo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private ArrayList<Avaliacao> avaliacoes = new ArrayList<>();
+   //  // Relacionamento One-to-Many com Avaliacao
+   //  @OneToMany(mappedBy = "disciplinaCodigo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+   //  private ArrayList<Avaliacao> avaliacoes = new ArrayList<>();
     
     /**
      * Construtor completo utilizado pelo serviço/repositório.
@@ -64,37 +63,39 @@ public class Disciplina {
     public void setNome(String nome) { this.nome = nome; }
     
     /** Lista de professores que lecionam esta disciplina. */
-    public Set<Professor> getProfessores() { 
+    public Set<String> getProfessores() { 
 		if(professores == null) {
 			professores = new HashSet<>();
 		}
 		return professores; 
 	}
-    public void setProfessores(Set<Professor> professores) { 
+    public void setProfessores(Set<String> professores) { 
 		this.professores = professores != null ? professores : new HashSet<>();
 	 }
 
-    /** Lista de avaliações desta disciplina. */
-    public ArrayList<Avaliacao> getAvaliacoes() { 
-		if(avaliacoes == null) {
-			avaliacoes = new ArrayList<>();
-		}
-		return avaliacoes;
-	}
-    public void setAvaliacoes(ArrayList<Avaliacao> avaliacoes) { 
-		this.avaliacoes = avaliacoes != null ? avaliacoes : new ArrayList<>();
-	}
+   //  /** Lista de avaliações desta disciplina. */
+   //  public ArrayList<Avaliacao> getAvaliacoes() { 
+	// 	if(avaliacoes == null) {
+	// 		avaliacoes = new ArrayList<>();
+	// 	}
+	// 	return avaliacoes;
+	// }
+   //  public void setAvaliacoes(ArrayList<Avaliacao> avaliacoes) { 
+	// 	this.avaliacoes = avaliacoes != null ? avaliacoes : new ArrayList<>();
+	// }
 
     // Métodos auxiliares para gerenciamento de relacionamentos
-    public void adicionarProfessor(Professor professor) {
+	 public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getID_LATTES());}
+    public void adicionarProfessor(String professor) {
       if(professores == null) {
 	 	  professores = new HashSet<>();
 		}
 
 		professores.add(professor);
     }
-    
-	 public boolean temProfessor(Professor professor) {
+
+	 public boolean temProfessor(Professor professor) { return temProfessor(professor.getID_LATTES()); }
+	 public boolean temProfessor(String professor) {
 		if(professores == null) {
 	 	  professores = new HashSet<>();
 		}

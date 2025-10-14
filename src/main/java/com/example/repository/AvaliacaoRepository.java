@@ -4,7 +4,9 @@ import com.example.model.Avaliacao;
 import com.example.model.Professor;
 import com.example.model.Disciplina;
 import com.example.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -12,188 +14,138 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository de Avaliacao que mantém a interface de negócio e usa JPA internamente.
- * Mantém compatibilidade com a camada de serviço existente.
+ * Repository consolidado para Avaliacao que herda diretamente de JpaRepository.
  */
 @Repository
-public class AvaliacaoRepository {
-    
-    @Autowired
-    private AvaliacaoJpaRepository avaliacaoJpaRepository;
+public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
     
     /**
-     * Salva uma avaliação no banco de dados.
+     * Busca avaliações por ID do professor.
      */
-    public Avaliacao save(Avaliacao avaliacao) {
-        return avaliacaoJpaRepository.save(avaliacao);
-    }
+    ArrayList<Avaliacao> findByProfessorId(String professorId);
     
     /**
-     * Busca avaliação por ID.
+     * Busca avaliações por código da disciplina.
      */
-    public Optional<Avaliacao> findById(Long id) {
-        return avaliacaoJpaRepository.findById(id);
-    }
+    ArrayList<Avaliacao> findByDisciplinaCodigo(String disciplinaCodigo);
     
     /**
-     * Busca todas as avaliações.
+     * Busca avaliações por email do usuário.
      */
-    public List<Avaliacao> findAll() {
-        return avaliacaoJpaRepository.findAll();
-    }
-    
-    /**
-     * Busca avaliações por professor.
-     */
-    public ArrayList<Avaliacao> findByProfessor(Professor professor) {
-        return avaliacaoJpaRepository.findByProfessorId(professor.getID_LATTES());
-    }
-    
-    /**
-     * Busca avaliações por disciplina.
-     */
-    public ArrayList<Avaliacao> findByDisciplina(Disciplina disciplina) {
-        return avaliacaoJpaRepository.findByDisciplinaCodigo(disciplina.getCodigo());
-    }
-    
-    /**
-     * Busca avaliações por usuário.
-     */
-    public ArrayList<Avaliacao> findByUser(User user) {
-        return avaliacaoJpaRepository.findByUserEmail(user.getEmail());
-    }
+    ArrayList<Avaliacao> findByUserEmail(String userEmail);
     
     /**
      * Busca avaliações por professor e disciplina.
      */
-    public ArrayList<Avaliacao> findByProfessorAndDisciplina(Professor professor, Disciplina disciplina) {
-        return avaliacaoJpaRepository.findByProfessorIdAndDisciplinaCodigo(professor.getID_LATTES(), disciplina.getCodigo());
-    }
+    ArrayList<Avaliacao> findByProfessorIdAndDisciplinaCodigo(String professorId, String disciplinaCodigo);
     
     /**
      * Busca avaliação específica de um usuário.
      */
-    public Optional<Avaliacao> findByProfessorAndDisciplinaAndUser(Professor professor, Disciplina disciplina, User user) {
-        return avaliacaoJpaRepository.findByProfessorIdAndDisciplinaCodigoAndUserEmail(
-                professor.getID_LATTES(), disciplina.getCodigo(), user.getEmail());
-    }
+    Optional<Avaliacao> findByProfessorIdAndDisciplinaCodigoAndUserEmail(String professorId, String disciplinaCodigo, String userEmail);
     
     /**
      * Calcula média de notas de um professor.
      */
-    public Double calcularMediaProfessor(String professorId) {
-        return avaliacaoJpaRepository.calcularMediaProfessor(professorId);
-    }
+    @Query("SELECT AVG(a.nota) FROM Avaliacao a WHERE a.professorId = :professorId")
+    Double calcularMediaProfessor(@Param("professorId") String professorId);
     
     /**
      * Calcula média de notas de um professor em uma disciplina.
      */
-    public Double calcularMediaProfessorDisciplina(String professorId, String disciplinaCodigo) {
-        return avaliacaoJpaRepository.calcularMediaProfessorDisciplina(professorId, disciplinaCodigo);
-    }
+    @Query("SELECT AVG(a.nota) FROM Avaliacao a WHERE a.professorId = :professorId AND a.disciplinaCodigo = :disciplinaCodigo")
+    Double calcularMediaProfessorDisciplina(@Param("professorId") String professorId, @Param("disciplinaCodigo") String disciplinaCodigo);
     
     /**
      * Busca avaliações por nota.
      */
-    public ArrayList<Avaliacao> findByNota(Integer nota) {
-        return avaliacaoJpaRepository.findByNota(nota);
-    }
+    ArrayList<Avaliacao> findByNota(Double nota);
     
     /**
      * Busca avaliações com nota maior ou igual.
      */
-    public ArrayList<Avaliacao> findByNotaMaiorOuIgual(Integer nota) {
-        return avaliacaoJpaRepository.findByNotaGreaterThanEqual(nota);
-    }
+    ArrayList<Avaliacao> findByNotaGreaterThanEqual(Double nota);
     
     /**
      * Busca avaliações com nota menor ou igual.
      */
-    public ArrayList<Avaliacao> findByNotaMenorOuIgual(Integer nota) {
-        return avaliacaoJpaRepository.findByNotaLessThanEqual(nota);
-    }
-    
-    /**
-     * Remove avaliação por ID.
-     */
-    public void deleteById(Long id) {
-        avaliacaoJpaRepository.deleteById(id);
-    }
-    
-    /**
-     * Remove avaliação específica.
-     */
-    public void delete(Avaliacao avaliacao) {
-        avaliacaoJpaRepository.delete(avaliacao);
-    }
+    ArrayList<Avaliacao> findByNotaLessThanEqual(Double nota);
     
     /**
      * Conta avaliações por professor.
      */
-    public long countByProfessor(Professor professor) {
-        return avaliacaoJpaRepository.countByProfessorId(professor.getID_LATTES());
-    }
+    long countByProfessorId(String professorId);
     
     /**
      * Conta avaliações por disciplina.
      */
-    public long countByDisciplina(Disciplina disciplina) {
-        return avaliacaoJpaRepository.countByDisciplinaCodigo(disciplina.getCodigo());
-    }
-    
-    /**
-     * Verifica se existe avaliação por ID.
-     */
-    public boolean existsById(Long id) {
-        return avaliacaoJpaRepository.existsById(id);
-    }
-    
-    /**
-     * Conta total de avaliações.
-     */
-    public long count() {
-        return avaliacaoJpaRepository.count();
-    }
+    long countByDisciplinaCodigo(String disciplinaCodigo);
     
     /**
      * Busca avaliações que possuem comentário principal.
      */
-    public ArrayList<Avaliacao> findAvaliacoesComComentario() {
-        return avaliacaoJpaRepository.findAvaliacoesComComentario();
-    }
+    @Query("SELECT a FROM Avaliacao a WHERE a.comentario IS NOT NULL")
+    ArrayList<Avaliacao> findAvaliacoesComComentario();
     
     /**
      * Busca avaliações sem comentário principal.
      */
-    public ArrayList<Avaliacao> findAvaliacoesSemComentario() {
-        return avaliacaoJpaRepository.findAvaliacoesSemComentario();
-    }
+    @Query("SELECT a FROM Avaliacao a WHERE a.comentario IS NULL")
+    ArrayList<Avaliacao> findAvaliacoesSemComentario();
     
     /**
      * Busca avaliações com comentário por professor e disciplina.
      */
-    public ArrayList<Avaliacao> findByProfessorAndDisciplinaComComentario(Professor professor, Disciplina disciplina) {
-        return avaliacaoJpaRepository.findByProfessorAndDisciplinaComComentario(professor.getID_LATTES(), disciplina.getCodigo());
-    }
+    @Query("SELECT a FROM Avaliacao a WHERE a.professorId = :professorId AND a.disciplinaCodigo = :disciplinaCodigo AND a.comentario IS NOT NULL")
+    ArrayList<Avaliacao> findByProfessorAndDisciplinaComComentario(@Param("professorId") String professorId, @Param("disciplinaCodigo") String disciplinaCodigo);
     
     /**
      * Busca avaliações por palavra-chave no comentário.
      */
-    public ArrayList<Avaliacao> findByComentarioContendo(String palavra) {
-        return avaliacaoJpaRepository.findByComentarioTextoContaining(palavra);
-    }
+    @Query("SELECT a FROM Avaliacao a WHERE a.comentario.texto LIKE %:palavra%")
+    ArrayList<Avaliacao> findByComentarioTextoContaining(@Param("palavra") String palavra);
     
     /**
      * Conta avaliações com comentário de um professor.
      */
-    public long countAvaliacoesComComentarioByProfessor(Professor professor) {
-        return avaliacaoJpaRepository.countAvaliacoesComComentarioByProfessor(professor.getID_LATTES());
-    }
+    @Query("SELECT COUNT(a) FROM Avaliacao a WHERE a.professorId = :professorId AND a.comentario IS NOT NULL")
+    long countAvaliacoesComComentarioByProfessor(@Param("professorId") String professorId);
     
     /**
      * Busca avaliação com seu comentário carregado.
      */
-    public Optional<Avaliacao> findByIdWithComentario(Long id) {
-        return avaliacaoJpaRepository.findByIdWithComentario(id);
+    @Query("SELECT a FROM Avaliacao a LEFT JOIN FETCH a.comentario WHERE a.id = :id")
+    Optional<Avaliacao> findByIdWithComentario(@Param("id") Long id);
+    
+    /**
+     * Métodos de conveniência implementados como default
+     */
+    default ArrayList<Avaliacao> findByProfessor(Professor professor) {
+        return findByProfessorId(professor.getID_LATTES());
+    }
+    
+    default ArrayList<Avaliacao> findByDisciplina(Disciplina disciplina) {
+        return findByDisciplinaCodigo(disciplina.getCodigo());
+    }
+    
+    default ArrayList<Avaliacao> findByUser(User user) {
+        return findByUserEmail(user.getEmail());
+    }
+    
+    default ArrayList<Avaliacao> findByProfessorAndDisciplina(Professor professor, Disciplina disciplina) {
+        return findByProfessorIdAndDisciplinaCodigo(professor.getID_LATTES(), disciplina.getCodigo());
+    }
+    
+    default Optional<Avaliacao> findByProfessorAndDisciplinaAndUser(Professor professor, Disciplina disciplina, User user) {
+        return findByProfessorIdAndDisciplinaCodigoAndUserEmail(
+                professor.getID_LATTES(), disciplina.getCodigo(), user.getEmail());
+    }
+    
+    default long countByProfessor(Professor professor) {
+        return countByProfessorId(professor.getID_LATTES());
+    }
+    
+    default long countByDisciplina(Disciplina disciplina) {
+        return countByDisciplinaCodigo(disciplina.getCodigo());
     }
 }

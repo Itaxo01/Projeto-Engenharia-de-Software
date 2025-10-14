@@ -2,7 +2,9 @@ package com.example.repository;
 
 import com.example.model.ArquivoComentario;
 import com.example.model.Comentario;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -10,131 +12,69 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository de ArquivoComentario que mantém a interface de negócio e usa JPA internamente.
- * Mantém compatibilidade com a camada de serviço existente.
+ * Repository consolidado para ArquivoComentario que herda diretamente de JpaRepository.
  */
 @Repository
-public class ArquivoComentarioRepository {
-    
-    @Autowired
-    private ArquivoComentarioJpaRepository arquivoComentarioJpaRepository;
-    
-    /**
-     * Salva um arquivo de comentário no banco de dados.
-     */
-    public ArquivoComentario save(ArquivoComentario arquivoComentario) {
-        return arquivoComentarioJpaRepository.save(arquivoComentario);
-    }
-    
-    /**
-     * Busca arquivo por ID.
-     */
-    public Optional<ArquivoComentario> findById(Long id) {
-        return arquivoComentarioJpaRepository.findById(id);
-    }
-    
-    /**
-     * Busca todos os arquivos.
-     */
-    public List<ArquivoComentario> findAll() {
-        return arquivoComentarioJpaRepository.findAll();
-    }
+public interface ArquivoComentarioRepository extends JpaRepository<ArquivoComentario, Long> {
     
     /**
      * Busca arquivos por comentário.
      */
-    public ArrayList<ArquivoComentario> findByComentario(Comentario comentario) {
-        return arquivoComentarioJpaRepository.findByComentario(comentario);
-    }
+    ArrayList<ArquivoComentario> findByComentario(Comentario comentario);
     
     /**
      * Busca arquivos por ID do comentário.
      */
-    public ArrayList<ArquivoComentario> findByComentarioId(Long comentarioId) {
-        return arquivoComentarioJpaRepository.findByComentarioId(comentarioId);
-    }
+    ArrayList<ArquivoComentario> findByComentarioId(Long comentarioId);
     
     /**
      * Busca arquivo pelo nome único do arquivo.
      */
-    public Optional<ArquivoComentario> findByNomeArquivo(String nomeArquivo) {
-        return arquivoComentarioJpaRepository.findByNomeArquivo(nomeArquivo);
-    }
+    Optional<ArquivoComentario> findByNomeArquivo(String nomeArquivo);
     
     /**
      * Busca arquivo pelo caminho do arquivo.
      */
-    public Optional<ArquivoComentario> findByCaminhoArquivo(String caminhoArquivo) {
-        return arquivoComentarioJpaRepository.findByCaminhoArquivo(caminhoArquivo);
-    }
+    Optional<ArquivoComentario> findByCaminhoArquivo(String caminhoArquivo);
     
     /**
      * Busca arquivos por tipo MIME.
      */
-    public ArrayList<ArquivoComentario> findByTipoMime(String tipoMime) {
-        return arquivoComentarioJpaRepository.findByTipoMime(tipoMime);
-    }
-    
-    /**
-     * Busca arquivos por nome original (busca parcial).
-     */
-    public ArrayList<ArquivoComentario> findByNomeOriginal(String nomeOriginal) {
-        return arquivoComentarioJpaRepository.findByNomeOriginalContainingIgnoreCase(nomeOriginal);
-    }
+    ArrayList<ArquivoComentario> findByTipoMime(String tipoMime);
     
     /**
      * Busca arquivos com tamanho maior que o especificado.
      */
-    public ArrayList<ArquivoComentario> findByTamanhoMaiorQue(Long tamanho) {
-        return arquivoComentarioJpaRepository.findByTamanhoGreaterThan(tamanho);
-    }
+    @Query("SELECT a FROM ArquivoComentario a WHERE a.tamanho > :tamanho")
+    ArrayList<ArquivoComentario> findByTamanhoGreaterThan(@Param("tamanho") Long tamanho);
     
     /**
-     * Remove arquivo por ID.
+     * Busca arquivos por nome original (busca parcial).
      */
-    public void deleteById(Long id) {
-        arquivoComentarioJpaRepository.deleteById(id);
-    }
-    
-    /**
-     * Remove arquivo específico.
-     */
-    public void delete(ArquivoComentario arquivoComentario) {
-        arquivoComentarioJpaRepository.delete(arquivoComentario);
-    }
-    
-    /**
-     * Remove todos os arquivos de um comentário.
-     */
-    public void deleteByComentarioId(Long comentarioId) {
-        arquivoComentarioJpaRepository.deleteByComentarioId(comentarioId);
-    }
+    ArrayList<ArquivoComentario> findByNomeOriginalContainingIgnoreCase(String nomeOriginal);
     
     /**
      * Conta total de arquivos por comentário.
      */
-    public long countByComentarioId(Long comentarioId) {
-        return arquivoComentarioJpaRepository.countByComentarioId(comentarioId);
-    }
+    long countByComentarioId(Long comentarioId);
     
     /**
-     * Conta total de arquivos.
+     * Remove todos os arquivos de um comentário.
      */
-    public long count() {
-        return arquivoComentarioJpaRepository.count();
-    }
+    void deleteByComentarioId(Long comentarioId);
     
     /**
-     * Verifica se existe arquivo pelo nome único.
+     * Métodos de conveniência implementados como default
      */
-    public boolean existsByNomeArquivo(String nomeArquivo) {
-        return arquivoComentarioJpaRepository.findByNomeArquivo(nomeArquivo).isPresent();
+    default ArrayList<ArquivoComentario> findByNomeOriginal(String nomeOriginal) {
+        return findByNomeOriginalContainingIgnoreCase(nomeOriginal);
     }
     
-    /**
-     * Verifica se existe arquivo pelo caminho.
-     */
-    public boolean existsByCaminhoArquivo(String caminhoArquivo) {
-        return arquivoComentarioJpaRepository.findByCaminhoArquivo(caminhoArquivo).isPresent();
+    default boolean existsByNomeArquivo(String nomeArquivo) {
+        return findByNomeArquivo(nomeArquivo).isPresent();
+    }
+    
+    default boolean existsByCaminhoArquivo(String caminhoArquivo) {
+        return findByCaminhoArquivo(caminhoArquivo).isPresent();
     }
 }

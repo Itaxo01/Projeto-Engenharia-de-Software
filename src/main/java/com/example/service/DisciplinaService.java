@@ -32,55 +32,43 @@ public class DisciplinaService {
 
     public Disciplina criarOuAtualizar(String codigo, String nome, Set<Professor> professores) {
         logger.debug("=== Buscando disciplina com código: {} ===", codigo);
-        
-        // DEBUG: Verificar múltiplas formas
-        Optional<Disciplina> disciplinaExistente = buscarPorCodigo(codigo);
-        logger.debug("Resultado buscarPorCodigo: {}", disciplinaExistente.isPresent() ? "ENCONTRADA" : "NÃO ENCONTRADA");
-        
-        // DEBUG: Verificar se existe com método alternativo
-        boolean existe = disciplinaRepository.existsByCodigo(codigo);
-        logger.debug("Resultado existsByCodigo: {}", existe);
-        
-        // DEBUG: Buscar todas e verificar manualmente
-        List<Disciplina> todas = disciplinaRepository.findAll();
-        boolean existeManual = todas.stream().anyMatch(d -> codigo.equals(d.getCodigo()));
-        logger.debug("Verificação manual - Total disciplinas: {}, Existe '{}': {}", todas.size(), codigo, existeManual);
-        
-        Disciplina disciplina;
-        if (disciplinaExistente.isPresent()) {
-            disciplina = disciplinaExistente.get();
-            logger.info("*** DISCIPLINA EXISTENTE ENCONTRADA: {} (ID: {}) ***", codigo, disciplina.getId());
-            
+
+        Optional<Disciplina> disciplina = disciplinaRepository.findByCodigo(codigo);
+        logger.debug("Resultado existsByCodigo: {}", disciplina.isPresent() ? "ENCONTRADA" : "NÃO ENCONTRADA");
+		  Disciplina d;
+        if (disciplina.isPresent()) {
+			  d = disciplina.get();
+			  logger.debug("*** DISCIPLINA EXISTENTE ENCONTRADA: {} (ID: {}) ***", codigo, d.getId());
             // Atualizar nome se necessário
-            if (!nome.equals(disciplina.getNome())) {
-                disciplina.setNome(nome);
-                logger.debug("Nome da disciplina atualizado de '{}' para '{}'", disciplina.getNome(), nome);
+            if (!nome.equals(d.getNome())) {
+                d.setNome(nome);
+                logger.debug("Nome da disciplina atualizado de '{}' para '{}'", d.getNome(), nome);
             }
         } else {
-            disciplina = new Disciplina();
-            disciplina.setCodigo(codigo);
-            disciplina.setNome(nome);
+            d = new Disciplina();
+            d.setCodigo(codigo);
+            d.setNome(nome);
             logger.info("*** CRIANDO NOVA DISCIPLINA: {} ***", codigo);
         }
         
         // Adicionar professores
-        int professoresAntes = disciplina.getProfessores().size();
+        int professoresAntes = d.getProfessores().size();
         logger.debug("Professores antes: {}", professoresAntes);
         
         for (Professor professor : professores) {
-            if (!disciplina.temProfessor(professor)) {
-                disciplina.adicionarProfessor(professor);
+            if (!d.temProfessor(professor)) {
+                d.adicionarProfessor(professor);
                 logger.debug("Professor {} adicionado à disciplina {}", professor.getNome(), codigo);
             } else {
                 logger.debug("Professor {} já estava associado à disciplina {}", professor.getNome(), codigo);
             }
         }
-        
-        int professoresDepois = disciplina.getProfessores().size();
-        logger.info("Disciplina {}: {} professores antes, {} adicionados, {} total", 
+
+        int professoresDepois = d.getProfessores().size();
+        logger.info("Disciplina {}: {} professores antes, {} adicionados, {} total",
                    codigo, professoresAntes, (professoresDepois - professoresAntes), professoresDepois);
-        
-        Disciplina disciplinaSalva = disciplinaRepository.save(disciplina);
+
+        Disciplina disciplinaSalva = disciplinaRepository.save(d);
         logger.debug("Disciplina salva com ID: {}", disciplinaSalva.getId());
         
         return disciplinaSalva;

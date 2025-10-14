@@ -15,8 +15,8 @@ public class ScrapingResult {
 	public int getDisciplinasSalvas() { return disciplinasSalvas; }
 	public int getProfessoresSalvos() { return professores.size(); }
 
-	public void addProfessores(Set<Professor> professores){
-		this.professores.addAll(professores);
+	public void addProfessor(Professor professor){
+		this.professores.add(professor);
 	}
 
 	public String getErro() { return erro; }

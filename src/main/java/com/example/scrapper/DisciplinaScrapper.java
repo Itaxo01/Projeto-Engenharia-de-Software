@@ -167,7 +167,7 @@ public class DisciplinaScrapper {
 											processarPaginas(resultDoc, semestre, centroId, result);
 										}
 
-										Thread.sleep(2000);
+										Thread.sleep(500);
 										
 								} catch (InterruptedException e) {
 										Thread.currentThread().interrupt();
@@ -469,16 +469,15 @@ public class DisciplinaScrapper {
 
 		while(currentDoc != null){
 			logger.debug("Processando página {} para semestre={}, centro={}", paginaAtual, semestre, centro);
-			int disciplinasProcessadas = processarTabelaPagina(currentDoc, semestre, centro, result);
-			totalDisciplinasProcessadas += disciplinasProcessadas;
 
-			logger.debug("{} disciplinas processadas para a página {}", disciplinasProcessadas, paginaAtual);
+			totalDisciplinasProcessadas += processarTabelaPagina(currentDoc, semestre, centro, result);
+			logger.debug("total de {} disciplinas processadas até a página {}", totalDisciplinasProcessadas, paginaAtual);
 
 			Element nextButton = temProximaPagina(currentDoc);
 			if(nextButton != null) {
 				currentDoc = proximaPagina(nextButton, currentDoc, semestre, centro);
 				paginaAtual++;
-				Thread.sleep(1500);
+				Thread.sleep(500);
 			} else {
 				logger.info("Ultima página alcançada para o semestre={}, centro={}", semestre, centro);
 				break;
@@ -514,16 +513,28 @@ public class DisciplinaScrapper {
 							  Set<Professor> professores = new HashSet<>();
 								for(ProfessorInfo professorInfo: info.getProfessores()){
 									logger.debug("Processando professor: {} ({})", professorInfo.getNome(), professorInfo.getLattesId());
-									Professor professor = professorService.criarOuObter(professorInfo.getLattesId(), professorInfo.getNome());
-									logger.debug("Professor criado com sucesso: {}", professor.toString());
-									professores.add(professor);
+									try{
+										Professor professor = professorService.criarOuObter(professorInfo.getLattesId(), professorInfo.getNome());
+										professores.add(professor);
+										result.addProfessor(professor);
+									} catch(Exception e){
+										logger.warn("Erro ao criar/obter professor {}: {}", professorInfo.getNome(), e.getMessage());
+										throw new RuntimeException(e);
+									}
 								}
-                        Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores);
-								result.addProfessores(professores);
+								try{
+									Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores);
+									logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
+									if (disciplina != null) {
+										disciplinasProcessadas++;
+									}
+								} catch(Exception e){
+									logger.warn("Erro ao criar/atualizar disciplina {}: {}", info.getNome(),
+											e.getMessage());
+									Thread.sleep(60000);
+									throw new RuntimeException(e);
+								}
 
-                        if (disciplina != null) {
-                            disciplinasProcessadas++;
-                        }
                     }
                 } catch (Exception e) {
                     logger.error("Erro ao processar linha da tabela: {}", e.getMessage());
@@ -605,16 +616,15 @@ public class DisciplinaScrapper {
     }
     
 	 private Element temProximaPagina(Document doc){
-		Elements paginationControls = doc.select("td.rich-datascr-button");
-    
-		for (Element control : paginationControls) {
+		Elements nextButtons = doc.select("td.rich-datascr-button[onclick*='next']");
+
+		for (Element control : nextButtons) {
 			String onclick = control.attr("onclick");
 			String className = control.attr("class");
 			
 			// Verificar se é o botão "next" e se está habilitado
 			if (onclick.contains("'next'") && !className.contains("rich-datascr-button-dsbld")) {
-					logger.debug("Próxima página disponível - botão next habilitado");
-					return control;
+				return control;
 			}
 		}
 		
@@ -624,7 +634,7 @@ public class DisciplinaScrapper {
 
 	 private Document proximaPagina(Element nextButton, Document currentDoc, String semestre, String centro) throws Exception {
 		// Encontrar o formulário
-		Element form = currentDoc.select("form").first();
+		Element form = currentDoc.select("form#formBusca").first();
 		if (form == null) {
 			logger.warn("Formulário não encontrado para navegação");
 			return null;
@@ -635,7 +645,7 @@ public class DisciplinaScrapper {
 			actionUrl = "https://cagr.sistemas.ufsc.br" + actionUrl;
 		}
 		
-		// Construir o POST simples
+		// Construir a requisição AJAX para o DataScroller
 		FormBody.Builder formBuilder = new FormBody.Builder();
 		
 		// Adicionar todos os campos ocultos da página atual
@@ -644,43 +654,118 @@ public class DisciplinaScrapper {
 			String name = input.attr("name");
 			String value = input.attr("value");
 			if (!name.isEmpty()) {
-					formBuilder.add(name, value);
+				formBuilder.add(name, value);
 			}
 		}
-		
-		// Extrair o ID do botão de navegação
-		String buttonId = nextButton.attr("id");
-		if (buttonId.isEmpty()) {
-			// Tentar extrair do onclick
-			String onclick = nextButton.attr("onclick");
-			Pattern pattern = Pattern.compile("'([^']*formBusca[^']*)'");
-			Matcher matcher = pattern.matcher(onclick);
-			if (matcher.find()) {
-					buttonId = matcher.group(1);
-			}
-		}
-		
-		if (!buttonId.isEmpty()) {
-			formBuilder.add(buttonId, buttonId);
-			logger.debug("Clicando no botão: {}", buttonId);
-		}
-		
-		// Fazer a requisição
-		Request nextPageRequest = new Request.Builder()
-					.url(actionUrl)
-					.post(formBuilder.build())
-					.addHeader("Content-Type", "application/x-www-form-urlencoded")
-					.addHeader("User-Agent", USER_AGENT)
-					.build();
-		
-		try (Response response = httpClient.newCall(nextPageRequest).execute()) {
-			if (!response.isSuccessful()) {
-					logger.warn("Erro ao navegar para próxima página: {}", response.code());
-					return null;
-			}
-			
-			String html = response.body().string();
-			return Jsoup.parse(html);
-		}
+	
+		// Adicionar campos específicos do form de busca para manter o contexto
+		Elements searchInputs = currentDoc.select("#formBusca input, #formBusca select");
+    	for (Element input : searchInputs) {
+        String name = input.attr("name");
+        String value = input.attr("value");
+        String tagName = input.tagName().toLowerCase();
+        
+        if (!name.isEmpty() && !name.equals("javax.faces.ViewState")) {
+            if (tagName.equals("select")) {
+                // Para selects, pegar a opção selecionada
+                Element selectedOption = input.select("option[selected]").first();
+                if (selectedOption != null) {
+                    value = selectedOption.attr("value");
+                }
+            }
+            
+            if (value != null && !value.isEmpty()) {
+                formBuilder.add(name, value);
+                logger.debug("Campo mantido: {} = {}", name, value);
+            }
+        }
+    }
+    
+    // Parâmetros específicos do DataScroller (baseado no HTML)
+    formBuilder.add("formBusca:dataScroller1", "next");
+    formBuilder.add("autoScroll", "");
+    
+    // Headers específicos para requisição AJAX do RichFaces
+    Request nextPageRequest = new Request.Builder()
+            .url(actionUrl)
+            .post(formBuilder.build())
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .addHeader("User-Agent", USER_AGENT)
+            .addHeader("Faces-Request", "partial/ajax")
+            .addHeader("X-Requested-With", "XMLHttpRequest")
+            .build();
+    
+    logger.debug("Enviando requisição AJAX para DataScroller...");
+    
+    try (Response response = httpClient.newCall(nextPageRequest).execute()) {
+        logger.debug("Resposta recebida. Status: {}", response.code());
+        
+        if (!response.isSuccessful()) {
+            logger.error("Erro na requisição: {}", response.code());
+            return null;
+        }
+        
+        String responseBody = response.body().string();
+        logger.debug("Resposta recebida. Tamanho: {} chars", responseBody.length());
+        
+        // Para RichFaces, a resposta pode ser XML com updates parciais
+        // Vamos tentar primeiro como HTML normal
+        Document newDoc = Jsoup.parse(responseBody);
+        
+        // Verificar se temos uma tabela de dados na resposta
+        Elements newTable = newDoc.select("table#formBusca\\:dataTable tr");
+        if(DEBUG) {
+			if (newTable.size() > 1) {
+            logger.debug("Nova página carregada com {} linhas", newTable.size());
+            
+            // Verificar se o conteúdo realmente mudou
+            Elements oldTable = currentDoc.select("table#formBusca\\:dataTable tr");
+            if (oldTable.size() > 1 && newTable.size() > 1) {
+                String primeiraLinhaAntiga = oldTable.get(1).text();
+                String primeiraLinhaNova = newTable.get(1).text();
+                
+                boolean mudou = !primeiraLinhaAntiga.equals(primeiraLinhaNova);
+                logger.debug("Página mudou: {}", mudou);
+                
+                if (!mudou) {
+                    logger.warn("ATENÇÃO: A página parece não ter mudado!");
+                }
+            }
+            return newDoc;
+        } else {
+            // Se não encontrou tabela, pode ser uma resposta XML do RichFaces
+            logger.debug("Resposta não contém tabela HTML direta, pode ser resposta AJAX XML");
+            
+            // Tentar extrair HTML da resposta XML se necessário
+            if (responseBody.contains("formBusca:dataTable")) {
+                // A resposta contém dados da tabela, mas em formato XML
+                // Vamos tentar uma nova requisição para obter a página completa
+                logger.debug("Fazendo nova requisição para obter página completa...");
+                
+                Request fullPageRequest = new Request.Builder()
+                        .url(actionUrl)
+                        .get()
+                        .addHeader("User-Agent", USER_AGENT)
+                        .build();
+                
+                try (Response fullPageResponse = httpClient.newCall(fullPageRequest).execute()) {
+                    if (fullPageResponse.isSuccessful()) {
+                        Document fullDoc = Jsoup.parse(fullPageResponse.body().string());
+                        Elements fullTable = fullDoc.select("table#formBusca\\:dataTable tr");
+                        
+                        if (fullTable.size() > 1) {
+                            logger.debug("Página completa obtida com {} linhas", fullTable.size());
+                            return fullDoc;
+                        }
+                    }
+                }
+            }
+		  }   
+			logger.warn("Não foi possível obter nova página válida");
+			return null;
+        } else {
+			return newDoc;
+		  }
+    	}
 	 }
 }

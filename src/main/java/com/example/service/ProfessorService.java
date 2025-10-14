@@ -25,52 +25,95 @@ public class ProfessorService {
 
     // Criar novo professor
     public Professor salvar(Professor professor) {
-        return professorRepository.save(professor);
+        try {
+            logger.debug("Salvando professor: {} ({})", professor.getNome(), professor.getID_LATTES());
+            Professor salvo = professorRepository.save(professor);
+            logger.debug("Professor salvo com sucesso: ID {}", salvo.getID_LATTES());
+            return salvo;
+        } catch (Exception e) {
+            logger.error("Erro ao salvar professor {}: {}", professor.getID_LATTES(), e.getMessage());
+            throw e;
+        }
     }
 
 	 public Professor criarOuObter(String lattesId, String nome) {
-        Optional<Professor> professorExistente = buscarPorId(lattesId);
-        if (professorExistente.isPresent()) {
-            Professor professor = professorExistente.get();
-            // Atualizar nome se necessário
-            if (!nome.equals(professor.getNome())) {
-                professor.setNome(nome);
-                return professorRepository.save(professor);
+        try {
+            logger.debug("=== Processando professor: {} ({}) ===", nome, lattesId);
+            
+            // Verificar se professor já existe
+            Optional<Professor> professorExistente = buscarPorId(lattesId);
+            
+            if (professorExistente.isPresent()) {
+                Professor professor = professorExistente.get();
+                logger.debug("*** PROFESSOR EXISTENTE: {} ({}) ***", professor.getNome(), professor.getID_LATTES());
+                
+                // Atualizar nome se necessário
+                if (!nome.equals(professor.getNome())) {
+                    String nomeAntigo = professor.getNome();
+                    professor.setNome(nome);
+                    Professor atualizado = professorRepository.save(professor);
+                    logger.debug("Nome do professor atualizado: '{}' -> '{}'", nomeAntigo, nome);
+                    return atualizado;
+                }
+                
+                return professor;
             }
-            return professor;
-        } 
-        
-        // Criar novo professor
-        Professor novoProfessor = new Professor();
-        novoProfessor.setID_LATTES(lattesId);
-        novoProfessor.setNome(nome);
-        
-        return professorRepository.save(novoProfessor);
+            
+            // Criar novo professor
+            Professor novoProfessor = new Professor();
+            novoProfessor.setID_LATTES(lattesId);
+            novoProfessor.setNome(nome);
+            
+            logger.debug("*** CRIANDO NOVO PROFESSOR: {} ({}) ***", nome, lattesId);
+            Professor criado = professorRepository.save(novoProfessor);
+            logger.debug("Professor criado com sucesso: {}", criado.toString());
+            
+            return criado;
+            
+        } catch (Exception e) {
+            logger.error("Erro ao criar/obter professor {} ({}): {}", nome, lattesId, e.getMessage(), e);
+            
+            // Última tentativa: buscar novamente caso tenha sido criado por outra thread
+            try {
+                Optional<Professor> ultimaTentativa = professorRepository.findById(lattesId);
+                if (ultimaTentativa.isPresent()) {
+                    logger.warn("Professor encontrado após erro - possível condição de corrida: {}", 
+                               ultimaTentativa.get().getNome());
+                    return ultimaTentativa.get();
+                }
+            } catch (Exception e2) {
+                logger.error("Falha na última tentativa de busca: {}", e2.getMessage());
+            }
+            
+            throw e; // Re-lançar se não conseguiu resolver
+        }
     }
 
     // Buscar professor por ID Lattes
-    public Optional<Professor> buscarPorId(String idLattes) {
-        return professorRepository.findById(idLattes);
+    public Optional<Professor> buscarPorId(String id) {
+        try {
+            Optional<Professor> resultado = professorRepository.findById(id);
+            logger.debug("Busca por ID '{}': {}", id, resultado.isPresent() ? "ENCONTRADO" : "NÃO ENCONTRADO");
+            return resultado;
+        } catch (Exception e) {
+            logger.error("Erro ao buscar professor por ID '{}': {}", id, e.getMessage());
+            return Optional.empty();
+        }
     }
 
     // Buscar todos os professores
-    public List<Professor> buscarTodos() {
-        return professorRepository.findAll();
+    public ArrayList<Professor> buscarTodos() {
+        return (ArrayList<Professor>)professorRepository.findAll();
     }
 
     // Buscar professores por nome
     public ArrayList<Professor> buscarPorNome(String nome) {
-        return professorRepository.findByNome(nome);
+        return professorRepository.findByNomeContainingIgnoreCase(nome);
     }
 
     // Buscar professor por nome exato
     public Optional<Professor> buscarPorNomeExato(String nome) {
         return professorRepository.findByNomeExato(nome);
-    }
-
-    // Buscar professores de uma disciplina
-    public ArrayList<Professor> buscarPorDisciplina(String codigoDisciplina) {
-        return professorRepository.findByDisciplina(codigoDisciplina);
     }
 
     // Deletar professor
@@ -86,15 +129,5 @@ public class ProfessorService {
     // Contar professores
     public long contar() {
         return professorRepository.count();
-    }
-
-    // Buscar professor com disciplinas
-    public Optional<Professor> buscarComDisciplinas(String idLattes) {
-        return professorRepository.findByIdWithDisciplinas(idLattes);
-    }
-
-    // Contar professores de uma disciplina
-    public long contarPorDisciplina(String codigoDisciplina) {
-        return professorRepository.countByDisciplina(codigoDisciplina);
     }
 }

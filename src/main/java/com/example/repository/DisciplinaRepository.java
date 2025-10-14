@@ -23,13 +23,13 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
 
     ArrayList<Disciplina> findByNome(String nome);
 
-    @Query("SELECT d FROM Disciplina d JOIN d.professores p WHERE p.ID_LATTES = :professorId")
+    @Query("SELECT d FROM Disciplina d WHERE :professorId MEMBER OF d.professores")
     ArrayList<Disciplina> findByProfessor(@Param("professorId") String professorId);
 
     void deleteByCodigo(String codigo);
 
     boolean existsByCodigo(String codigo);
 
-    @Query("SELECT d FROM Disciplina d LEFT JOIN FETCH d.professores WHERE d.codigo = :codigo")
+    @Query("SELECT d FROM Disciplina d WHERE d.codigo = :codigo")
     Optional<Disciplina> findByCodigoWithProfessores(@Param("codigo") String codigo);
 }

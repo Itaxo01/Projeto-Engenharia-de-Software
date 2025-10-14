@@ -10,8 +10,8 @@ import jakarta.persistence.*;
 /**
  * Entidade JPA que representa um professor cadastrado no sistema.
  * <ul>
- * <li>{@link #nome} Nome completo do professor.</li>
  * <li>{@link #ID_LATTES} Identificador único do professor na plataforma Lattes.</li>
+ * <li>{@link #nome} Nome completo do professor.</li>
  * </ul>
  */
 @Entity
@@ -25,8 +25,8 @@ public class Professor {
 	private String nome;
 	
 	// Relacionamento Many-to-Many com Disciplina
-	@ManyToMany(mappedBy = "professores", fetch = FetchType.LAZY)
-	private Set<Disciplina> disciplinas = new HashSet<>();
+	// @ManyToMany(mappedBy = "professores", fetch = FetchType.LAZY)
+	// private Set<Disciplina> disciplinas = new HashSet<>();
 
 	// Relacionamento One-to-Many com Avaliacao  
 	@OneToMany(mappedBy = "professorId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -50,8 +50,8 @@ public class Professor {
 	public String getID_LATTES() {return ID_LATTES;}
 	public void setID_LATTES(String ID_LATTES) {this.ID_LATTES = ID_LATTES;}
 
-	public Set<Disciplina> getDisciplinas() { return disciplinas; }
-	public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
+	// public Set<Disciplina> getDisciplinas() { return disciplinas; }
+	// public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
 
 	/** Lista de avaliações do professor. */
 	public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
@@ -65,17 +65,17 @@ public class Professor {
 	}
 
 	// Métodos auxiliares para gerenciamento de relacionamentos
-	public void adicionarDisciplina(Disciplina disciplina) {
-		if (!disciplinas.contains(disciplina)) {
-			disciplinas.add(disciplina);
-			disciplina.getProfessores().add(this);
-		}
-	}
+	// public void adicionarDisciplina(Disciplina disciplina) {
+	// 	if (!disciplinas.contains(disciplina)) {
+	// 		disciplinas.add(disciplina);
+	// 		disciplina.getProfessores().add(this);
+	// 	}
+	// }
 	
-	public void removerDisciplina(Disciplina disciplina) {
-		disciplinas.remove(disciplina);
-		disciplina.getProfessores().remove(this);
-	}
+	// public void removerDisciplina(Disciplina disciplina) {
+	// 	disciplinas.remove(disciplina);
+	// 	disciplina.getProfessores().remove(this);
+	// }
 
 	@Override
     public boolean equals(Object o) {

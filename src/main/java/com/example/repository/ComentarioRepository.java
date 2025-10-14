@@ -1,7 +1,9 @@
 package com.example.repository;
 
 import com.example.model.Comentario;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -9,110 +11,68 @@ import java.util.Optional;
 import java.util.List;
 
 /**
- * Repository de Comentario que mantém a interface de negócio e usa JPA internamente.
- * Mantém compatibilidade com a camada de serviço existente.
+ * Repository consolidado para Comentario que herda diretamente de JpaRepository.
  */
 @Repository
-public class ComentarioRepository {
-    
-    @Autowired
-    private ComentarioJpaRepository comentarioJpaRepository;
+public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
     
     /**
-     * Salva um comentário no banco de dados.
+     * Busca comentários raiz (sem pai) de uma avaliação.
      */
-    public Comentario save(Comentario comentario) {
-        return comentarioJpaRepository.save(comentario);
-    }
-    
-    /**
-     * Busca comentário por ID.
-     */
-    public Optional<Comentario> findById(Long id) {
-        return comentarioJpaRepository.findById(id);
-    }
-    
-    /**
-     * Busca todos os comentários.
-     */
-    public List<Comentario> findAll() {
-        return comentarioJpaRepository.findAll();
-    }
-    
-    /**
-     * Busca comentários raiz de uma avaliação.
-     */
-    public ArrayList<Comentario> findComentariosRaizByAvaliacaoId(Long avaliacaoId) {
-        return comentarioJpaRepository.findComentariosRaizByAvaliacaoId(avaliacaoId);
-    }
+    @Query("SELECT c FROM Comentario c WHERE c.avaliacao.id = :avaliacaoId AND c.pai IS NULL")
+    ArrayList<Comentario> findComentariosRaizByAvaliacaoId(@Param("avaliacaoId") Long avaliacaoId);
     
     /**
      * Busca filhos diretos de um comentário.
      */
-    public ArrayList<Comentario> findFilhosByPaiId(Long paiId) {
-        return comentarioJpaRepository.findFilhosByPaiId(paiId);
-    }
+    @Query("SELECT c FROM Comentario c WHERE c.pai.id = :paiId ORDER BY c.createdAt ASC")
+    ArrayList<Comentario> findFilhosByPaiId(@Param("paiId") Long paiId);
     
     /**
-     * Busca comentário com filhos carregados.
+     * Busca comentário com seus filhos carregados.
      */
-    public Optional<Comentario> findByIdWithFilhos(Long id) {
-        return comentarioJpaRepository.findByIdWithFilhos(id);
-    }
+    @Query("SELECT c FROM Comentario c LEFT JOIN FETCH c.filhos WHERE c.id = :id")
+    Optional<Comentario> findByIdWithFilhos(@Param("id") Long id);
     
     /**
-     * Busca comentários de um usuário.
+     * Busca comentário com seus arquivos carregados.
      */
-    public ArrayList<Comentario> findByUserEmail(String userEmail) {
-        return comentarioJpaRepository.findByUserEmail(userEmail);
-    }
+    @Query("SELECT c FROM Comentario c LEFT JOIN FETCH c.arquivos WHERE c.id = :id")
+    Optional<Comentario> findByIdWithArquivos(@Param("id") Long id);
     
     /**
-     * Busca comentários por texto.
+     * Busca comentário com tudo carregado (filhos e arquivos).
      */
-    public ArrayList<Comentario> findByTextoContaining(String texto) {
-        return comentarioJpaRepository.findByTextoContaining(texto);
-    }
+    @Query("SELECT c FROM Comentario c LEFT JOIN FETCH c.filhos LEFT JOIN FETCH c.arquivos WHERE c.id = :id")
+    Optional<Comentario> findByIdWithAllData(@Param("id") Long id);
     
     /**
-     * Remove comentário por ID.
+     * Busca comentários de um usuário específico.
      */
-    public void deleteById(Long id) {
-        comentarioJpaRepository.deleteById(id);
-    }
+    @Query("SELECT c FROM Comentario c WHERE c.usuario.email = :userEmail ORDER BY c.createdAt DESC")
+    ArrayList<Comentario> findByUserEmail(@Param("userEmail") String userEmail);
     
     /**
-     * Remove comentário específico.
+     * Busca comentários que contêm determinado texto.
      */
-    public void delete(Comentario comentario) {
-        comentarioJpaRepository.delete(comentario);
-    }
+    @Query("SELECT c FROM Comentario c WHERE LOWER(c.texto) LIKE LOWER(CONCAT('%', :texto, '%'))")
+    ArrayList<Comentario> findByTextoContaining(@Param("texto") String texto);
     
     /**
-     * Conta filhos de um comentário.
+     * Conta filhos diretos de um comentário.
      */
-    public long countFilhosByPaiId(Long paiId) {
-        return comentarioJpaRepository.countFilhosByPaiId(paiId);
-    }
+    @Query("SELECT COUNT(c) FROM Comentario c WHERE c.pai.id = :paiId")
+    long countFilhosByPaiId(@Param("paiId") Long paiId);
     
     /**
-     * Verifica se existe comentário por ID.
+     * Conta comentários raiz de uma avaliação.
      */
-    public boolean existsById(Long id) {
-        return comentarioJpaRepository.existsById(id);
-    }
+    @Query("SELECT COUNT(c) FROM Comentario c WHERE c.avaliacao.id = :avaliacaoId AND c.pai IS NULL")
+    long countComentariosRaizByAvaliacaoId(@Param("avaliacaoId") Long avaliacaoId);
     
     /**
-     * Conta total de comentários.
+     * Busca comentários recentes (últimos N dias).
      */
-    public long count() {
-        return comentarioJpaRepository.count();
-    }
-    
-    /**
-     * Busca comentários recentes.
-     */
-    public ArrayList<Comentario> findRecentComments(int dias) {
-        return comentarioJpaRepository.findRecentComments(dias);
-    }
+    @Query("SELECT c FROM Comentario c WHERE c.createdAt >= CURRENT_TIMESTAMP - :dias DAY ORDER BY c.createdAt DESC")
+    ArrayList<Comentario> findRecentComments(@Param("dias") int dias);
 }
