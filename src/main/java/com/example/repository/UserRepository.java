@@ -1,18 +1,11 @@
 package com.example.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.model.User;
-import jakarta.annotation.PostConstruct;
-
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.List;
 
 /**
  * Repository consolidado para User que herda diretamente de JpaRepository.

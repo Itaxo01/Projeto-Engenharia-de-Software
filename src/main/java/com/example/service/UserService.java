@@ -1,12 +1,12 @@
 package com.example.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.repository.UserRepository;
 import com.example.model.User;
-import java.util.ArrayList;
-import java.util.List;
+import com.example.repository.UserRepository;
 
 /**
  * Camada de serviço para regras de negócio relacionadas a usuários. A modificação do banco de dados é feita pelo repository, aqui há somente a validação e ponte entre o controller e o repository.

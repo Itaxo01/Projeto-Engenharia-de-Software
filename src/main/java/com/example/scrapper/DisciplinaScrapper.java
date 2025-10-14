@@ -2,13 +2,10 @@ package com.example.scrapper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -21,21 +18,18 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
 import com.example.service.DisciplinaService;
 import com.example.service.ProfessorService;
-import com.example.scrapper.ScrapperStatus;
-import com.example.scrapper.DisciplinaInfo;
-import com.example.scrapper.DadosIniciais;
-import com.example.scrapper.ProfessorInfo;
-import com.example.scrapper.ScrapingResult;
 
-import okhttp3.*;
-import okio.Buffer;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Singleton Web Scraper para capturar disciplinas e professores do sistema CAGR da UFSC.
