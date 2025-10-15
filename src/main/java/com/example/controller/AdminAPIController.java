@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.model.User;
 import com.example.scrapper.DisciplinaScrapper;
+import com.example.service.ScrapperStatusService;
 import com.example.service.SessionService;
 import com.example.service.UserService;
 
@@ -33,6 +34,8 @@ public class AdminAPIController {
 	private SessionService sessionService;
 	@Autowired
 	private DisciplinaScrapper disciplinaScrapper;
+	@Autowired
+	private ScrapperStatusService scrapperStatusService;
 
 	@GetMapping("/users")
 	public ResponseEntity<ArrayList<UserDto>> getUsers(HttpServletRequest request) {
@@ -96,7 +99,7 @@ public class AdminAPIController {
 		
 		// System.out.println(sessionService.getCurrentUser(request) + " solicitou status do scrapper");
 		try {
-			var status = disciplinaScrapper.getStatus();
+			var status = scrapperStatusService.getUltimoStatus();
 			return ResponseEntity.ok(status);
 		} catch (Exception e) {
 			return ResponseEntity.status(500).body("Erro ao obter status do scrapper: " + e.getMessage());

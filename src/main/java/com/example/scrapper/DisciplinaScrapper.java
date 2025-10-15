@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
+import com.example.model.ScrapperStatus;
+import com.example.service.ScrapperStatusService;
 import com.example.service.DisciplinaService;
 import com.example.service.ProfessorService;
 
@@ -32,21 +34,16 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Singleton Web Scraper para capturar disciplinas e professores do sistema CAGR da UFSC.
+ * Web Scraper para capturar disciplinas e professores do sistema CAGR da UFSC.
  * Mantém controle da última execução para evitar requisições desnecessárias.
  */
 @Service
-public class DisciplinaScrapper {
-	 private final boolean DEBUG = true;
+public class DisciplinaScrapper { 
+    private final boolean DEBUG = true;
     
     private static final Logger logger = LoggerFactory.getLogger(DisciplinaScrapper.class);
     
-    // Singleton instance
-    private static DisciplinaScrapper instance;
     private static final Object lock = new Object();
-    
-    // Status de execução
-    private final ScrapperStatus status = new ScrapperStatus();
     
     // URLs e configurações
     private static final String BASE_URL = "https://cagr.sistemas.ufsc.br";
@@ -64,6 +61,9 @@ public class DisciplinaScrapper {
     
     @Autowired 
     private ProfessorService professorService;
+
+    @Autowired
+    private ScrapperStatusService scrapperStatusService;
     
     // Sets para evitar duplicatas
     
@@ -77,34 +77,13 @@ public class DisciplinaScrapper {
                 .readTimeout(60, TimeUnit.SECONDS)
                 .cookieJar(new okhttp3.JavaNetCookieJar(cookieManager))
                 .build();
-        
-        // Definir como instância singleton se ainda não foi definida
-        if (instance == null) {
-            instance = this;
-        }
-    }
-    
-    /**
-     * Obtém a instância singleton do DisciplinaScrapper
-     * @return A instância única do DisciplinaScrapper
-     */
-    public static DisciplinaScrapper getInstance() {
-        if (instance == null) {
-            synchronized (lock) {
-                if (instance == null) {
-                    // Em ambiente Spring, a instância deve ser criada pelo container
-                    throw new IllegalStateException("DisciplinaScrapper deve ser inicializado pelo Spring. Use @Autowired.");
-                }
-            }
-        }
-        return instance;
     }
     
     /**
      * Retorna o status atual do scrapper para interface administrativa
      */
     public ScrapperStatus getStatus() {
-      return status;
+      return scrapperStatusService.getUltimoStatus();
     }
     
     /**
@@ -113,25 +92,20 @@ public class DisciplinaScrapper {
     public ScrapingResult executarScraping(String user, String pass, String administrador) {
         synchronized (lock) {
             // Verifica se já está executando
-            if (status.isExecutando()) {
-                throw new IllegalStateException("Scraping já está em execução desde " + status.getUltimaExecucao());
+            if (getStatus().isExecutando()) {
+                throw new IllegalStateException("Scraping já está em execução desde " + getStatus().getUltimaExecucao());
             }
             
             logger.info("Iniciando scraping das disciplinas do CAGR/UFSC... Executado por: {}", administrador);
-            
+            scrapperStatusService.marcarInicioExecucao(administrador);
             // Atualiza status para executando
-            status.setExecutando(true);
-            status.setUltimaExecucao(LocalDateTime.now());
-            status.setUltimoErro(null);
-            status.setUltimoAdministrador(administrador);
             
             ScrapingResult result = new ScrapingResult();
-            
             try {
                 // 1. Fazer login
                 if (!fazerLogin(user, pass)) {
                     result.setErro("Falha no login");
-                    status.setUltimoErro("Falha no login");
+                    scrapperStatusService.marcarFimExecucao(false, 0, 0, "Falha no login");
                     return result;
                 }
                 
@@ -175,17 +149,14 @@ public class DisciplinaScrapper {
 						result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos());
                 
 						// Atualiza status de sucesso
-                status.setUltimoSucesso(LocalDateTime.now());
-                status.setDisciplinasCapturadas(result.getNumDisciplinasSalvas());
-                status.setProfessoresCapturados(result.getNumProfessoresSalvos());
+                scrapperStatusService.marcarFimExecucao(true, result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos(), null);
 
             } catch (Exception e) {
                 logger.error("Erro durante o scraping", e);
-                status.setUltimoErro(e.getMessage());
-                result.setErro("Erro durante o scraping: " + e.getMessage());
+                scrapperStatusService.marcarFimExecucao(false, 0, 0, "Erro durante o scraping: " + e.getMessage());
             } finally {
                 // Sempre marca como não executando ao final
-                status.setExecutando(false);
+                scrapperStatusService.setExecucao(false);
             }
             return result;
         }
@@ -507,7 +478,8 @@ public class DisciplinaScrapper {
 								}
 								try{
 									Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores);
-									logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
+									result.addDisciplina(disciplina);
+                                    logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
 								} catch(Exception e){
 									logger.warn("Erro ao criar/atualizar disciplina {}: {}", info.getNome(),
 											e.getMessage());
