@@ -58,7 +58,6 @@ public class DisciplinaScrapper {
     private final OkHttpClient httpClient;
     
     // Pattern para extrair ID Lattes
-    private static final Pattern LATTES_PATTERN = Pattern.compile("lattes\\.cnpq\\.br/([0-9]+)");
     
     @Autowired
     private DisciplinaService disciplinaService;
@@ -67,8 +66,6 @@ public class DisciplinaScrapper {
     private ProfessorService professorService;
     
     // Sets para evitar duplicatas
-    private Set<String> disciplinasProcessadas = new HashSet<>();
-    private Set<String> professoresProcessados = new HashSet<>();
     
     public DisciplinaScrapper() {
         // Cliente HTTP com timeout e cookies
@@ -175,12 +172,12 @@ public class DisciplinaScrapper {
 						}
 						
 						logger.info("Scraping concluído. Disciplinas: {}, Professores: {}", 
-						result.getDisciplinasSalvas(), result.getProfessoresSalvos());
+						result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos());
                 
 						// Atualiza status de sucesso
                 status.setUltimoSucesso(LocalDateTime.now());
-                status.setDisciplinasCapturadas(result.getDisciplinasSalvas());
-                status.setProfessoresCapturados(result.getProfessoresSalvos());
+                status.setDisciplinasCapturadas(result.getNumDisciplinasSalvas());
+                status.setProfessoresCapturados(result.getNumProfessoresSalvos());
 
             } catch (Exception e) {
                 logger.error("Erro durante o scraping", e);
@@ -263,7 +260,6 @@ public class DisciplinaScrapper {
                 return false;
             }
             
-            String responseBody = testResponse.body().string();
             String finalUrl = testResponse.request().url().toString();
             
 				// Se conseguiu acessar a página de turmas, login foi bem-sucedido
@@ -392,8 +388,6 @@ public class DisciplinaScrapper {
 					actionUrl = "https://cagr.sistemas.ufsc.br" + actionUrl;
 			}
 			
-			String viewState = doc.select("input[name=javax.faces.ViewState]").val();
-			
 			// Extrair ID do botão de busca dinamicamente
 			String botaoBuscarId = extrairIdBotaoBusca(doc);
 			logger.debug("Botao de busca encontrado = {}", botaoBuscarId);
@@ -458,14 +452,13 @@ public class DisciplinaScrapper {
     
     private void processarPaginas(Document doc, String semestre, String centro, ScrapingResult result) throws Exception {
 		int paginaAtual = 1;
-		int totalDisciplinasProcessadas = 0;
 		Document currentDoc = doc;
 
 		while(currentDoc != null){
 			logger.debug("Processando página {} para semestre={}, centro={}", paginaAtual, semestre, centro);
 
-			totalDisciplinasProcessadas += processarTabelaPagina(currentDoc, semestre, centro, result);
-			logger.debug("total de {} disciplinas processadas até a página {}", totalDisciplinasProcessadas, paginaAtual);
+            processarTabelaPagina(currentDoc, semestre, centro, result);
+			logger.debug("total de {} disciplinas processadas até a página {}", result.getNumDisciplinasSalvas(), paginaAtual);
 
 			Element nextButton = temProximaPagina(currentDoc);
 			if(nextButton != null) {
@@ -477,21 +470,17 @@ public class DisciplinaScrapper {
 				break;
 			}
 		}
-
-		logger.info("Total de {} disciplinas processadas em {} páginas para semestre={}, curso={}", totalDisciplinasProcessadas, paginaAtual, semestre, centro);
-		result.addDisciplinasSalvas(totalDisciplinasProcessadas);
     }
 
-	 private int processarTabelaPagina(Document doc, String semestre, String centro, ScrapingResult result){
+	 private void processarTabelaPagina(Document doc, String semestre, String centro, ScrapingResult result){
 		Element tabela = doc.select("table[id='formBusca:dataTable']").first();
         if (tabela == null) {
             logger.info("Nenhuma tabela encontrada para semestre={}, centro={}", semestre, centro);
-            return 0;
+            return;
         }
         
         Elements linhas = tabela.select("tr");
-        int disciplinasProcessadas = 0;
-			// logger.debug("Quantidade de linhas={}", linhas.size());
+        // logger.debug("Quantidade de linhas={}", linhas.size());
         
         for (int i = 1; i < linhas.size(); i++) { // Pular cabeçalho
             Element linha = linhas.get(i);
@@ -519,9 +508,6 @@ public class DisciplinaScrapper {
 								try{
 									Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores);
 									logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
-									if (disciplina != null) {
-										disciplinasProcessadas++;
-									}
 								} catch(Exception e){
 									logger.warn("Erro ao criar/atualizar disciplina {}: {}", info.getNome(),
 											e.getMessage());
@@ -535,7 +521,6 @@ public class DisciplinaScrapper {
                 }
             }
         }
-		  return disciplinasProcessadas;
 	 }
     
     private DisciplinaInfo extrairInformacoesLinha(Element linha) {
