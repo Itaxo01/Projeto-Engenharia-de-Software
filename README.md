@@ -16,7 +16,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.com.example.scr
 ---
 ## Recent changes
 
-Tentei fazer o scrapping funcionar mas estou falhando miseravelmente. Ele não está avançando corretamente as páginas mas isso deve ser tranquilo de resolver, mas está acontecendo algum erro ao salvar os professores/disciplinas no banco de dados (O banco de dados não retorna que aquela disciplina já existe, não sei se é pq não foi criada ou só retorna errado mesmo). A funcionalidade que implementa o scrapping está na aba de administrador.
+Scrapper já funciona aparentemente sempre. A funcionalidade está implementada no front-end na aba de administrador, e o status do scrapping fica guardado em uma tabela, com o último status sendo exibido no front-end.
 
 ---
 ## TO DO (Iteração 2)
