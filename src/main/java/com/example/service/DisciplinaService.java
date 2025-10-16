@@ -122,4 +122,17 @@ public class DisciplinaService {
     public Optional<Disciplina> buscarComProfessores(String codigo) {
         return disciplinaRepository.findByCodigoWithProfessores(codigo);
     }
+
+    public List<Disciplina> searchByCodigoOrNome(String query) {
+        String searchPattern = "%" + query + "%";
+        String startsWithPattern = query + "%";
+        String exactQuery = query;
+        
+        return disciplinaRepository.findByCodigoOrNomeContaining(
+            searchPattern,
+            exactQuery,
+            startsWithPattern
+        );
+    }
+
 }

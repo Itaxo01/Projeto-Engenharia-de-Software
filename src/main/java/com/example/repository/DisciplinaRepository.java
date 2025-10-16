@@ -32,4 +32,17 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
 
     @Query("SELECT d FROM Disciplina d WHERE d.codigo = :codigo")
     Optional<Disciplina> findByCodigoWithProfessores(@Param("codigo") String codigo);
+
+    @Query("SELECT d FROM Disciplina d WHERE LOWER(d.codigo) LIKE LOWER(:query) OR LOWER(d.nome) LIKE LOWER(:query) " +
+            " ORDER BY " +
+            " CASE " +
+            "  WHEN LOWER(d.codigo) = LOWER(:exactQuery) THEN 1 " +
+            "  WHEN LOWER(d.codigo) LIKE LOWER(:startsWithQuery) THEN 2 " +
+            "  WHEN LOWER(d.nome) LIKE LOWER(:startsWithQuery) THEN 3 " +
+            "  ELSE 4 " +
+            " END, " +
+            " d.codigo ASC")
+    ArrayList<Disciplina> findByCodigoOrNomeContaining(@Param("query") String query,
+                                                      @Param("exactQuery") String exactQuery,
+                                                      @Param("startsWithQuery") String startsWithQuery);
 }
