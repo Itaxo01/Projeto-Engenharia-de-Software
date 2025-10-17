@@ -33,6 +33,15 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
     @Query("SELECT d FROM Disciplina d WHERE d.codigo = :codigo")
     Optional<Disciplina> findByCodigoWithProfessores(@Param("codigo") String codigo);
 
+	 /* Retorna o matching de disciplinas pelo código ou nome 
+	  * Ordena os resultados priorizando:
+	  * 1. Código exato (case insensitive)
+	  * 2. Código que começa com a query (case insensitive)
+	  * 3. Nome que começa com a query (case insensitive)
+	  * 4. Outros resultados que contenham a query (case insensitive)
+	  * Dentro de cada grupo, ordena por código em ordem alfabética
+	 */
+
     @Query("SELECT d FROM Disciplina d WHERE LOWER(d.codigo) LIKE LOWER(:query) OR LOWER(d.nome) LIKE LOWER(:query) " +
             " ORDER BY " +
             " CASE " +
