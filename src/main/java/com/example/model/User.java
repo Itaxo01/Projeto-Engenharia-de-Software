@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 /**
  * Entidade de domínio que representa um usuário cadastrado no sistema. Utilizada para o manejo dos dados
  * <ul>
- * <li> {@link #email} Email do usuário (chave de login).</li
+ * <li> {@link #user_email} Email do usuário (chave de login).</li
  * <li> {@link #password} Hash da senha armazenado.</li>
  * <li> {@link #nome} Nome completo do usuário extraído do PDF.</li
  * <li> {@link #matricula} Matrícula estudantil (ID).</li>
@@ -17,7 +17,7 @@ import jakarta.persistence.*;
 @Table(name = "users")
 public class User {
 	@Id
-	private String email;
+	private String user_email;
 	
 	@Column(nullable = false)
 	private String password;
@@ -38,7 +38,7 @@ public class User {
 	 * Construtor completo utilizado pelo serviço/repositório.
 	 */
 	public User(String email, String password, String nome, String matricula, String curso) {
-		this.email = email;
+		this.user_email = email;
 		this.password = password;
 		this.nome = nome;
 		this.matricula = matricula;
@@ -49,8 +49,8 @@ public class User {
 	public User(){}
 
 	/** Email (chave de login). */
-	public String getEmail() { return email;}
-	public void setEmail(String email) { this.email = email; }
+	public String getUser_email() { return user_email;}
+	public void setUser_email(String email) { this.user_email = email; }
 
 	/** Hash da senha armazenado. */
 	// the password here is already hashed

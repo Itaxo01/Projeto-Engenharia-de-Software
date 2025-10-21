@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 /**
  * Entidade JPA que representa um professor cadastrado no sistema.
  * <ul>
- * <li>{@link #ID_LATTES} Identificador único do professor na plataforma Lattes.</li>
+ * <li>{@link #professorId} Identificador único do professor na plataforma Lattes.</li>
  * <li>{@link #nome} Nome completo do professor.</li>
  * </ul>
  */
@@ -23,8 +23,8 @@ import jakarta.persistence.Table;
 @Table(name = "professores")
 public class Professor {
 	@Id
-	@Column(name = "id_lattes", nullable = false, unique = true, length = 50)
-	private String ID_LATTES; // Identificador único do professor na plataforma Lattes, já que o nome pode se repetir.
+	@Column(name = "professor_id", nullable = false, unique = true, length = 50)
+	private String professorId; // Identificador único do professor na plataforma Lattes, já que o nome pode se repetir.
 
 	@Column(nullable = false)
 	private String nome;
@@ -41,9 +41,9 @@ public class Professor {
 	public Professor(){}
 
 	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Professor(String nome, String ID_LATTES) {
+	public Professor(String nome, String professorId) {
 		this.nome = nome;
-		this.ID_LATTES = ID_LATTES;
+		this.professorId = professorId;
 	}
 
 	
@@ -52,8 +52,8 @@ public class Professor {
 	public void setNome(String nome) {this.nome = nome;}
 
 	/** ID Lattes do professor. */
-	public String getID_LATTES() {return ID_LATTES;}
-	public void setID_LATTES(String ID_LATTES) {this.ID_LATTES = ID_LATTES;}
+	public String getProfessorId() {return professorId;}
+	public void setProfessorId(String professorId) {this.professorId = professorId;}
 
 	// public Set<Disciplina> getDisciplinas() { return disciplinas; }
 	// public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
@@ -66,7 +66,7 @@ public class Professor {
 
 	public void addAvaliacao(Avaliacao avaliacao){
 		avaliacoes.add(avaliacao);
-		avaliacao.setProfessorId(this.ID_LATTES);
+		avaliacao.setProfessorId(this.professorId);
 	}
 
 	// Métodos auxiliares para gerenciamento de relacionamentos
@@ -87,18 +87,18 @@ public class Professor {
         if (this == o) return true;
         if (!(o instanceof Professor)) return false;
         Professor professor = (Professor) o;
-        return java.util.Objects.equals(ID_LATTES, professor.ID_LATTES);
+        return java.util.Objects.equals(professorId, professor.professorId);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(ID_LATTES);
+        return java.util.Objects.hash(professorId);
     }
 
     @Override
     public String toString() {
         return "Professor{" +
-                "ID_LATTES='" + ID_LATTES + '\'' +
+                "ID_LATTES='" + professorId + '\'' +
                 ", nome='" + nome + '\'' +
                 '}';
     }
@@ -106,9 +106,9 @@ public class Professor {
 	/**
 	 * Record para representar um resumo(página de disciplina) do professor.
 	 */
-	public record ProfessorResumo(String nome, String ID_LATTES, int numeroAvaliacoes) {
+	public record ProfessorResumo(String nome, String professorId, int numeroAvaliacoes) {
 		public static ProfessorResumo from(Professor professor) {
-			return new ProfessorResumo(professor.getNome(), professor.getID_LATTES(), professor.getAvaliacoes().size());
+			return new ProfessorResumo(professor.getNome(), professor.getProfessorId(), professor.getAvaliacoes().size());
 		}
 	}
 }

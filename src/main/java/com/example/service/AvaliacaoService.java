@@ -31,16 +31,6 @@ public class AvaliacaoService {
         return avaliacaoRepository.findAll();
     }
 
-    // Calcular média por professor
-    public Double calcularMediaProfessor(String professorId) {
-        return avaliacaoRepository.calcularMediaProfessor(professorId);
-    }
-
-    // Calcular média por professor e disciplina
-    public Double calcularMediaProfessorDisciplina(String professorId, String disciplinaCodigo) {
-        return avaliacaoRepository.calcularMediaProfessorDisciplina(professorId, disciplinaCodigo);
-    }
-
     // Deletar avaliação
     public void deletar(Long id) {
         avaliacaoRepository.deleteById(id);
@@ -54,15 +44,5 @@ public class AvaliacaoService {
     // Contar total de avaliações
     public long contar() {
         return avaliacaoRepository.count();
-    }
-
-    // Buscar avaliações com comentário
-    public ArrayList<Avaliacao> buscarComComentario() {
-        return avaliacaoRepository.findAvaliacoesComComentario();
-    }
-
-    // Buscar avaliações sem comentário
-    public ArrayList<Avaliacao> buscarSemComentario() {
-        return avaliacaoRepository.findAvaliacoesSemComentario();
     }
 }

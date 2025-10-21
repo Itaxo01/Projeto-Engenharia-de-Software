@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
  * <ul>
  *   <li>{@link #nota} - Nota dada pelo usuário (1 a 5). Use -1 para indicar que a nota não foi definida</li>
  *   <li>{@link #professorId} - ID do professor avaliado. Pode ser nulo se a avaliação for apenas da disciplina</li>
- *   <li>{@link #disciplinaCodigo} - Código da disciplina avaliada</li>
+ *   <li>{@link #disciplinaId} - Código da disciplina avaliada</li>
  *   <li>{@link #userEmail} - Email do usuário que fez a avaliação</li>
  *   <li>{@link #comentario} - Comentário principal associado à avaliação (opcional)</li>
  *   <li>{@link #createdAt} - Timestamp de quando a avaliação foi criada</li>
@@ -33,8 +33,8 @@ public class Avaliacao {
 	@Column(name = "professor_id", nullable = true)
 	private String professorId;
 
-	@Column(name = "disciplina_codigo", nullable = false)
-	private String disciplinaCodigo;
+	@Column(name = "disciplina_id", nullable = false)
+	private String disciplinaId;
 
 	@Column(name = "user_email", nullable = false)
 	private String userEmail;
@@ -51,18 +51,18 @@ public class Avaliacao {
 	private Comentario comentario;
 
 	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Avaliacao(Integer nota, String professorId, String disciplinaCodigo, String userEmail) {
+	public Avaliacao(Integer nota, String professorId, String disciplinaId, String userEmail) {
 		this.nota = nota;
 		this.professorId = professorId;
-		this.disciplinaCodigo = disciplinaCodigo;
+		this.disciplinaId = disciplinaId;
 		this.userEmail = userEmail;
 	}
 
 	/** Construtor completo com comentário. */
-	public Avaliacao(Integer nota, String professorId, String disciplinaCodigo, String userEmail, Comentario comentario) {
+	public Avaliacao(Integer nota, String professorId, String disciplinaId, String userEmail, Comentario comentario) {
 		this.nota = nota;
 		this.professorId = professorId;
-		this.disciplinaCodigo = disciplinaCodigo;
+		this.disciplinaId = disciplinaId;
 		this.userEmail = userEmail;
 		this.comentario = comentario;
 		if (comentario != null) {
@@ -71,25 +71,25 @@ public class Avaliacao {
 	}
 
 	/** Construtor para comentário sem nota. */
-	public Avaliacao(String professorId, String disciplinaCodigo, String userEmail, Comentario comentario) {
+	public Avaliacao(String professorId, String disciplinaId, String userEmail, Comentario comentario) {
 		this.professorId = professorId;
-		this.disciplinaCodigo = disciplinaCodigo;
+		this.disciplinaId = disciplinaId;
 		this.userEmail = userEmail;
 		this.nota = -1; // Indica que a nota não foi definida
 		this.comentario = comentario;
 	}
 	
 	/* Construtor para a avaliação sem nota da disciplina*/
-	public Avaliacao(String disciplinaCodigo, String userEmail, Comentario comentario) {
-		this.disciplinaCodigo = disciplinaCodigo;
+	public Avaliacao(String disciplinaId, String userEmail, Comentario comentario) {
+		this.disciplinaId = disciplinaId;
 		this.userEmail = userEmail;
 		this.nota = -1; // Indica que a nota não foi definida
 		this.comentario = comentario;
 	}
 
 	/* Construtor para a avaliação com nota da disciplina*/
-	public Avaliacao(String disciplinaCodigo, String userEmail, Integer nota, Comentario comentario) {
-		this.disciplinaCodigo = disciplinaCodigo;
+	public Avaliacao(String disciplinaId, String userEmail, Integer nota, Comentario comentario) {
+		this.disciplinaId = disciplinaId;
 		this.userEmail = userEmail;
 		this.nota = nota;
 		this.comentario = comentario;
@@ -111,8 +111,8 @@ public class Avaliacao {
 	public String getProfessorId() { return professorId; }
 	public void setProfessorId(String professorId) { this.professorId = professorId; }
 
-	public String getDisciplinaCodigo() { return disciplinaCodigo; }
-	public void setDisciplinaCodigo(String disciplinaCodigo) { this.disciplinaCodigo = disciplinaCodigo; }
+	public String getDisciplinaId() { return disciplinaId; }
+	public void setDisciplinaId(String disciplinaId) { this.disciplinaId = disciplinaId; }
 
 	public String getUserEmail() { return userEmail; }
 	public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
@@ -174,7 +174,7 @@ public class Avaliacao {
 				"id=" + id +
 				", nota=" + nota +
 				", professorId='" + professorId + '\'' +
-				", disciplinaCodigo='" + disciplinaCodigo + '\'' +
+				", disciplinaId='" + disciplinaId + '\'' +
 				", userEmail='" + userEmail + '\'' +
 				", comentario='" + (comentarioTexto != null ? comentarioTexto : "null") + '\'' +
 				", createdAt=" + createdAt +

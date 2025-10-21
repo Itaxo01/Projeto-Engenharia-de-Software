@@ -25,12 +25,12 @@ public class ProfessorService {
     // Criar novo professor
     public Professor salvar(Professor professor) {
         try {
-            logger.debug("Salvando professor: {} ({})", professor.getNome(), professor.getID_LATTES());
+            logger.debug("Salvando professor: {} ({})", professor.getNome(), professor.getProfessorId());
             Professor salvo = professorRepository.save(professor);
-            logger.debug("Professor salvo com sucesso: ID {}", salvo.getID_LATTES());
+            logger.debug("Professor salvo com sucesso: ID {}", salvo.getProfessorId());
             return salvo;
         } catch (Exception e) {
-            logger.error("Erro ao salvar professor {}: {}", professor.getID_LATTES(), e.getMessage());
+            logger.error("Erro ao salvar professor {}: {}", professor.getProfessorId(), e.getMessage());
             throw e;
         }
     }
@@ -44,7 +44,7 @@ public class ProfessorService {
             
             if (professorExistente.isPresent()) {
                 Professor professor = professorExistente.get();
-                logger.debug("*** PROFESSOR EXISTENTE: {} ({}) ***", professor.getNome(), professor.getID_LATTES());
+                logger.debug("*** PROFESSOR EXISTENTE: {} ({}) ***", professor.getNome(), professor.getProfessorId());
                 
                 // Atualizar nome se necessário
                 if (!nome.equals(professor.getNome())) {
@@ -60,7 +60,7 @@ public class ProfessorService {
             
             // Criar novo professor
             Professor novoProfessor = new Professor();
-            novoProfessor.setID_LATTES(lattesId);
+            novoProfessor.setProfessorId(lattesId);
             novoProfessor.setNome(nome);
             
             logger.debug("*** CRIANDO NOVO PROFESSOR: {} ({}) ***", nome, lattesId);
@@ -103,16 +103,6 @@ public class ProfessorService {
     // Buscar todos os professores
     public ArrayList<Professor> buscarTodos() {
         return (ArrayList<Professor>)professorRepository.findAll();
-    }
-
-    // Buscar professores por nome
-    public ArrayList<Professor> buscarPorNome(String nome) {
-        return professorRepository.findByNomeContainingIgnoreCase(nome);
-    }
-
-    // Buscar professor por nome exato
-    public Optional<Professor> buscarPorNomeExato(String nome) {
-        return professorRepository.findByNomeExato(nome);
     }
 
     // Deletar professor

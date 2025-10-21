@@ -27,7 +27,7 @@ public class Disciplina {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long disciplinaId;
 
     @Column(name = "codigo", nullable = false, unique = true, length = 20)
     private String codigo;
@@ -45,7 +45,7 @@ public class Disciplina {
 	 private Set<String> professores = new HashSet<>();
     
    //  // Relacionamento One-to-Many com Avaliacao
-    // @OneToMany(mappedBy = "disciplinaCodigo", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    // @OneToMany(mappedBy = "disciplina_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     // private ArrayList<Avaliacao> avaliacoes = new ArrayList<>();
     
     /**
@@ -60,8 +60,8 @@ public class Disciplina {
     public Disciplina(){}
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getDisciplinaId() { return disciplinaId; }
+    public void setDisciplinaId(Long id) { this.disciplinaId = id; }
 
     /** Código da disciplina. */
     public String getCodigo() { return codigo; }
@@ -94,7 +94,7 @@ public class Disciplina {
 	// }
 
     // Métodos auxiliares para gerenciamento de relacionamentos
-	 public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getID_LATTES());}
+	 public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getProfessorId());}
     public void adicionarProfessor(String professor) {
       if(professores == null) {
 	 	  professores = new HashSet<>();
@@ -103,7 +103,7 @@ public class Disciplina {
 		professores.add(professor);
     }
 
-	 public boolean temProfessor(Professor professor) { return temProfessor(professor.getID_LATTES()); }
+	 public boolean temProfessor(Professor professor) { return temProfessor(professor.getProfessorId()); }
 	 public boolean temProfessor(String professor) {
 		if(professores == null) {
 	 	  professores = new HashSet<>();
@@ -127,7 +127,7 @@ public class Disciplina {
     @Override
     public String toString() {
         return "Disciplina{" +
-                "id=" + id +
+                "id=" + disciplinaId +
                 ", codigo='" + codigo + '\'' +
                 ", nome='" + nome + '\'' +
                 '}';

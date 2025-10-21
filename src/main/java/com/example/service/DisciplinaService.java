@@ -38,7 +38,7 @@ public class DisciplinaService {
 		  Disciplina d;
         if (disciplina.isPresent()) {
 			  d = disciplina.get();
-			  logger.debug("*** DISCIPLINA EXISTENTE ENCONTRADA: {} (ID: {}) ***", codigo, d.getId());
+			  logger.debug("*** DISCIPLINA EXISTENTE ENCONTRADA: {} (ID: {}) ***", codigo, d.getDisciplinaId());
             // Atualizar nome se necessário
             if (!nome.equals(d.getNome())) {
                 d.setNome(nome);
@@ -69,7 +69,7 @@ public class DisciplinaService {
                    codigo, professoresAntes, (professoresDepois - professoresAntes), professoresDepois);
 
         Disciplina disciplinaSalva = disciplinaRepository.save(d);
-        logger.debug("Disciplina salva com ID: {}", disciplinaSalva.getId());
+        logger.debug("Disciplina salva com ID: {}", disciplinaSalva.getDisciplinaId());
         
         return disciplinaSalva;
     }
@@ -122,17 +122,4 @@ public class DisciplinaService {
     public Optional<Disciplina> buscarComProfessores(String codigo) {
         return disciplinaRepository.findByCodigoWithProfessores(codigo);
     }
-
-    public List<Disciplina> searchByCodigoOrNome(String query) {
-        String searchPattern = "%" + query + "%";
-        String startsWithPattern = query + "%";
-        String exactQuery = query;
-        
-        return disciplinaRepository.findByCodigoOrNomeContaining(
-            searchPattern,
-            exactQuery,
-            startsWithPattern
-        );
-    }
-
 }

@@ -43,7 +43,7 @@ import jakarta.persistence.Table;
 public class Comentario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long comentarioId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_email")
@@ -93,8 +93,8 @@ public class Comentario {
 	}
 
 
-	public Long getId() { return id; }
-	public void setId(Long id) { this.id = id; }
+	public Long getComentarioId() { return comentarioId; }
+	public void setComentarioId(Long id) { this.comentarioId = id; }
 
 	public User getUsuario() { return usuario; }
 	public void setUsuario(User usuario) { this.usuario = usuario; }

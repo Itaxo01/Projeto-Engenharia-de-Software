@@ -89,7 +89,7 @@ public class UserAPIController {
 	public record UserDto(String email, String nome, String matricula, String curso){
 		/** Constrói o DTO a partir da entidade {@link com.example.model.User}. */
 		public static UserDto from(User u){
-			return new UserDto(u.getEmail(), u.getNome(), u.getMatricula(), u.getCurso());
+			return new UserDto(u.getUser_email(), u.getNome(), u.getMatricula(), u.getCurso());
 		}
 	}
 }

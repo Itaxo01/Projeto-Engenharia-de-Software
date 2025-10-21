@@ -117,10 +117,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     private boolean isSuperAdmin(HttpServletRequest request) {
-        String userEmail = sessionService.getCurrentUser(request);
+        String user_email = sessionService.getCurrentUser(request);
         // Only specific emails can access H2 console
-        return userEmail != null && 
-               ("kauanfank@gmail.com".equals(userEmail));
+        return user_email != null && 
+               ("kauanfank@gmail.com".equals(user_email));
     }
 
     private boolean matchesPattern(String uri, String[] patterns) {

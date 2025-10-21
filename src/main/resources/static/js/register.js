@@ -5,20 +5,8 @@ function validateEmail(email) {
 
 function validatePassword(password) {
 	// pelo menos 8 caracteres, um caixa alta, um caixa baixa, um número e um símbolo 
-	let t = password.length;
-	if(t < 8) return false;
-	let hasUpper = false;
-	let hasLower = false;
-	let hasNumber = false;
-	let hasSymbol = false;
-	for(let i = 0; i<t; i++){
-		let e = password[i];
-		if(e >= 'A' && e <= 'Z') hasUpper=true;
-		else if(e >= 'a' && e <= 'z') hasLower=true;
-		else if(e >= '0' && e <= '9') hasNumber=true;
-		else hasSymbol=true;
-	};
-	return hasUpper && hasLower && hasNumber && hasSymbol;
+	if(password.length < 8) return false;
+	return true;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -45,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	passwordInput.addEventListener('input', function() {
 		if (passwordInput.value.length >= 8 && !validatePassword(passwordInput.value)) {
-			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
+			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres';
 		} else if(passwordInput.value.length >= 8 && validatePassword(passwordInput.value)){
 			document.getElementById('password-error-message').textContent = '';
 		}
@@ -58,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	passwordInput.addEventListener('blur', function() {
 		if (!validatePassword(passwordInput.value)) {
-			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
+			document.getElementById('password-error-message').textContent = 'Senha deve ter pelo menos 8 caracteres';
 		} else if(validatePassword(passwordInput.value)){
 			document.getElementById('password-error-message').textContent = '';
 		}
@@ -130,7 +118,7 @@ function validateAndSubmit() {
 		isValid = false;
 	}
 	if (!validatePassword(passwordInput.value)) {
-		errorMessage.textContent = 'Senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um símbolo.';
+		errorMessage.textContent = 'Senha deve ter pelo menos 8 caracteres';
 		isValid = false;
 	}
 	if (confirmPasswordInput.value !== passwordInput.value) {
