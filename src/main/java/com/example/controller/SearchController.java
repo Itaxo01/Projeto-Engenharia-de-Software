@@ -16,8 +16,26 @@ public class SearchController {
     private DisciplinaService disciplinaService;
     
     @GetMapping("/disciplinas")
-    public ResponseEntity<List<Disciplina>> searchDisciplinas() {
+    public ResponseEntity<List<DisciplinaSearchDTO>> searchDisciplinas() {
         List<Disciplina> resultados = disciplinaService.buscarTodas();
-        return ResponseEntity.ok(resultados);
+		  List<DisciplinaSearchDTO> dtoList = resultados.stream()
+				.map(d -> new DisciplinaSearchDTO(d.getCodigo(), d.getNome()))
+				.toList();
+        return ResponseEntity.ok(dtoList);
     }
+}
+
+class DisciplinaSearchDTO {
+	private String codigo;
+	private String nome;
+	public DisciplinaSearchDTO(String codigo, String nome){
+		this.codigo = codigo;
+		this.nome = nome;
+	}
+
+	public String getCodigo() { return codigo; }
+	public String getNome() { return nome; }
+
+	public void setCodigo(String codigo) { this.codigo = codigo; }
+	public void setNome(String nome) { this.nome = nome; }
 }

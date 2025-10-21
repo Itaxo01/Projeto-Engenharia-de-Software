@@ -8,7 +8,7 @@ class DisciplinasCache {
         this.cacheDuration = 6 * 30 * 24 * 60 * 60 * 1000; // 6 months
         
         // Version to force cache refresh when needed
-        this.currentVersion = '1.0.0';
+        this.currentVersion = '1.0.2';
     }
 
     /**
