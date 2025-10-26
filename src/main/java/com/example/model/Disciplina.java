@@ -12,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 /**
@@ -36,13 +38,22 @@ public class Disciplina {
     private String nome;
 
 
-	 @ElementCollection(fetch = FetchType.EAGER)
-	 @CollectionTable(
-		  name = "professor_disciplina",
-		  joinColumns = @JoinColumn(name = "disciplina_id")
-	 )
-	 @Column(name = "professor_id")
-	 private Set<String> professores = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+        name="professor_disciplina",
+        joinColumns=
+            @JoinColumn(name="disciplina_id", referencedColumnName="disciplinaId"),
+        inverseJoinColumns=
+            @JoinColumn(name="professor_id", referencedColumnName="professor_id")
+    )
+    private Set<Professor> professores = new HashSet<>();
+
+	//  @ElementCollection(fetch = FetchType.EAGER)
+	//  @CollectionTable(
+	// 	  name = "professor_disciplina",
+	// 	  joinColumns = @JoinColumn(name = "disciplina_id")
+	//  )
+	//  @Column(name = "professor_id")
     
    //  // Relacionamento One-to-Many com Avaliacao
     // @OneToMany(mappedBy = "disciplina_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -72,13 +83,13 @@ public class Disciplina {
     public void setNome(String nome) { this.nome = nome; }
     
     /** Lista de professores que lecionam esta disciplina. */
-    public Set<String> getProfessores() { 
+    public Set<Professor> getProfessores() { 
 		if(professores == null) {
 			professores = new HashSet<>();
 		}
 		return professores; 
 	}
-    public void setProfessores(Set<String> professores) { 
+    public void setProfessores(Set<Professor> professores) { 
 		this.professores = professores != null ? professores : new HashSet<>();
 	 }
 
@@ -94,8 +105,8 @@ public class Disciplina {
 	// }
 
     // Métodos auxiliares para gerenciamento de relacionamentos
-	 public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getProfessorId());}
-    public void adicionarProfessor(String professor) {
+    // public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getProfessorId());}
+    public void adicionarProfessor(Professor professor) {
       if(professores == null) {
 	 	  professores = new HashSet<>();
 		}
@@ -103,8 +114,8 @@ public class Disciplina {
 		professores.add(professor);
     }
 
-	 public boolean temProfessor(Professor professor) { return temProfessor(professor.getProfessorId()); }
-	 public boolean temProfessor(String professor) {
+	//  public boolean temProfessor(Professor professor) { return temProfessor(professor.getProfessorId()); }
+	 public boolean temProfessor(Professor professor) {
 		if(professores == null) {
 	 	  professores = new HashSet<>();
 		}

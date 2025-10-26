@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
+import com.example.model.User;
 import com.example.repository.DisciplinaRepository;
 
 import jakarta.transaction.Transactional;
@@ -74,10 +75,14 @@ public class DisciplinaService {
         return disciplinaSalva;
     }
 
+    @Transactional
     public Optional<Disciplina> buscarPorCodigo(String codigo) {
         try {
             Optional<Disciplina> resultado = disciplinaRepository.findByCodigo(codigo);
             logger.debug("buscarPorCodigo('{}') -> {}", codigo, resultado.isPresent() ? "ENCONTRADA" : "NÃO ENCONTRADA");
+            if(resultado.isPresent()) { // Para conseguir os dados dos professores
+                resultado.get().getProfessores().size();
+            }
             return resultado;
         } catch (Exception e) {
             logger.error("Erro ao buscar disciplina por código '{}': {}", codigo, e.getMessage());

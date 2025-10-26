@@ -1,13 +1,16 @@
 package com.example.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -30,8 +33,8 @@ public class Professor {
 	private String nome;
 	
 	// Relacionamento Many-to-Many com Disciplina
-	// @ManyToMany(mappedBy = "professores", fetch = FetchType.LAZY)
-	// private Set<Disciplina> disciplinas = new HashSet<>();
+	@ManyToMany(mappedBy = "professores", fetch = FetchType.LAZY)
+	private Set<Disciplina> disciplinas = new HashSet<>();
 
 	// Relacionamento One-to-Many com Avaliacao  
 	@OneToMany(mappedBy = "professorId", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -55,8 +58,8 @@ public class Professor {
 	public String getProfessorId() {return professorId;}
 	public void setProfessorId(String professorId) {this.professorId = professorId;}
 
-	// public Set<Disciplina> getDisciplinas() { return disciplinas; }
-	// public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
+	public Set<Disciplina> getDisciplinas() { return disciplinas; }
+	public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
 
 	/** Lista de avaliações do professor. */
 	public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
@@ -70,17 +73,17 @@ public class Professor {
 	}
 
 	// Métodos auxiliares para gerenciamento de relacionamentos
-	// public void adicionarDisciplina(Disciplina disciplina) {
-	// 	if (!disciplinas.contains(disciplina)) {
-	// 		disciplinas.add(disciplina);
-	// 		disciplina.getProfessores().add(this);
-	// 	}
-	// }
+	public void adicionarDisciplina(Disciplina disciplina) {
+		if (!disciplinas.contains(disciplina)) {
+			disciplinas.add(disciplina);
+			disciplina.getProfessores().add(this);
+		}
+	}
 	
-	// public void removerDisciplina(Disciplina disciplina) {
-	// 	disciplinas.remove(disciplina);
-	// 	disciplina.getProfessores().remove(this);
-	// }
+	public void removerDisciplina(Disciplina disciplina) {
+		disciplinas.remove(disciplina);
+		disciplina.getProfessores().remove(this);
+	}
 
 	@Override
     public boolean equals(Object o) {
