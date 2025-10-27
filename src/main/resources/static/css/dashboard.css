@@ -4,7 +4,7 @@
 
 /* Container Principal */
 .dashboard-container {
-    max-width: 1600px;
+    max-width: 65%;
     margin: 0 auto;
     padding: 20px;
     background: #f5f5f5;
