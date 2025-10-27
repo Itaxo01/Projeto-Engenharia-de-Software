@@ -36,10 +36,6 @@ public class Professor {
 	@ManyToMany(mappedBy = "professores", fetch = FetchType.LAZY)
 	private Set<Disciplina> disciplinas = new HashSet<>();
 
-	// Relacionamento One-to-Many com Avaliacao  
-	@OneToMany(mappedBy = "professorId", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	private List<Avaliacao> avaliacoes = new ArrayList<>();
-	
 	/** Construtor padrão necessário para JPA. */
 	public Professor(){}
 
@@ -60,17 +56,6 @@ public class Professor {
 
 	public Set<Disciplina> getDisciplinas() { return disciplinas; }
 	public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
-
-	/** Lista de avaliações do professor. */
-	public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
-	public void setAvaliacoes(List<Avaliacao> avaliacoes) { 
-		this.avaliacoes = avaliacoes != null ? avaliacoes : new ArrayList<>();
-	}
-
-	public void addAvaliacao(Avaliacao avaliacao){
-		avaliacoes.add(avaliacao);
-		avaliacao.setProfessorId(this.professorId);
-	}
 
 	// Métodos auxiliares para gerenciamento de relacionamentos
 	public void adicionarDisciplina(Disciplina disciplina) {
@@ -109,9 +94,9 @@ public class Professor {
 	/**
 	 * Record para representar um resumo(página de disciplina) do professor.
 	 */
-	public record ProfessorResumo(String nome, String professorId, int numeroAvaliacoes) {
+	public record ProfessorResumo(String nome, String professorId) {
 		public static ProfessorResumo from(Professor professor) {
-			return new ProfessorResumo(professor.getNome(), professor.getProfessorId(), professor.getAvaliacoes().size());
+			return new ProfessorResumo(professor.getNome(), professor.getProfessorId());
 		}
 	}
 }
