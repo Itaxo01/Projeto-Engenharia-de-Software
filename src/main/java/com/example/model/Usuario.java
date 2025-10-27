@@ -14,8 +14,8 @@ import jakarta.persistence.*;
  * </ul>
  */
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "usuarios")
+public class Usuario {
 	@Id
 	private String user_email;
 	
@@ -37,7 +37,7 @@ public class User {
 	/**
 	 * Construtor completo utilizado pelo serviço/repositório.
 	 */
-	public User(String email, String password, String nome, String matricula, String curso) {
+	public Usuario(String email, String password, String nome, String matricula, String curso) {
 		this.user_email = email;
 		this.password = password;
 		this.nome = nome;
@@ -46,7 +46,7 @@ public class User {
 	}
 
 	/** Construtor padrão necessário para (de)serialização JSON. */
-	public User(){}
+	public Usuario(){}
 
 	/** Email (chave de login). */
 	public String getUser_email() { return user_email;}

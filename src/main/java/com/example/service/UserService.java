@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.model.User;
+import com.example.model.Usuario;
 import com.example.repository.UserRepository;
 
 /**
@@ -58,11 +58,11 @@ public class UserService {
         return HashingService.verifyPassword(password, storedHash);
     }
 
-	 public User getUser(String email){
+	 public Usuario getUser(String email){
 		if(!userRepository.emailExists(email)) return null;
 		return userRepository.getUser(email);
 	 }
-	public List<User> getUsers() {
+	public List<Usuario> getUsers() {
 		return userRepository.getUsers();
 	}
 	 public boolean toggleAdmin(String email){

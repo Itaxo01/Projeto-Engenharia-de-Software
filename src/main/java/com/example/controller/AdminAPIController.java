@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.model.User;
+import com.example.model.Usuario;
 import com.example.scrapper.DisciplinaScrapper;
 import com.example.service.ScrapperStatusService;
 import com.example.service.SessionService;
@@ -44,7 +44,7 @@ public class AdminAPIController {
 			return ResponseEntity.status(403).build();
 		}
 
-		List<User> users = userService.getUsers();
+		List<Usuario> users = userService.getUsers();
 		ArrayList<UserDto> usersRet = new ArrayList<UserDto>();
 		users.forEach(user -> {
 			usersRet.add(UserDto.from(user));
@@ -148,8 +148,8 @@ public class AdminAPIController {
 	}
 
 	public record UserDto(String email, String nome, String matricula, String curso, boolean admin){
-		/** Constrói o DTO a partir da entidade {@link com.example.model.User}. */
-		public static UserDto from(User u){
+		/** Constrói o DTO a partir da entidade {@link com.example.model.Usuario}. */
+		public static UserDto from(Usuario u){
 			return new UserDto(u.getUser_email(), u.getNome(), u.getMatricula(), u.getCurso(), u.getAdmin());
 		}
 	}

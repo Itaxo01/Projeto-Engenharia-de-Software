@@ -79,7 +79,7 @@
                         <div th:each="professor : ${professors}" class="professor-item">
                             <div class="professor-info">
                                 <div class="professor-avatar" th:text="${#strings.substring(professor.nome, 0, 1)}">J</div>
-                                <div class="professor-name" th:text="${professor.nome}">Prof. Jerusa Marchi</div>
+                                <div class="professor-name" th:text="${professor.nome}">Desconhecido</div>
                             </div>
                             <div class="professor-rating">
                                 <div class="rating-stars">
@@ -116,8 +116,13 @@
     </div>
 
     <!-- Scripts -->
+    <script th:inline="javascript">
+        // Dados do backend
+        const AVALIACOES_DATA = /*[[${avaliacoes}]]*/ [];
+        const PROFESSORES_DATA = /*[[${professors}]]*/ [];
+    </script>
     <script src="/js/class.js"></script>
-	 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.basic.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.basic.min.js"></script>
     <script src="/js/searchBar.js?v=1.0.3"></script>
 </body>
 </html>

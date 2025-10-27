@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.model.User;
+import com.example.model.Usuario;
 
 /**
  * Repository consolidado para User que herda diretamente de JpaRepository.
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<Usuario, String> {
     
     /**
      * Verifica se existe usuário com a matrícula.
@@ -30,19 +30,19 @@ public interface UserRepository extends JpaRepository<User, String> {
     }
 
     default String getPassword(String email) { 
-        return findById(email).map(User::getPassword).orElse(null); 
+        return findById(email).map(Usuario::getPassword).orElse(null); 
     }
 
-    default User getUser(String email) { 
+    default Usuario getUser(String email) { 
         return findById(email).orElse(null); 
     }
 
-    default List<User> getUsers() { 
+    default List<Usuario> getUsers() { 
         return findAll(); 
     }
 
     default Boolean getAdmin(String email) { 
-        return findById(email).map(User::getAdmin).orElse(false); 
+        return findById(email).map(Usuario::getAdmin).orElse(false); 
     }
 
     default void setAdmin(String email, boolean isAdmin) {
@@ -57,7 +57,7 @@ public interface UserRepository extends JpaRepository<User, String> {
             throw new IllegalArgumentException("Email ou matrícula já registrados.");
         }
 
-        User u = new User(email, password, nome, matricula, curso);
+        Usuario u = new Usuario(email, password, nome, matricula, curso);
         save(u);
     }
 

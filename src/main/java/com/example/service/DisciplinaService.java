@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
+import com.example.model.Usuario;
 import com.example.repository.DisciplinaRepository;
 
 import jakarta.transaction.Transactional;

@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
-
+    <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-					<a href="/dashboard" style="text-decoration: none;"><h2>Sistema Acadêmico</h2></a>
+                <a href="/dashboard" style="text-decoration: none;"><h2>Sistema Acadêmico</h2></a>
             </div>
             
             <div class="nav-search">
@@ -31,119 +31,65 @@
         </div>
     </nav>
 
-	 <!-- Hidden form -->
-	<form id="logout-form" method="post" action="/logout" style="display: none;">
-	</form>
-	<script>
-	function logout() {
-		document.getElementById('logout-form').submit();
-	}
-	</script>
+    <!-- Hidden form -->
+    <form id="logout-form" method="post" action="/logout" style="display: none;"></form>
+    <script>
+        function logout() {
+            document.getElementById('logout-form').submit();
+        }
+    </script>
 
+    <!-- Container Principal -->
     <div class="dashboard-container">
+        <!-- Header -->
         <div class="dashboard-header">
-            <h1>Meu Progresso Acadêmico</h1>
-            <p>Acompanhe o status das suas disciplinas</p>
+            <div class="header-content">
+                <h1>Mapa Curricular</h1>
+                <button class="btn-upload" onclick="uploadCurriculo()">
+                    Importar Histórico Escolar
+                </button>
+            </div>
+            
+            <!-- Legenda -->
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-box disponivel"></span>
+                    <span>Disponível</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box indisponivel"></span>
+                    <span>Indisponível</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box cursada"></span>
+                    <span>Cursada</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box avaliada"></span>
+                    <span>Avaliada</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box critica"></span>
+                    <span>Crítica</span>
+                </div>
+            </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">24</div>
-                <div class="stat-label">Disciplinas Concluídas</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">8</div>
-                <div class="stat-label">Disciplinas Restantes</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">75%</div>
-                <div class="stat-label">Progresso do Curso</div>
-            </div>
-            <div class="stat-card critical">
-                <div class="stat-number">2</div>
-                <div class="stat-label">Disciplinas Críticas</div>
-            </div>
+        <!-- Grid de Semestres -->
+        <div class="semestres-grid" id="semestresContainer">
+            <!-- Semestres serão gerados aqui -->
         </div>
 
-        <div class="classes-section">
-            <div class="section-header">
-                <h2>Disciplinas</h2>
-                <div class="legend">
-                    <span class="legend-item available">
-                        <span class="legend-color"></span>
-                        Disponível
-                    </span>
-                    <span class="legend-item unavailable">
-                        <span class="legend-color"></span>
-                        Indisponível
-                    </span>
-                    <span class="legend-item taken">
-                        <span class="legend-color"></span>
-                        Cursada
-                    </span>
-                    <span class="legend-item evaluated">
-                        <span class="legend-color"></span>
-                        Aprovado
-                    </span>
-                    <span class="legend-item critical">
-                        <span class="legend-color"></span>
-                        Crítica
-                    </span>
-                </div>
-            </div>
-
-            <div class="classes-grid">
-                <!-- Mock data - in real implementation, this would be generated from database -->
-                <div class="class-card available" onclick="window.location.href='/class?id=1'">
-                    <div class="class-code">INE5402</div>
-                    <div class="class-name">Programação Orientada a Objetos I</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card evaluated" onclick="window.location.href='/class?id=2'">
-                    <div class="class-code">INE5401</div>
-                    <div class="class-name">Introdução à Computação</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card critical" onclick="window.location.href='/class?id=3'">
-                    <div class="class-code">INE5403</div>
-                    <div class="class-name">Fundamentos de Matemática Discreta</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card taken" onclick="window.location.href='/class?id=4'">
-                    <div class="class-code">INE5404</div>
-                    <div class="class-name">Programação Orientada a Objetos II</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card unavailable">
-                    <div class="class-code">INE5405</div>
-                    <div class="class-name">Probabilidade e Estatística</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card available" onclick="window.location.href='/class?id=6'">
-                    <div class="class-code">INE5406</div>
-                    <div class="class-name">Sistemas Digitais</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card evaluated" onclick="window.location.href='/class?id=7'">
-                    <div class="class-code">MTM3161</div>
-                    <div class="class-name">Cálculo A</div>
-                    <div class="class-credits">4 créditos</div>
-                </div>
-                
-                <div class="class-card critical" onclick="window.location.href='/class?id=8'">
-                    <div class="class-code">INE5407</div>
-                    <div class="class-name">Ciência, Tecnologia e Sociedade</div>
-                    <div class="class-credits">3 créditos</div>
-                </div>
-            </div>
+        <!-- Botão Adicionar Semestre -->
+        <div class="add-semester-section">
+            <button class="btn-add-semester" onclick="adicionarSemestre()">
+                + Adicionar Fase
+            </button>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.basic.min.js"></script>
-	 <script src="/js/searchBar.js?v=1.0.3"></script></body>
+    <script src="/js/searchBar.js?v=1.0.3"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
 </html>

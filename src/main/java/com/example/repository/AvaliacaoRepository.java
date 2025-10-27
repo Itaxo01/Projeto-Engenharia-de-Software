@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.example.model.Avaliacao;
 import com.example.model.Disciplina;
 import com.example.model.Professor;
-import com.example.model.User;
+import com.example.model.Usuario;
 
 /**
  * Repository consolidado para Avaliacao que herda diretamente de JpaRepository.

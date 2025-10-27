@@ -35,6 +35,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: all 0.2s;
+}
+
+.discipline-header:hover {
+    border-color: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
 }
 
 .discipline-info h1 {
@@ -154,11 +160,24 @@
     padding: 12px;
     border: 1px solid #ecf0f1;
     border-radius: 6px;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    cursor: pointer;
 }
 
 .professor-item:hover {
-    border-color: #bdc3c7;
+    border-color: #3498db;
+    background-color: #f8f9fa;
+}
+
+.professor-item.selected {
+    border-color: #3498db;
+    background-color: #e3f2fd;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.professor-item.selected .professor-name {
+    color: #2980b9;
+    font-weight: 600;
 }
 
 .professor-info {

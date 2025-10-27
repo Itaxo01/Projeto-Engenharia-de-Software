@@ -1,271 +1,318 @@
-/* Dashboard page specific styles */
+/* =================================
+   DASHBOARD - MAPA CURRICULAR
+   ================================= */
 
+/* Container Principal */
 .dashboard-container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 20px;
+    background: #f5f5f5;
 }
 
+/* Header */
 .dashboard-header {
-    margin-bottom: 30px;
-}
-
-.dashboard-header h1 {
-    font-size: 28px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 8px;
-}
-
-.dashboard-header p {
-    color: #7f8c8d;
-    font-size: 16px;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
     background: white;
-    padding: 20px;
-    border-radius: 6px;
-    border: 1px solid #ecf0f1;
-    text-align: center;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.stat-card.critical {
-    border-left: 4px solid #e74c3c;
-}
-
-.stat-number {
-    font-size: 32px;
-    font-weight: 600;
-    color: #3498db;
-    margin-bottom: 4px;
-}
-
-.stat-card.critical .stat-number {
-    color: #e74c3c;
-}
-
-.stat-label {
-    color: #7f8c8d;
-    font-weight: 500;
-    font-size: 14px;
-}
-
-/* Classes Section */
-.classes-section {
-    background: white;
-    border-radius: 6px;
-    border: 1px solid #ecf0f1;
-    padding: 24px;
-}
-
-.section-header {
+.header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 16px;
+    margin-bottom: 16px;
     padding-bottom: 16px;
     border-bottom: 1px solid #ecf0f1;
 }
 
-.section-header h2 {
-    font-size: 20px;
+.dashboard-header h1 {
+    font-size: 22px;
     font-weight: 600;
     color: #2c3e50;
+    margin: 0;
 }
 
+.btn-upload {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-upload:hover {
+    background: #2980b9;
+}
+
+/* Legenda */
 .legend {
     display: flex;
-    gap: 16px;
+    gap: 20px;
     flex-wrap: wrap;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 13px;
-    color: #7f8c8d;
+    color: #2c3e50;
 }
 
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
+.legend-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
 }
 
-.legend-item.available .legend-color {
-    background-color: #3498db;
+.legend-box.disponivel {
+    background: white;
 }
 
-.legend-item.unavailable .legend-color {
-    background-color: #95a5a6;
+.legend-box.indisponivel {
+    background: #7f8c8d;
 }
 
-.legend-item.taken .legend-color {
-    background-color: #f39c12;
+.legend-box.cursada {
+    background: #3498db;
 }
 
-.legend-item.evaluated .legend-color {
-    background-color: #27ae60;
+.legend-box.avaliada {
+    background: #27ae60;
 }
 
-.legend-item.critical .legend-color {
-    background-color: #e74c3c;
+.legend-box.critica {
+    background: #e74c3c;
 }
 
-/* Classes Grid */
-.classes-grid {
+/* Grid de Semestres */
+.semestres-grid {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Linha de Semestre */
+.semestre-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: 100px repeat(auto-fill, minmax(110px, 1fr));
     gap: 12px;
+    margin-bottom: 16px;
+    align-items: start;
 }
 
-.class-card {
-    background: #fafafa;
-    border: 1px solid #e1e5e9;
-    border-radius: 4px;
-    padding: 16px;
-    transition: all 0.2s ease;
-    cursor: pointer;
+.semestre-row:last-child {
+    margin-bottom: 0;
 }
 
-.class-card:hover {
-    border-color: #bdc3c7;
-    background: #f7f9fa;
-}
-
-.class-card.available {
-    background: #f8fcff;
-    border-color: #3498db;
-}
-
-.class-card.available:hover {
-    background: #f0f8ff;
-    border-color: #2980b9;
-}
-
-.class-card.unavailable {
+/* Label de Fase/Semestre */
+.fase-label {
     background: #f8f9fa;
-    border-color: #95a5a6;
-    color: #7f8c8d;
-    cursor: default;
-}
-
-.class-card.unavailable:hover {
-    background: #f8f9fa;
-    border-color: #95a5a6;
-}
-
-.class-card.taken {
-    background: #fffbf0;
-    border-color: #f39c12;
-}
-
-.class-card.taken:hover {
-    background: #fef9e7;
-    border-color: #e67e22;
-}
-
-.class-card.evaluated {
-    background: #f0fff4;
-    border-color: #27ae60;
-}
-
-.class-card.evaluated:hover {
-    background: #e8f5e8;
-    border-color: #229954;
-}
-
-.class-card.critical {
-    background: #fdf2f2;
-    border-color: #e74c3c;
-}
-
-.class-card.critical:hover {
-    background: #fbeaea;
-    border-color: #c0392b;
-}
-
-.class-code {
-    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 6px;
-    font-family: 'Courier New', monospace;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 85px;
 }
 
-.class-name {
+/* Container de Disciplinas */
+.disciplinas-container {
+    display: contents;
+}
+
+/* Card de Disciplina */
+.disciplina-card {
+    background: #7f8c8d;
+    border: 1px solid #6c7a7b;
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 85px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.disciplina-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.disciplina-card.disponivel {
+    background: white;
+    border-color: #ddd;
+}
+
+.disciplina-card.indisponivel {
+    background: #7f8c8d;
+    border-color: #6c7a7b;
+    color: white;
+}
+
+.disciplina-card.cursada {
+    background: #3498db;
+    border-color: #2980b9;
+    color: white;
+}
+
+.disciplina-card.avaliada {
+    background: #27ae60;
+    border-color: #229954;
+    color: white;
+}
+
+.disciplina-card.critica {
+    background: #e74c3c;
+    border-color: #c0392b;
+    color: white;
+}
+
+.disciplina-codigo {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    opacity: 0.9;
+}
+
+.disciplina-nome {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Botão Adicionar Disciplina */
+.btn-add-disciplina-card {
+    background: transparent;
+    border: 2px dashed #bdc3c7;
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #95a5a6;
+}
+
+.btn-add-disciplina-card:hover {
+    border-color: #27ae60;
+    color: #27ae60;
+    background: #f0fff4;
+}
+
+/* Seção Adicionar Fase */
+.add-semester-section {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-add-semester {
+    background: white;
+    border: 2px dashed #bdc3c7;
+    color: #7f8c8d;
+    padding: 12px 24px;
+    border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
-    margin-bottom: 8px;
-    line-height: 1.3;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.class-credits {
-    font-size: 12px;
-    color: #7f8c8d;
-    font-weight: 500;
+.btn-add-semester:hover {
+    border-color: #3498db;
+    color: #3498db;
+    background: #f8fcff;
 }
 
-/* Responsive design */
+/* Responsividade */
+@media (max-width: 1200px) {
+    .semestre-row {
+        grid-template-columns: 90px repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+}
+
 @media (max-width: 768px) {
     .dashboard-container {
+        padding: 12px;
+    }
+    
+    .dashboard-header {
         padding: 16px;
     }
     
-    .dashboard-header h1 {
-        font-size: 24px;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 12px;
-    }
-    
-    .stat-card {
-        padding: 16px;
-    }
-    
-    .stat-number {
-        font-size: 28px;
-    }
-    
-    .section-header {
+    .header-content {
         flex-direction: column;
-        align-items: flex-start;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .btn-upload {
+        width: 100%;
     }
     
     .legend {
         gap: 12px;
+        justify-content: center;
     }
     
-    .classes-grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-    
-    .classes-section {
+    .semestres-grid {
         padding: 16px;
     }
-}
-
-@media (max-width: 480px) {
-    .legend {
-        flex-direction: column;
+    
+    .semestre-row {
+        grid-template-columns: 80px repeat(2, 1fr);
         gap: 8px;
+        margin-bottom: 12px;
     }
     
-    .legend-item {
+    .fase-label {
         font-size: 12px;
+        padding: 8px 6px;
+        min-height: 75px;
+    }
+    
+    .disciplina-card,
+    .btn-add-disciplina-card {
+        min-height: 75px;
+        padding: 8px 6px;
+    }
+    
+    .disciplina-codigo {
+        font-size: 10px;
+    }
+    
+    .disciplina-nome {
+        font-size: 9px;
+    }
+    
+    .btn-add-disciplina-card {
+        font-size: 24px;
     }
 }

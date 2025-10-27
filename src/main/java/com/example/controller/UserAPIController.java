@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.model.User;
+import com.example.model.Usuario;
 import com.example.service.SessionService;
 import com.example.service.UserService;
 
@@ -38,7 +38,7 @@ public class UserAPIController {
 		if(email == null){
 			return ResponseEntity.status(401).build();
 		}
-		User user = userService.getUser(email);
+		Usuario user = userService.getUser(email);
 		if(user == null){
 			return ResponseEntity.status(404).build();
 		}
@@ -87,8 +87,8 @@ public class UserAPIController {
 
 	/** DTO exposto pelo endpoint /api/me. */
 	public record UserDto(String email, String nome, String matricula, String curso){
-		/** Constrói o DTO a partir da entidade {@link com.example.model.User}. */
-		public static UserDto from(User u){
+		/** Constrói o DTO a partir da entidade {@link com.example.model.Usuario}. */
+		public static UserDto from(Usuario u){
 			return new UserDto(u.getUser_email(), u.getNome(), u.getMatricula(), u.getCurso());
 		}
 	}

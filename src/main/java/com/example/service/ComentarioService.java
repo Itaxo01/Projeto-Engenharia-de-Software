@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.model.Comentario;
-import com.example.model.User;
+import com.example.model.Usuario;
 import com.example.repository.ComentarioRepository;
 
 @Service
@@ -18,13 +18,13 @@ public class ComentarioService {
     private ComentarioRepository comentarioRepository;
     
     // Criar comentário
-    public Comentario criarComentario(User usuario, String texto) {
+    public Comentario criarComentario(Usuario usuario, String texto) {
         Comentario comentario = new Comentario(usuario, texto);
         return comentarioRepository.save(comentario);
     }
     
     // Responder comentário
-    public Comentario responderComentario(User usuario, String texto, Long parentId) {
+    public Comentario responderComentario(Usuario usuario, String texto, Long parentId) {
         Comentario parent = comentarioRepository.findById(parentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comentário pai não encontrado"));
         

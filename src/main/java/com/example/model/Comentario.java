@@ -2,6 +2,7 @@ package com.example.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -47,7 +48,7 @@ public class Comentario {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_email")
-	private User usuario;
+	private Usuario usuario;
 
 	@Column(name = "up_votes")
 	private Integer upVotes = 0;
@@ -66,7 +67,7 @@ public class Comentario {
 	private Avaliacao avaliacao;
 
 	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private ArrayList<ArquivoComentario> arquivos = new ArrayList<>();
+	private List<ArquivoComentario> arquivos = new ArrayList<>();
 
 	// Relacionamento autoreferencial - comentário pai
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -75,18 +76,18 @@ public class Comentario {
 
 	// Relacionamento autoreferencial - comentários filhos
 	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private ArrayList<Comentario> filhos = new ArrayList<>();
+	private List<Comentario> filhos = new ArrayList<>();
 
 	public Comentario(){}
 
 	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Comentario(User usuario, String texto) {
+	public Comentario(Usuario usuario, String texto) {
 		this.usuario = usuario;
 		this.texto = texto;
 	}
 
 	/** Construtor para comentário com pai */
-	public Comentario(User usuario, String texto, Comentario pai) {
+	public Comentario(Usuario usuario, String texto, Comentario pai) {
 		this.usuario = usuario;
 		this.texto = texto;
 		this.pai = pai;
@@ -96,8 +97,8 @@ public class Comentario {
 	public Long getComentarioId() { return comentarioId; }
 	public void setComentarioId(Long id) { this.comentarioId = id; }
 
-	public User getUsuario() { return usuario; }
-	public void setUsuario(User usuario) { this.usuario = usuario; }
+	public Usuario getUsuario() { return usuario; }
+	public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
 	public String getTexto() { return texto; }
 	public void setTexto(String texto) { this.texto = texto; }
@@ -105,14 +106,14 @@ public class Comentario {
 	public Instant getCreatedAt() { return createdAt; }
 	public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-	public ArrayList<ArquivoComentario> getArquivos() { return arquivos; }
-	public void setArquivos(ArrayList<ArquivoComentario> arquivos) { this.arquivos = arquivos; }
+	public List<ArquivoComentario> getArquivos() { return arquivos; }
+	public void setArquivos(List<ArquivoComentario> arquivos) { this.arquivos = arquivos; }
 
 	public Comentario getPai() { return pai; }
 	public void setPai(Comentario pai) { this.pai = pai; }
 
-	public ArrayList<Comentario> getFilhos() { return filhos; }
-	public void setFilhos(ArrayList<Comentario> filhos) { this.filhos = filhos; }
+	public List<Comentario> getFilhos() { return filhos; }
+	public void setFilhos(List<Comentario> filhos) { this.filhos = filhos; }
 
 	public Avaliacao getAvaliacao() { return avaliacao; }
 	public void setAvaliacao(Avaliacao avaliacao) { this.avaliacao = avaliacao; }
