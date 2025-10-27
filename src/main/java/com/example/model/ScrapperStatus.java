@@ -34,17 +34,17 @@ public class ScrapperStatus {
     @Column(name = "total_execucoes")
     private int totalExecucoes = 0;
 
-    @Column(name = "criado_em", updatable = false)
-    private LocalDateTime criadoEm;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime creattedAt;
 
-    @Column(name = "atualizado_em")
-    private LocalDateTime atualizadoEm;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public ScrapperStatus() {}
 
     @PreUpdate
     public void preUpdate() {
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Long getId() { return id; }
@@ -53,51 +53,51 @@ public class ScrapperStatus {
     public LocalDateTime getUltimaExecucao() { return ultimaExecucao; }
     public void setUltimaExecucao(LocalDateTime ultimaExecucao) {
         this.ultimaExecucao = ultimaExecucao;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
     
     public LocalDateTime getUltimoSucesso() { return ultimoSucesso; }
     public void setUltimoSucesso(LocalDateTime ultimoSucesso) {
         this.ultimoSucesso = ultimoSucesso;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
     
     public boolean isExecutando() { return executando; }
     public void setExecutando(boolean executando) {
         this.executando = executando;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
     
     public int getDisciplinasCapturadas() { return disciplinasCapturadas; }
     public void setDisciplinasCapturadas(int disciplinasCapturadas) {
         this.disciplinasCapturadas = disciplinasCapturadas;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public int getProfessoresCapturados() { return professoresCapturados; }
     public void setProfessoresCapturados(int professoresCapturados) {
         this.professoresCapturados = professoresCapturados;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public String getUltimoErro() { return ultimoErro; }
     public void setUltimoErro(String ultimoErro) {
         this.ultimoErro = ultimoErro;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
     
     public String getUltimoAdministrador() { return ultimoAdministrador; }
     public void setUltimoAdministrador(String ultimoAdministrador) {
         this.ultimoAdministrador = ultimoAdministrador;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public LocalDateTime getCriadoEm() { return criadoEm; }
-    public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
+    public LocalDateTime getCreattedAt() { return creattedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     public void incrementarTotalExecucoes() {
         this.totalExecucoes++;
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void marcarInicioExecucao(String administrador) {
@@ -119,6 +119,6 @@ public class ScrapperStatus {
             if(erro != null) this.ultimoErro = erro;
             else this.ultimoErro = "Erro desconhecido";
         }
-        this.atualizadoEm = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }
