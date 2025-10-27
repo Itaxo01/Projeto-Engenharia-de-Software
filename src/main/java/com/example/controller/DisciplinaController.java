@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
+import com.example.service.AvaliacaoService;
 import com.example.service.DisciplinaService;
 import com.example.service.SessionService;
 
@@ -28,6 +29,9 @@ public class DisciplinaController {
 	@Autowired
 	private DisciplinaService disciplinaService;
 
+	@Autowired
+	private AvaliacaoService avaliacaoService;
+
 	// @Autowired
 	// private ProfessorService professorService;
 	
@@ -41,10 +45,13 @@ public class DisciplinaController {
 			Disciplina disciplina = optDisciplina.get();
 
 			List<Professor.ProfessorResumo> professors = new ArrayList<Professor.ProfessorResumo>(disciplina.getProfessores().stream().map(Professor.ProfessorResumo::from).toList());
+
+			List<AvaliacaoService.AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId);
 			
 			model.addAttribute("disciplina", disciplina);
 			model.addAttribute("professors", professors);
 			model.addAttribute("classId", classId);
+			model.addAttribute("avaliacoes", avaliacoes);
 			return "class";
 		} else {
 			return "error";

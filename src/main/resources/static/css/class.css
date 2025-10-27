@@ -1,11 +1,15 @@
-/* Class page specific styles */
+/* =================================
+   PÁGINA DA DISCIPLINA - CSS
+   ================================= */
 
+/* Container Principal */
 .class-container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
+/* Breadcrumb */
 .breadcrumb {
     margin-bottom: 20px;
     color: #7f8c8d;
@@ -21,204 +25,58 @@
     text-decoration: underline;
 }
 
-.class-header {
+/* Cabeçalho da Disciplina */
+.discipline-header {
     background: white;
-    border-radius: 6px;
     border: 1px solid #ecf0f1;
+    border-radius: 8px;
     padding: 24px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.class-info h1 {
+.discipline-info h1 {
     font-size: 24px;
     font-weight: 600;
     color: #2c3e50;
-    margin-bottom: 16px;
+    margin: 0 0 8px 0;
 }
 
-.class-meta {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.class-credits,
-.class-department {
-    color: #7f8c8d;
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.class-status {
-    padding: 4px 8px;
+.discipline-status {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #d5dbdb;
+    color: #2c3e50;
     border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
 }
 
-.class-status.available {
-    background: #d5dbdb;
-    color: #2c3e50;
+/* Rating da Disciplina */
+.discipline-rating {
+    text-align: center;
+    min-width: 120px;
 }
 
-.class-status.unavailable {
-    background: #bdc3c7;
-    color: #7f8c8d;
-}
-
-.class-status.taken {
-    background: #f4d03f;
-    color: #7d6608;
-}
-
-.class-status.evaluated {
-    background: #a9dfbf;
-    color: #0e6b0e;
-}
-
-.class-status.critical {
-    background: #f1948a;
-    color: #a93226;
-}
-
-.class-content {
-    display: grid;
-    gap: 20px;
-}
-
-/* Description Section */
-.class-description-section {
-    background: white;
-    border-radius: 6px;
-    border: 1px solid #ecf0f1;
-    padding: 24px;
-}
-
-.class-description-section h2 {
-    font-size: 18px;
+.rating-score {
+    font-size: 32px;
     font-weight: 600;
     color: #2c3e50;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #ecf0f1;
-}
-
-.description-card p {
-    color: #2c3e50;
-    line-height: 1.5;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
-.class-details {
-    border-top: 1px solid #ecf0f1;
-    padding-top: 16px;
-}
-
-.detail-row {
-    display: flex;
-    padding: 8px 0;
-    border-bottom: 1px solid #f8f9fa;
-}
-
-.detail-row:last-child {
-    border-bottom: none;
-}
-
-.detail-row label {
-    width: 120px;
-    font-weight: 500;
-    color: #2c3e50;
-    margin: 0;
-    font-size: 14px;
-}
-
-.detail-row span {
-    color: #7f8c8d;
-    font-size: 14px;
-}
-
-/* Teachers Section */
-.teachers-section {
-    background: white;
-    border-radius: 6px;
-    border: 1px solid #ecf0f1;
-    padding: 24px;
-}
-
-.teachers-section h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #ecf0f1;
-}
-
-.teachers-grid {
-    display: grid;
-    gap: 12px;
-}
-
-.teacher-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border: 1px solid #e1e5e9;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
-
-.teacher-card:hover {
-    border-color: #bdc3c7;
-}
-
-.teacher-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.teacher-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #3498db;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.teacher-details h3 {
-    font-size: 14px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 2px;
-}
-
-.teacher-details p {
-    color: #7f8c8d;
-    font-size: 12px;
-}
-
-.teacher-rating {
-    text-align: right;
+    margin-bottom: 4px;
 }
 
 .rating-stars {
     display: flex;
+    justify-content: center;
     gap: 2px;
-    align-items: center;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .star {
     color: #bdc3c7;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .star.filled {
@@ -232,78 +90,168 @@
     background-clip: text;
 }
 
-.rating-value {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-left: 4px;
-    font-size: 13px;
-}
-
 .rating-count {
+    font-size: 12px;
     color: #7f8c8d;
-    font-size: 11px;
 }
 
-/* Reviews Section */
-.reviews-section {
+/* Layout em Duas Colunas */
+.two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+}
+
+/* Colunas */
+.left-column,
+.right-column {
+    min-height: 300px;
+}
+
+/* Cards de Seção */
+.section-card {
     background: white;
-    border-radius: 6px;
     border: 1px solid #ecf0f1;
-    padding: 24px;
+    border-radius: 8px;
+    padding: 20px;
 }
 
-.reviews-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.reviews-header h2 {
+.section-card h2 {
     font-size: 18px;
     font-weight: 600;
     color: #2c3e50;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.section-header h2 {
     margin: 0;
+    padding: 0;
+    border: none;
 }
 
-.overall-rating {
-    margin-bottom: 20px;
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    text-align: center;
-}
-
-.rating-summary {
+/* Lista de Professores */
+.professors-list {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
-.rating-score {
-    font-size: 24px;
+.professor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #ecf0f1;
+    border-radius: 6px;
+    transition: border-color 0.2s;
+}
+
+.professor-item:hover {
+    border-color: #bdc3c7;
+}
+
+.professor-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.professor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 600;
+    font-size: 16px;
+}
+
+.professor-name {
+    font-size: 14px;
+    font-weight: 500;
     color: #2c3e50;
 }
 
-.rating-text {
-    color: #7f8c8d;
-    font-size: 13px;
+.professor-rating {
+    text-align: right;
 }
 
+.professor-rating .rating-stars {
+    justify-content: flex-end;
+    margin-bottom: 2px;
+}
+
+.professor-rating .star {
+    font-size: 14px;
+}
+
+.rating-value {
+    font-size: 12px;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+/* Botão Adicionar Avaliação */
+.btn-add-review {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-add-review:hover {
+    background: #2980b9;
+}
+
+/* Lista de Avaliações */
 .reviews-list {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
 }
 
+/* Sem Avaliações */
+.no-reviews {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7f8c8d;
+}
+
+.no-reviews p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.no-reviews p:first-child {
+    font-weight: 500;
+    color: #95a5a6;
+}
+
+/* Card de Avaliação */
 .review-card {
-    border: 1px solid #e1e5e9;
-    border-radius: 6px;
     padding: 16px;
-    transition: all 0.2s ease;
+    border: 1px solid #ecf0f1;
+    border-radius: 6px;
+    transition: border-color 0.2s;
 }
 
 .review-card:hover {
@@ -320,135 +268,82 @@
 .reviewer-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .reviewer-avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #e1e5e9;
+    background: #ecf0f1;
+    color: #7f8c8d;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #7f8c8d;
     font-weight: 600;
-    font-size: 12px;
-}
-
-.reviewer-details {
-    display: flex;
-    flex-direction: column;
+    font-size: 14px;
 }
 
 .reviewer-name {
-    font-weight: 600;
-    color: #2c3e50;
     font-size: 14px;
-}
-
-.review-date {
-    color: #7f8c8d;
-    font-size: 12px;
-}
-
-.review-rating {
-    display: flex;
-    gap: 2px;
-}
-
-.review-content p {
-    color: #2c3e50;
-    line-height: 1.4;
-    margin-bottom: 12px;
-    font-size: 14px;
-}
-
-.review-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.tag {
-    background: #e8f4fd;
-    color: #2980b9;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
     font-weight: 500;
+    color: #2c3e50;
 }
 
-/* Responsive design */
+.reviewer-date {
+    font-size: 12px;
+    color: #95a5a6;
+    margin-left: 8px;
+}
+
+.review-rating .star {
+    font-size: 14px;
+}
+
+.review-content {
+    color: #2c3e50;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Responsividade */
 @media (max-width: 768px) {
-    .class-container {
-        padding: 16px;
+    .two-column-layout {
+        grid-template-columns: 1fr;
     }
     
-    .class-header,
-    .class-description-section,
-    .teachers-section,
-    .reviews-section {
-        padding: 16px;
-    }
-    
-    .class-info h1 {
-        font-size: 20px;
-    }
-    
-    .class-meta {
+    .discipline-header {
         flex-direction: column;
-        gap: 8px;
+        gap: 16px;
+        text-align: center;
     }
     
-    .teacher-card {
+    .section-header {
         flex-direction: column;
         gap: 12px;
-        text-align: center;
-    }
-    
-    .teacher-rating {
-        text-align: center;
-    }
-    
-    .reviews-header {
-        flex-direction: column;
         align-items: stretch;
     }
     
-    .review-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .detail-row {
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .detail-row label {
-        width: auto;
+    .btn-add-review {
+        width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    .class-header,
-    .class-description-section,
-    .teachers-section,
-    .reviews-section {
+    .class-container {
         padding: 12px;
     }
     
-    .teacher-card {
-        padding: 12px;
+    .discipline-header,
+    .section-card {
+        padding: 16px;
     }
     
-    .review-card {
-        padding: 12px;
+    .discipline-info h1 {
+        font-size: 20px;
     }
     
     .rating-score {
-        font-size: 20px;
+        font-size: 24px;
     }
 }
