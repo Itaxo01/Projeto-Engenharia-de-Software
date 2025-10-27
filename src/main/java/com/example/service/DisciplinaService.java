@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
-import com.example.model.User;
 import com.example.repository.DisciplinaRepository;
 
 import jakarta.transaction.Transactional;
@@ -27,10 +26,6 @@ public class DisciplinaService {
     private DisciplinaRepository disciplinaRepository;
 
     // Criar nova disciplina
-    public Disciplina salvar(Disciplina disciplina) {
-        return disciplinaRepository.save(disciplina);
-    }
-
     public Disciplina criarOuAtualizar(String codigo, String nome, Set<Professor> professores) {
         logger.debug("=== Buscando disciplina com código: {} ===", codigo);
 
@@ -122,9 +117,5 @@ public class DisciplinaService {
 
     public long contar() {
         return disciplinaRepository.count();
-    }
-
-    public Optional<Disciplina> buscarComProfessores(String codigo) {
-        return disciplinaRepository.findByCodigoWithProfessores(codigo);
     }
 }

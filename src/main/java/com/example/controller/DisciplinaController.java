@@ -57,9 +57,4 @@ public class DisciplinaController {
 			return "error";
 		}
 	}
-
-	@GetMapping("/disciplina/{id}")
-	public String disciplinaDetails(HttpServletRequest request, @PathVariable("id") String classId, Model model) {
-		return classDetails(request, classId, model);
-	}
 }

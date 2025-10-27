@@ -24,7 +24,4 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
     void deleteByCodigo(String codigo);
 
     boolean existsByCodigo(String codigo);
-
-    @Query("SELECT d FROM Disciplina d WHERE d.codigo = :codigo")
-    Optional<Disciplina> findByCodigoWithProfessores(@Param("codigo") String codigo);
 }

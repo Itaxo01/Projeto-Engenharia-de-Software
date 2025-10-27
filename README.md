@@ -22,7 +22,7 @@ Agora a barra de pesquisas está mais complexa porém bem melhor. O código e no
 
 ---
 ## TO DO (Iteração 2)
-- [X] Implementar as páginas das disciplinas (localhost:8080/disciplina/{CODE})
+- [X] Implementar as páginas das disciplinas (localhost:8080/class/{CODE})
 
 
 - [X] Fetch das disciplinas e professores da UFSC

@@ -19,23 +19,14 @@ public class SearchController {
     public ResponseEntity<List<DisciplinaSearchDTO>> searchDisciplinas() {
         List<Disciplina> resultados = disciplinaService.buscarTodas();
 		  List<DisciplinaSearchDTO> dtoList = resultados.stream()
-				.map(d -> new DisciplinaSearchDTO(d.getCodigo(), d.getNome()))
+				.map(d -> DisciplinaSearchDTO.from(d))
 				.toList();
         return ResponseEntity.ok(dtoList);
     }
-}
-
-class DisciplinaSearchDTO {
-	private String codigo;
-	private String nome;
-	public DisciplinaSearchDTO(String codigo, String nome){
-		this.codigo = codigo;
-		this.nome = nome;
+	
+	private record DisciplinaSearchDTO (String codigo, String nome) {
+		public static DisciplinaSearchDTO from(Disciplina u) {
+			return new DisciplinaSearchDTO(u.getCodigo(), u.getNome());
+		}
 	}
-
-	public String getCodigo() { return codigo; }
-	public String getNome() { return nome; }
-
-	public void setCodigo(String codigo) { this.codigo = codigo; }
-	public void setNome(String nome) { this.nome = nome; }
 }
