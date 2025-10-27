@@ -28,17 +28,8 @@ public class MapaCurricular {
     @Column(nullable = false)
     private Boolean avaliada = false;
     
-    @Column(name = "created_at")
-    private Instant createdAt;
-    
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-    
     // Construtor padrão
-    public MapaCurricular() {
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-    }
+    public MapaCurricular() {}
     
     // Construtor completo
     public MapaCurricular(String userEmail, String disciplinaId, Integer semestre) {
@@ -65,12 +56,5 @@ public class MapaCurricular {
     public Boolean getAvaliada() { return avaliada; }
     public void setAvaliada(Boolean avaliada) { 
         this.avaliada = avaliada;
-        this.updatedAt = Instant.now();
     }
-    
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-    
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }
