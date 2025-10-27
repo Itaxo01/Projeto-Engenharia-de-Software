@@ -203,9 +203,17 @@ class DisciplinasCache {
 // Global cache instance
 const disciplinasCache = new DisciplinasCache();
 
+// Expor funções para reutilização em outros módulos (dashboard.js)
+window.getDisciplinasData = function() {
+    return disciplinas_fetch;
+};
 
-
-
+window.searchDisciplinas = function(termo) {
+    if (!fuse || !termo) return [];
+    
+    const fuseResults = fuse.search(termo, { limit: 20 });
+    return fuseResults.map(result => result.item);
+};
 
 let searchTimeout;
 const searchInput = document.getElementById('searchInput');

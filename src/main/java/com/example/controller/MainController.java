@@ -47,15 +47,6 @@ public class MainController {
     }
 
     /**
-     * Exibe o dashboard se autenticado, caso contrário retorna à tela de login.
-     */
-    @GetMapping("/dashboard")
-    public String dashboard(HttpServletRequest request, Model model) {
-      model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-      return "dashboard";
-    }
-
-    /**
      * Exibe o perfil do usuário autenticado.
      */
     @GetMapping("/user")

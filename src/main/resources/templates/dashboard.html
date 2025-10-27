@@ -53,24 +53,12 @@
             <!-- Legenda -->
             <div class="legend">
                 <div class="legend-item">
-                    <span class="legend-box disponivel"></span>
-                    <span>Disponível</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-box indisponivel"></span>
-                    <span>Indisponível</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-box cursada"></span>
-                    <span>Cursada</span>
+                    <span class="legend-box nao-avaliada"></span>
+                    <span>Não Avaliada</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-box avaliada"></span>
                     <span>Avaliada</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-box critica"></span>
-                    <span>Crítica</span>
                 </div>
             </div>
         </div>
@@ -85,6 +73,23 @@
             <button class="btn-add-semester" onclick="adicionarSemestre()">
                 + Adicionar Fase
             </button>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Disciplina -->
+    <div id="modalAddDisciplina" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Disciplina</h3>
+                <span class="modal-close" onclick="fecharModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-search-container">
+                    <input type="text" id="modalSearchInput" class="modal-search-input" 
+                           placeholder="Buscar disciplina por código ou nome..." autocomplete="off">
+                    <div id="modalSearchResults" class="modal-search-results"></div>
+                </div>
+            </div>
         </div>
     </div>
 

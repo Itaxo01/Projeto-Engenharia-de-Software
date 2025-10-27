@@ -22,9 +22,27 @@ public class AvaliacaoService {
     @Autowired
     private AvaliacaoRepository avaliacaoRepository;
 
+    @Autowired
+    private MapaCurricularService mapaCurricularService;
+
     // Criar nova avaliação
     public Avaliacao salvar(Avaliacao avaliacao) {
-        return avaliacaoRepository.save(avaliacao);
+        Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
+        
+        // Marcar disciplina como avaliada no mapa curricular
+        if (avaliacao.getDisciplinaId() != null && avaliacao.getUserEmail() != null) {
+            try {
+                mapaCurricularService.marcarComoAvaliada(
+                    avaliacao.getUserEmail(), 
+                    avaliacao.getDisciplinaId()
+                );
+            } catch (Exception e) {
+                // Log do erro, mas não falha a operação principal
+                System.err.println("Erro ao marcar disciplina como avaliada: " + e.getMessage());
+            }
+        }
+        
+        return avaliacaoSalva;
     }
 
     // Buscar avaliação por ID
