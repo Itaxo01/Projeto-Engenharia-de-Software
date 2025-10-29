@@ -72,7 +72,8 @@ public class DashboardController {
 		
 		try {
 			MapaCurricular item = mapaCurricularService.adicionarDisciplina(userEmail, disciplinaId, semestre);
-			return ResponseEntity.ok(item);
+			
+			return ResponseEntity.ok(MapaCurricularDTO.from(item));
 		} catch(IllegalArgumentException e) {
 			return ResponseEntity.status(400).body(e.getMessage());
 		}
@@ -89,5 +90,12 @@ public class DashboardController {
 		
 		mapaCurricularService.removerDisciplina(userEmail, disciplinaId);
 		return ResponseEntity.ok().build();
+	}
+
+	public record MapaCurricularDTO (Long id, Integer semestre, Boolean avaliada) {
+		public static MapaCurricularDTO from (MapaCurricular u) {
+			return new MapaCurricularDTO(u.getId(), u.getSemestre(), u.getAvaliada());
+		}
+
 	}
 }

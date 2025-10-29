@@ -185,6 +185,7 @@ async function adicionarNoServidor(cod, nome) {
         });
         
         if (!response.ok) {
+            console.log(response)
             throw new Error('Erro ao adicionar disciplina');
         }
         
@@ -194,7 +195,6 @@ async function adicionarNoServidor(cod, nome) {
             nome: nome, 
             avaliada: false 
         });
-        
         renderizar();
         fecharModal();
     } catch (error) {

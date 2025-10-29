@@ -59,6 +59,7 @@ public class MapaCurricularService {
 		Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaCodigo);
 		
 		if (disciplinaOpt.isEmpty()) {
+			System.out.println();
 			throw new IllegalArgumentException("Código de disciplina não existe.");
 		}
 
