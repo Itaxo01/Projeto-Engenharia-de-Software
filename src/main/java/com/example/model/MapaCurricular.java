@@ -1,26 +1,30 @@
 package com.example.model;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 
 /**
  * Entidade que representa a relação entre usuário e disciplina no mapa curricular.
  * Cada registro indica que uma disciplina foi adicionada ao semestre X do usuário.
  */
 @Entity
-@Table(name = "mapa_curricular",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"user_email", "disciplina_id"}))
+@Table(
+    name = "mapa_curricular",
+    indexes = {
+        @Index(name="uniquePairUsuarioDisciplina", columnList = "usuario, disciplina", unique = true)
+    })
 public class MapaCurricular {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "user_email", nullable = false)
-    private String userEmail;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
     
-    @Column(name = "disciplina_id", nullable = false)
-    private String disciplinaId;
+    @ManyToOne
+    @JoinColumn(name = "disciplina_id")
+    private Disciplina disciplina;
     
     @Column(nullable = false)
     private Integer semestre; // 1, 2, 3... 8, 9, etc.
@@ -32,10 +36,10 @@ public class MapaCurricular {
     public MapaCurricular() {}
     
     // Construtor completo
-    public MapaCurricular(String userEmail, String disciplinaId, Integer semestre) {
+    public MapaCurricular(Usuario usuario, Disciplina disciplina, Integer semestre) {
         this();
-        this.userEmail = userEmail;
-        this.disciplinaId = disciplinaId;
+        this.usuario = usuario;
+        this.disciplina = disciplina;
         this.semestre = semestre;
         this.avaliada = false;
     }
@@ -44,11 +48,11 @@ public class MapaCurricular {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
-    public String getUserEmail() { return userEmail; }
-    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     
-    public String getDisciplinaId() { return disciplinaId; }
-    public void setDisciplinaId(String disciplinaId) { this.disciplinaId = disciplinaId; }
+    public Disciplina getDisciplina() { return disciplina; }
+    public void setDisciplina(Disciplina disciplina) { this.disciplina = disciplina; }
     
     public Integer getSemestre() { return semestre; }
     public void setSemestre(Integer semestre) { this.semestre = semestre; }

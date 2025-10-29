@@ -7,7 +7,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -16,28 +18,34 @@ import jakarta.persistence.Table;
  * <p>Uma avaliação contém os seguintes atributos principais:</p>
  * <ul>
  *   <li>{@link #nota} - Nota dada pelo usuário (1 a 5). Use -1 para indicar que a nota não foi definida</li>
- *   <li>{@link #professorId} - ID do professor avaliado. Pode ser nulo se a avaliação for apenas da disciplina</li>
- *   <li>{@link #disciplinaId} - Código da disciplina avaliada</li>
- *   <li>{@link #userEmail} - Email do usuário que fez a avaliação</li>
+ *   <li>{@link #professor} - ID do professor avaliado. Pode ser nulo se a avaliação for apenas da disciplina</li>
+ *   <li>{@link #disciplina} - Código da disciplina avaliada</li>
+ *   <li>{@link #usuario} - Email do usuário que fez a avaliação</li>
  *   <li>{@link #comentario} - Comentário principal associado à avaliação (opcional)</li>
  *   <li>{@link #createdAt} - Timestamp de quando a avaliação foi criada</li>
  * </ul>
  */
 @Entity
-@Table(name = "avaliacoes")
+@Table(
+	name = "avaliacoes",
+	indexes = {
+		@Index(name="uniqueTupleDisplinaUsusuarioProfessor" ,columnList = "disciplina, usuario, professor", unique = true)
+	})
 public class Avaliacao {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "professor_id", nullable = true)
-	private String professorId;
+	@ManyToOne
+	private Professor professor;
 
-	@Column(name = "disciplina_id", nullable = false)
-	private String disciplinaId;
+	@ManyToOne
+	@JoinColumn
+	private Disciplina disciplina;
 
-	@Column(name = "user_email", nullable = false)
-	private String userEmail;
+	@ManyToOne
+	@JoinColumn
+	private Usuario usuario;
 
 	@Column(name = "nota", nullable = true)
 	private Integer nota;
@@ -51,19 +59,19 @@ public class Avaliacao {
 	private Comentario comentario;
 
 	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Avaliacao(Integer nota, String professorId, String disciplinaId, String userEmail) {
+	public Avaliacao(Integer nota, Professor professor, Disciplina disciplina, Usuario usuario) {
 		this.nota = nota;
-		this.professorId = professorId;
-		this.disciplinaId = disciplinaId;
-		this.userEmail = userEmail;
+		this.professor = professor;
+		this.disciplina = disciplina;
+		this.usuario = usuario;
 	}
 
 	/** Construtor completo com comentário. */
-	public Avaliacao(Integer nota, String professorId, String disciplinaId, String userEmail, Comentario comentario) {
+	public Avaliacao(Integer nota, Professor professor, Disciplina disciplina, Usuario usuario, Comentario comentario) {
 		this.nota = nota;
-		this.professorId = professorId;
-		this.disciplinaId = disciplinaId;
-		this.userEmail = userEmail;
+		this.professor = professor;
+		this.disciplina = disciplina;
+		this.usuario = usuario;
 		this.comentario = comentario;
 		if (comentario != null) {
 			comentario.setAvaliacao(this);
@@ -71,26 +79,26 @@ public class Avaliacao {
 	}
 
 	/** Construtor para comentário sem nota. */
-	public Avaliacao(String professorId, String disciplinaId, String userEmail, Comentario comentario) {
-		this.professorId = professorId;
-		this.disciplinaId = disciplinaId;
-		this.userEmail = userEmail;
+	public Avaliacao(Professor professor, Disciplina disciplina, Usuario usuario, Comentario comentario) {
+		this.professor = professor;
+		this.disciplina = disciplina;
+		this.usuario = usuario;
 		this.nota = -1; // Indica que a nota não foi definida
 		this.comentario = comentario;
 	}
 	
 	/* Construtor para a avaliação sem nota da disciplina*/
-	public Avaliacao(String disciplinaId, String userEmail, Comentario comentario) {
-		this.disciplinaId = disciplinaId;
-		this.userEmail = userEmail;
+	public Avaliacao(Disciplina disciplina, Usuario usuario, Comentario comentario) {
+		this.disciplina = disciplina;
+		this.usuario = usuario;
 		this.nota = -1; // Indica que a nota não foi definida
 		this.comentario = comentario;
 	}
 
 	/* Construtor para a avaliação com nota da disciplina*/
-	public Avaliacao(String disciplinaId, String userEmail, Integer nota, Comentario comentario) {
-		this.disciplinaId = disciplinaId;
-		this.userEmail = userEmail;
+	public Avaliacao(Disciplina disciplina, Usuario usuario, Integer nota, Comentario comentario) {
+		this.disciplina = disciplina;
+		this.usuario = usuario;
 		this.nota = nota;
 		this.comentario = comentario;
 	}
@@ -108,14 +116,14 @@ public class Avaliacao {
 		this.id = id; 
 	}
 
-	public String getProfessorId() { return professorId; }
-	public void setProfessorId(String professorId) { this.professorId = professorId; }
+	public Professor getProfessor() { return professor; }
+	public void setProfessorId(Professor professor) { this.professor = professor; }
 
-	public String getDisciplinaId() { return disciplinaId; }
-	public void setDisciplinaId(String disciplinaId) { this.disciplinaId = disciplinaId; }
+	public Disciplina getDisciplina() { return disciplina; }
+	public void setDisciplinaId(Disciplina disciplina) { this.disciplina = disciplina; }
 
-	public String getUserEmail() { return userEmail; }
-	public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+	public Usuario getUsuario() { return usuario; }
+	public void setUserEmail(Usuario usuario) { this.usuario = usuario; }
 
 	public Integer getNota() { return nota; }
 	public void setNota(Integer nota) { this.nota = nota; }
@@ -173,9 +181,9 @@ public class Avaliacao {
 		return "Avaliacao{" +
 				"id=" + id +
 				", nota=" + nota +
-				", professorId='" + professorId + '\'' +
-				", disciplinaId='" + disciplinaId + '\'' +
-				", userEmail='" + userEmail + '\'' +
+				", professorId='" + professor.getProfessorId() + '\'' +
+				", disciplinaId='" + disciplina.getDisciplinaId() + '\'' +
+				", userEmail='" + usuario.getUser_email() + '\'' +
 				", comentario='" + (comentarioTexto != null ? comentarioTexto : "null") + '\'' +
 				", createdAt=" + createdAt +
 				", totalComentarios=" + getTotalComentarios() +

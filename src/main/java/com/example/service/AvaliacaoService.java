@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.model.Avaliacao;
+import com.example.model.Disciplina;
+import com.example.model.Professor;
+import com.example.model.Usuario;
 import com.example.repository.AvaliacaoRepository;
 
 @Service
@@ -25,16 +28,19 @@ public class AvaliacaoService {
     @Autowired
     private MapaCurricularService mapaCurricularService;
 
+    @Autowired
+    private DisciplinaService disciplinaService;
+
     // Criar nova avaliação
     public Avaliacao salvar(Avaliacao avaliacao) {
         Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
         
         // Marcar disciplina como avaliada no mapa curricular
-        if (avaliacao.getDisciplinaId() != null && avaliacao.getUserEmail() != null) {
+        if (avaliacao.getDisciplina() != null && avaliacao.getUsuario() != null) {
             try {
                 mapaCurricularService.marcarComoAvaliada(
-                    avaliacao.getUserEmail(), 
-                    avaliacao.getDisciplinaId()
+                    avaliacao.getUsuario(), 
+                    avaliacao.getDisciplina()
                 );
             } catch (Exception e) {
                 // Log do erro, mas não falha a operação principal
@@ -74,7 +80,13 @@ public class AvaliacaoService {
 	 /* O front-end vai usar isso aqui e processar para criar a página da disciplina */
 	@Transactional(readOnly = true)
 	public List<AvaliacaoDTO> buscarTodasAvaliacoesDisciplina(String disciplinaId) {
-		List<Avaliacao> avaliacoes = avaliacaoRepository.findAllAvaliacoesByDisciplina(disciplinaId);
+        Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
+
+        if (disciplinaOpt.isEmpty()) {
+            throw new IllegalArgumentException("Disciplina não existe.");
+        }
+		
+        List<Avaliacao> avaliacoes = avaliacaoRepository.findAllAvaliacoesByDisciplina(disciplinaOpt.get());
         
 		return avaliacoes.stream()
 			.map(this::converterParaDTO)
@@ -103,9 +115,9 @@ public class AvaliacaoService {
         
         return new AvaliacaoDTO(
             avaliacao.getId(),
-            avaliacao.getDisciplinaId(),
-            avaliacao.getProfessorId(),
-            avaliacao.getUserEmail(),
+            avaliacao.getDisciplina(),
+            avaliacao.getProfessor(),
+            avaliacao.getUsuario(),
             avaliacao.getNota() != null ? avaliacao.getNota() : 0,
             comentarioDTO,
             avaliacao.getCreatedAt()
@@ -155,13 +167,13 @@ public class AvaliacaoService {
         private final ComentarioDTO comentario; // Null = sem comentário
         private final Instant createdAt;
         
-        public AvaliacaoDTO(Long id, String disciplinaId, String professorId, 
-                           String userEmail, Integer nota, ComentarioDTO comentario, 
+        public AvaliacaoDTO(Long id, Disciplina disciplina, Professor professor, 
+                           Usuario usuario, Integer nota, ComentarioDTO comentario, 
                            Instant createdAt) {
             this.id = id;
-            this.disciplinaId = disciplinaId;
-            this.professorId = professorId;
-            this.userEmail = userEmail;
+            this.disciplinaId = disciplina.getCodigo();
+            this.professorId = professor.getProfessorId();
+            this.userEmail = usuario.getUser_email();
             this.nota = nota;
             this.comentario = comentario;
             this.createdAt = createdAt;

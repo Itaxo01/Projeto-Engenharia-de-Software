@@ -68,9 +68,14 @@ public class DashboardController {
 		
 		String disciplinaId = (String) payload.get("disciplinaId");
 		Integer semestre = (Integer) payload.get("semestre");
+
 		
-		MapaCurricular item = mapaCurricularService.adicionarDisciplina(userEmail, disciplinaId, semestre);
-		return ResponseEntity.ok(item);
+		try {
+			MapaCurricular item = mapaCurricularService.adicionarDisciplina(userEmail, disciplinaId, semestre);
+			return ResponseEntity.ok(item);
+		} catch(IllegalArgumentException e) {
+			return ResponseEntity.status(400).body(e.getMessage());
+		}
 	}
 
 	@DeleteMapping("/api/mapa/remover/{disciplinaId}")

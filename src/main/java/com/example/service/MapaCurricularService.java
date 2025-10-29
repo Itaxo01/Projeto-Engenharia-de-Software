@@ -3,6 +3,7 @@ package com.example.service;
 
 import com.example.model.Disciplina;
 import com.example.model.MapaCurricular;
+import com.example.model.Usuario;
 import com.example.repository.DisciplinaRepository;
 import com.example.repository.MapaCurricularRepository;
 import com.example.service.MapaCurricularService.MapaCurricularDTO;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.foreign.Linker.Option;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -22,14 +25,21 @@ public class MapaCurricularService {
     
 	@Autowired
 	private DisciplinaRepository disciplinaRepository;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private DisciplinaService disciplinaService;
    
 	
 	@Transactional(readOnly = true)
 	public List<MapaCurricularDTO> getMapaDoUsuario(String usuarioId) {
-		List<MapaCurricular> mapaCurricular = mapaCurricularRepository.findByUserEmail(usuarioId);
+		Usuario usuario = userService.getUser(usuarioId);
+		List<MapaCurricular> mapaCurricular = mapaCurricularRepository.findByUsuario(usuario);
 		
 		return mapaCurricular.stream().map(item -> {
-            Disciplina disciplina = disciplinaRepository.findByCodigo(item.getDisciplinaId()).orElse(null);
+            Disciplina disciplina = disciplinaRepository.findByCodigo(item.getDisciplina().getCodigo()).orElse(null);
             if (disciplina == null) return null;
             
             return new MapaCurricularDTO(
@@ -42,9 +52,19 @@ public class MapaCurricularService {
 	}
 
 	@Transactional
-	public MapaCurricular adicionarDisciplina(String userEmail, String disciplinaId, Integer semestre) {
+	public MapaCurricular adicionarDisciplina(String usuarioEmail, String disciplinaCodigo, Integer semestre) {
 		// Verificar se já existe
-		var existente = mapaCurricularRepository.findByUserEmailAndDisciplinaId(userEmail, disciplinaId);
+
+		Usuario usuario = userService.getUser(usuarioEmail);
+		Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaCodigo);
+		
+		if (disciplinaOpt.isEmpty()) {
+			throw new IllegalArgumentException("Código de disciplina não existe.");
+		}
+
+		Disciplina disciplina = disciplinaOpt.get();
+
+		var existente = mapaCurricularRepository.findByUsuarioAndDisciplina(usuario, disciplina);
 		if (existente.isPresent()) {
 			// Atualizar semestre se já existe
 			MapaCurricular item = existente.get();
@@ -53,18 +73,25 @@ public class MapaCurricularService {
 		}
 		
 		// Criar novo
-		MapaCurricular novo = new MapaCurricular(userEmail, disciplinaId, semestre);
+		MapaCurricular novo = new MapaCurricular(usuario, disciplina, semestre);
 		return mapaCurricularRepository.save(novo);
 	}
 
 	@Transactional
 	public void removerDisciplina(String userEmail, String disciplinaId) {
-		mapaCurricularRepository.deleteByUserEmailAndDisciplinaId(userEmail, disciplinaId);
+		Usuario usuario = userService.getUser(userEmail);
+		Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
+
+		if (disciplinaOpt.isEmpty()) {
+			throw new IllegalArgumentException("Código de disciplina não existe.");
+		}
+
+		mapaCurricularRepository.deleteByUsuarioAndDisciplina(usuario, disciplinaOpt.get());
 	}
 
 	@Transactional
-	public void marcarComoAvaliada(String userEmail, String disciplinaId) {
-		var item = mapaCurricularRepository.findByUserEmailAndDisciplinaId(userEmail, disciplinaId);
+	public void marcarComoAvaliada(Usuario usuario, Disciplina disciplina) {
+		var item = mapaCurricularRepository.findByUsuarioAndDisciplina(usuario, disciplina);
 		if (item.isPresent()) {
 			MapaCurricular mapa = item.get();
 			mapa.setAvaliada(true);
