@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="15.1">
-  <zoom_level>8</zoom_level>
+  <zoom_level>9</zoom_level>
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>128</x>
+      <x>630</x>
       <y>0</y>
-      <w>16</w>
-      <h>16</h>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -15,10 +15,10 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>128</x>
-      <y>8</y>
-      <w>96</w>
-      <h>104</h>
+      <x>630</x>
+      <y>9</y>
+      <w>108</w>
+      <h>117</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 create(nome)</panel_attributes>
@@ -27,10 +27,10 @@ create(nome)</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>80</x>
-      <y>184</y>
-      <w>112</w>
-      <h>32</h>
+      <x>576</x>
+      <y>207</y>
+      <w>126</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Associa primeiro</panel_attributes>
     <additional_attributes/>
@@ -38,10 +38,10 @@ create(nome)</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>80</x>
-      <y>264</y>
-      <w>112</w>
-      <h>32</h>
+      <x>576</x>
+      <y>297</y>
+      <w>126</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Associa primeiro</panel_attributes>
     <additional_attributes/>
@@ -49,10 +49,10 @@ create(nome)</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>136</y>
-      <w>120</w>
-      <h>64</h>
+      <x>621</x>
+      <y>153</y>
+      <w>135</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 associaAvaliador()</panel_attributes>
@@ -61,10 +61,10 @@ associaAvaliador()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>208</y>
-      <w>120</w>
-      <h>72</h>
+      <x>621</x>
+      <y>234</y>
+      <w>135</w>
+      <h>81</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 associaAvaliador()</panel_attributes>
@@ -73,10 +73,10 @@ associaAvaliador()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>288</y>
-      <w>312</w>
-      <h>48</h>
+      <x>621</x>
+      <y>324</y>
+      <w>351</w>
+      <h>54</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 associaAvaliador()</panel_attributes>
@@ -85,10 +85,10 @@ associaAvaliador()</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>416</x>
-      <y>88</y>
-      <w>240</w>
-      <h>264</h>
+      <x>954</x>
+      <y>99</y>
+      <w>270</w>
+      <h>297</h>
     </coordinates>
     <panel_attributes>Aguarda revisões
 --
@@ -101,10 +101,10 @@ valign=top
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>528</x>
-      <y>120</y>
-      <w>16</w>
-      <h>16</h>
+      <x>1080</x>
+      <y>135</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -112,10 +112,10 @@ valign=top
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>120</x>
-      <y>128</y>
-      <w>16</w>
-      <h>16</h>
+      <x>621</x>
+      <y>144</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -123,10 +123,10 @@ valign=top
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>8</x>
-      <y>96</y>
-      <w>264</w>
-      <h>256</h>
+      <x>495</x>
+      <y>108</y>
+      <w>297</w>
+      <h>288</h>
     </coordinates>
     <panel_attributes>Aguardando três avaliadores
 --
@@ -140,10 +140,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>528</x>
-      <y>128</y>
-      <w>112</w>
-      <h>64</h>
+      <x>1080</x>
+      <y>144</y>
+      <w>126</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 associaRevisao()</panel_attributes>
@@ -152,10 +152,10 @@ associaRevisao()</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>488</x>
-      <y>176</y>
-      <w>112</w>
-      <h>32</h>
+      <x>1035</x>
+      <y>198</y>
+      <w>126</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Associa primeiro</panel_attributes>
     <additional_attributes/>
@@ -163,10 +163,10 @@ associaRevisao()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>528</x>
-      <y>200</y>
-      <w>112</w>
-      <h>72</h>
+      <x>1080</x>
+      <y>225</y>
+      <w>126</w>
+      <h>81</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 associaRevisao()</panel_attributes>
@@ -175,10 +175,10 @@ associaRevisao()</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>488</x>
-      <y>256</y>
-      <w>112</w>
-      <h>32</h>
+      <x>1035</x>
+      <y>288</y>
+      <w>126</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Associa primeiro</panel_attributes>
     <additional_attributes/>
@@ -186,10 +186,10 @@ associaRevisao()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>528</x>
-      <y>280</y>
-      <w>312</w>
-      <h>48</h>
+      <x>1080</x>
+      <y>315</y>
+      <w>351</w>
+      <h>54</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 calculaNotaFinal()</panel_attributes>
@@ -198,10 +198,10 @@ calculaNotaFinal()</panel_attributes>
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>824</x>
-      <y>304</y>
-      <w>16</w>
-      <h>16</h>
+      <x>1413</x>
+      <y>342</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=final</panel_attributes>
     <additional_attributes/>
@@ -209,10 +209,10 @@ calculaNotaFinal()</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>144</x>
-      <y>616</y>
-      <w>72</w>
-      <h>296</h>
+      <x>648</x>
+      <y>693</y>
+      <w>81</w>
+      <h>333</h>
     </coordinates>
     <panel_attributes>Neutro</panel_attributes>
     <additional_attributes/>
@@ -220,10 +220,10 @@ calculaNotaFinal()</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>448</x>
-      <y>624</y>
-      <w>72</w>
-      <h>56</h>
+      <x>990</x>
+      <y>702</y>
+      <w>81</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>Ré</panel_attributes>
     <additional_attributes/>
@@ -231,10 +231,10 @@ calculaNotaFinal()</panel_attributes>
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>152</x>
-      <y>552</y>
-      <w>16</w>
-      <h>16</h>
+      <x>657</x>
+      <y>621</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -242,10 +242,10 @@ calculaNotaFinal()</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>152</x>
-      <y>560</y>
-      <w>48</w>
-      <h>72</h>
+      <x>657</x>
+      <y>630</y>
+      <w>54</w>
+      <h>81</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Start</panel_attributes>
@@ -254,10 +254,10 @@ Start</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>624</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>702</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 troca marcha ré [velocidade == 0]</panel_attributes>
@@ -266,10 +266,10 @@ troca marcha ré [velocidade == 0]</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>648</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>729</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 troca marcha</panel_attributes>
@@ -278,10 +278,10 @@ troca marcha</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>448</x>
-      <y>696</y>
-      <w>72</w>
-      <h>56</h>
+      <x>990</x>
+      <y>783</y>
+      <w>81</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>Primeira</panel_attributes>
     <additional_attributes/>
@@ -289,10 +289,10 @@ troca marcha</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>448</x>
-      <y>768</y>
-      <w>72</w>
-      <h>56</h>
+      <x>990</x>
+      <y>864</y>
+      <w>81</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>Segunda</panel_attributes>
     <additional_attributes/>
@@ -300,10 +300,10 @@ troca marcha</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>448</x>
-      <y>840</y>
-      <w>72</w>
-      <h>56</h>
+      <x>990</x>
+      <y>945</y>
+      <w>81</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>Terceira</panel_attributes>
     <additional_attributes/>
@@ -311,10 +311,10 @@ troca marcha</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>696</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>783</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 troca marcha 1</panel_attributes>
@@ -323,10 +323,10 @@ troca marcha 1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>720</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>810</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 troca marcha</panel_attributes>
@@ -335,10 +335,10 @@ troca marcha</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>768</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>864</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 troca marcha 2</panel_attributes>
@@ -347,10 +347,10 @@ troca marcha 2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>792</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>891</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 troca marcha</panel_attributes>
@@ -359,10 +359,10 @@ troca marcha</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>840</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>945</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 troca marcha 3</panel_attributes>
@@ -371,10 +371,10 @@ troca marcha 3</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>208</x>
-      <y>864</y>
-      <w>256</w>
-      <h>32</h>
+      <x>720</x>
+      <y>972</y>
+      <w>288</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 troca marcha</panel_attributes>
@@ -383,10 +383,10 @@ troca marcha</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>232</x>
-      <y>1224</y>
-      <w>72</w>
-      <h>168</h>
+      <x>747</x>
+      <y>1377</y>
+      <w>81</w>
+      <h>189</h>
     </coordinates>
     <panel_attributes>Neutro</panel_attributes>
     <additional_attributes/>
@@ -394,10 +394,10 @@ troca marcha</panel_attributes>
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>256</x>
-      <y>1168</y>
-      <w>16</w>
-      <h>16</h>
+      <x>774</x>
+      <y>1314</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -405,10 +405,10 @@ troca marcha</panel_attributes>
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>168</x>
-      <y>952</y>
-      <w>16</w>
-      <h>16</h>
+      <x>675</x>
+      <y>1071</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=final</panel_attributes>
     <additional_attributes/>
@@ -416,10 +416,10 @@ troca marcha</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>168</x>
-      <y>904</y>
-      <w>64</w>
-      <h>64</h>
+      <x>675</x>
+      <y>1017</y>
+      <w>72</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Turn off</panel_attributes>
@@ -428,10 +428,10 @@ Turn off</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>256</x>
-      <y>1176</y>
-      <w>48</w>
-      <h>64</h>
+      <x>774</x>
+      <y>1323</y>
+      <w>54</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Start</panel_attributes>
@@ -440,10 +440,10 @@ Start</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>0</x>
-      <y>1280</y>
-      <w>72</w>
-      <h>72</h>
+      <x>486</x>
+      <y>1440</y>
+      <w>81</w>
+      <h>81</h>
     </coordinates>
     <panel_attributes>Ré</panel_attributes>
     <additional_attributes/>
@@ -451,10 +451,10 @@ Start</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>64</x>
-      <y>1280</y>
-      <w>184</w>
-      <h>32</h>
+      <x>558</x>
+      <y>1440</y>
+      <w>207</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Botão R</panel_attributes>
@@ -463,10 +463,10 @@ Botão R</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>296</x>
-      <y>1280</y>
-      <w>200</w>
-      <h>32</h>
+      <x>819</x>
+      <y>1440</y>
+      <w>225</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Botão D</panel_attributes>
@@ -475,10 +475,10 @@ Botão D</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>480</x>
-      <y>1192</y>
-      <w>248</w>
-      <h>344</h>
+      <x>1026</x>
+      <y>1341</y>
+      <w>279</w>
+      <h>387</h>
     </coordinates>
     <panel_attributes>Dirigir
 --
@@ -490,10 +490,10 @@ valign=top
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>504</x>
-      <y>1248</y>
-      <w>160</w>
-      <h>40</h>
+      <x>1053</x>
+      <y>1404</y>
+      <w>180</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>Primeira</panel_attributes>
     <additional_attributes/>
@@ -501,10 +501,10 @@ valign=top
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>504</x>
-      <y>1360</y>
-      <w>160</w>
-      <h>40</h>
+      <x>1053</x>
+      <y>1530</y>
+      <w>180</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>Segunda</panel_attributes>
     <additional_attributes/>
@@ -512,10 +512,10 @@ valign=top
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>504</x>
-      <y>1464</y>
-      <w>160</w>
-      <h>40</h>
+      <x>1053</x>
+      <y>1647</y>
+      <w>180</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>Terceira</panel_attributes>
     <additional_attributes/>
@@ -523,10 +523,10 @@ valign=top
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>528</x>
-      <y>1216</y>
-      <w>16</w>
-      <h>16</h>
+      <x>1080</x>
+      <y>1368</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -534,10 +534,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>528</x>
-      <y>1224</y>
-      <w>24</w>
-      <h>40</h>
+      <x>1080</x>
+      <y>1377</y>
+      <w>27</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>lt=-&gt;</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;30.0</additional_attributes>
@@ -545,10 +545,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>1240</y>
-      <w>104</w>
-      <h>80</h>
+      <x>1296</x>
+      <y>1395</y>
+      <w>117</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Acelerar</panel_attributes>
@@ -557,10 +557,10 @@ Acelerar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>1280</y>
-      <w>112</w>
-      <h>96</h>
+      <x>1062</x>
+      <y>1440</y>
+      <w>126</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 [rotação &gt;= 2000]</panel_attributes>
@@ -569,10 +569,10 @@ Acelerar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>1392</y>
-      <w>112</w>
-      <h>88</h>
+      <x>1062</x>
+      <y>1566</y>
+      <w>126</w>
+      <h>99</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 [rotação &gt;= 2000]</panel_attributes>
@@ -581,10 +581,10 @@ Acelerar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>1328</y>
-      <w>104</w>
-      <h>80</h>
+      <x>1296</x>
+      <y>1494</y>
+      <w>117</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Reduzir</panel_attributes>
@@ -593,10 +593,10 @@ Reduzir</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>624</x>
-      <y>1392</y>
-      <w>112</w>
-      <h>88</h>
+      <x>1188</x>
+      <y>1566</y>
+      <w>126</w>
+      <h>99</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 [rotação &lt; 1400]</panel_attributes>
@@ -605,10 +605,10 @@ Reduzir</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>624</x>
-      <y>1280</y>
-      <w>112</w>
-      <h>96</h>
+      <x>1188</x>
+      <y>1440</y>
+      <w>126</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 [rotação &lt; 1400]</panel_attributes>
@@ -617,10 +617,10 @@ Reduzir</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>296</x>
-      <y>1312</y>
-      <w>200</w>
-      <h>32</h>
+      <x>819</x>
+      <y>1476</y>
+      <w>225</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Botão N [velocidade == 0]</panel_attributes>
@@ -629,10 +629,10 @@ Botão N [velocidade == 0]</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>64</x>
-      <y>1312</y>
-      <w>184</w>
-      <h>32</h>
+      <x>558</x>
+      <y>1476</y>
+      <w>207</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Botão N [velocidade == 0]</panel_attributes>
@@ -641,10 +641,10 @@ Botão N [velocidade == 0]</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>392</x>
-      <y>1672</y>
-      <w>800</w>
-      <h>472</h>
+      <x>927</x>
+      <y>1881</y>
+      <w>900</w>
+      <h>531</h>
     </coordinates>
     <panel_attributes>Ligado
 --
@@ -656,10 +656,10 @@ valign=top
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>128</x>
-      <y>1768</y>
-      <w>16</w>
-      <h>16</h>
+      <x>630</x>
+      <y>1989</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -667,10 +667,10 @@ valign=top
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>80</x>
-      <y>1832</y>
-      <w>120</w>
-      <h>64</h>
+      <x>576</x>
+      <y>2061</y>
+      <w>135</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>Desligado</panel_attributes>
     <additional_attributes/>
@@ -678,10 +678,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>128</x>
-      <y>1776</y>
-      <w>24</w>
-      <h>72</h>
+      <x>630</x>
+      <y>1998</y>
+      <w>27</w>
+      <h>81</h>
     </coordinates>
     <panel_attributes>lt=-&gt;</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
@@ -689,10 +689,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>192</x>
-      <y>1832</y>
-      <w>216</w>
-      <h>32</h>
+      <x>702</x>
+      <y>2061</y>
+      <w>243</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Aperta botão Ligar/Desligar</panel_attributes>
@@ -701,10 +701,10 @@ Aperta botão Ligar/Desligar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>192</x>
-      <y>1856</y>
-      <w>216</w>
-      <h>32</h>
+      <x>702</x>
+      <y>2088</y>
+      <w>243</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Aperta botão Ligar/Desligar</panel_attributes>
@@ -713,10 +713,10 @@ Aperta botão Ligar/Desligar</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>872</x>
-      <y>1752</y>
-      <w>304</w>
-      <h>376</h>
+      <x>1467</x>
+      <y>1971</y>
+      <w>342</w>
+      <h>423</h>
     </coordinates>
     <panel_attributes>Modo Reprodução
 --
@@ -728,10 +728,10 @@ valign=top
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>408</x>
-      <y>1752</y>
-      <w>320</w>
-      <h>376</h>
+      <x>945</x>
+      <y>1971</y>
+      <w>360</w>
+      <h>423</h>
     </coordinates>
     <panel_attributes>Modo Gravação
 --
@@ -743,10 +743,10 @@ valign=top
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>768</x>
-      <y>1712</y>
-      <w>16</w>
-      <h>16</h>
+      <x>1350</x>
+      <y>1926</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -754,10 +754,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>544</x>
-      <y>1712</y>
-      <w>240</w>
-      <h>56</h>
+      <x>1098</x>
+      <y>1926</y>
+      <w>270</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=-&gt;</panel_attributes>
     <additional_attributes>280.0;10.0;10.0;10.0;10.0;50.0</additional_attributes>
@@ -765,10 +765,10 @@ valign=top
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>1912</y>
-      <w>168</w>
-      <h>32</h>
+      <x>1296</x>
+      <y>2151</y>
+      <w>189</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Aperta botão Modo</panel_attributes>
@@ -777,10 +777,10 @@ Aperta botão Modo</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>1888</y>
-      <w>168</w>
-      <h>32</h>
+      <x>1296</x>
+      <y>2124</y>
+      <w>189</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 Aperta botão Modo</panel_attributes>
@@ -789,10 +789,10 @@ Aperta botão Modo</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>464</x>
-      <y>1800</y>
-      <w>88</w>
-      <h>128</h>
+      <x>1008</x>
+      <y>2025</y>
+      <w>99</w>
+      <h>144</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 botão iniciar</panel_attributes>
@@ -801,10 +801,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>432</x>
-      <y>1912</y>
-      <w>80</w>
-      <h>32</h>
+      <x>972</x>
+      <y>2151</y>
+      <w>90</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Gravando</panel_attributes>
     <additional_attributes/>
@@ -812,10 +812,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>504</x>
-      <y>1912</y>
-      <w>104</w>
-      <h>32</h>
+      <x>1053</x>
+      <y>2151</y>
+      <w>117</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 botão iniciar</panel_attributes>
@@ -824,10 +824,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>592</x>
-      <y>1912</y>
-      <w>112</w>
-      <h>32</h>
+      <x>1152</x>
+      <y>2151</y>
+      <w>126</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Finaliza a Gravação</panel_attributes>
     <additional_attributes/>
@@ -835,10 +835,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>512</x>
-      <y>1792</y>
-      <w>72</w>
-      <h>32</h>
+      <x>1062</x>
+      <y>2016</y>
+      <w>81</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Waiting</panel_attributes>
     <additional_attributes/>
@@ -846,10 +846,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>UMLSpecialState</id>
     <coordinates>
-      <x>624</x>
-      <y>1800</y>
-      <w>16</w>
-      <h>16</h>
+      <x>1188</x>
+      <y>2025</y>
+      <w>18</w>
+      <h>18</h>
     </coordinates>
     <panel_attributes>type=initial</panel_attributes>
     <additional_attributes/>
@@ -857,10 +857,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>576</x>
-      <y>1800</y>
-      <w>64</w>
-      <h>24</h>
+      <x>1134</x>
+      <y>2025</y>
+      <w>72</w>
+      <h>27</h>
     </coordinates>
     <panel_attributes>lt=-&gt;</panel_attributes>
     <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
@@ -868,21 +868,21 @@ botão iniciar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>544</x>
-      <y>1816</y>
-      <w>128</w>
-      <h>112</h>
+      <x>1098</x>
+      <y>2043</y>
+      <w>144</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>lt=-&gt;</panel_attributes>
-    <additional_attributes>140.0;120.0;110.0;60.0;10.0;60.0;10.0;10.0</additional_attributes>
+    <additional_attributes>140.0;120.0;140.0;60.0;10.0;60.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>416</x>
-      <y>2032</y>
-      <w>112</w>
-      <h>32</h>
+      <x>954</x>
+      <y>2286</y>
+      <w>126</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Gravação Pausada</panel_attributes>
     <additional_attributes/>
@@ -890,10 +890,10 @@ botão iniciar</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>432</x>
-      <y>1936</y>
-      <w>88</w>
-      <h>112</h>
+      <x>972</x>
+      <y>2178</y>
+      <w>99</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 botão pausa</panel_attributes>
@@ -902,13 +902,339 @@ botão pausa</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>480</x>
-      <y>1936</y>
-      <w>184</w>
-      <h>112</h>
+      <x>1026</x>
+      <y>2178</y>
+      <w>207</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 botão pausa</panel_attributes>
     <additional_attributes>10.0;120.0;10.0;100.0;130.0;100.0;130.0;30.0;10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1575</x>
+      <y>2016</y>
+      <w>108</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1503</x>
+      <y>2007</y>
+      <w>81</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Waiting</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>1665</x>
+      <y>2016</y>
+      <w>18</w>
+      <h>18</h>
+    </coordinates>
+    <panel_attributes>type=initial</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1503</x>
+      <y>2133</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Reproduzindo</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1503</x>
+      <y>2268</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Pausado</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1521</x>
+      <y>2160</y>
+      <w>99</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+botão pausa</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;120.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1575</x>
+      <y>2160</y>
+      <w>207</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+botão pausa</panel_attributes>
+    <additional_attributes>10.0;120.0;10.0;100.0;130.0;100.0;130.0;30.0;10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1512</x>
+      <y>2034</y>
+      <w>99</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+botão iniciar</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1602</x>
+      <y>2133</y>
+      <w>234</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+botão avançar/retroceder</panel_attributes>
+    <additional_attributes>10.0;30.0;70.0;30.0;70.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1530</x>
+      <y>2277</y>
+      <w>180</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+botão avançar/retroceder</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;100.0;130.0;100.0;130.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1566</x>
+      <y>2034</y>
+      <w>216</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+[duração do video
+ reproduzindo
+ terminou]</panel_attributes>
+    <additional_attributes>10.0;110.0;10.0;80.0;100.0;80.0;100.0;30.0;10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>729</x>
+      <y>2538</y>
+      <w>18</w>
+      <h>18</h>
+    </coordinates>
+    <panel_attributes>type=initial</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>702</x>
+      <y>2745</y>
+      <w>81</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>aguardando</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>594</x>
+      <y>2898</y>
+      <w>81</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>tocando</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>621</x>
+      <y>2754</y>
+      <w>108</w>
+      <h>162</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+recebe ligação</panel_attributes>
+    <additional_attributes>90.0;10.0;10.0;10.0;10.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>495</x>
+      <y>3069</y>
+      <w>261</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>reproduzindo mensagem pré-gravada</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>612</x>
+      <y>2970</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>621</x>
+      <y>2925</y>
+      <w>27</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>531</x>
+      <y>2907</y>
+      <w>99</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+[toque &lt;= 5]</panel_attributes>
+    <additional_attributes>90.0;90.0;10.0;90.0;10.0;10.0;70.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>621</x>
+      <y>2997</y>
+      <w>90</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+[toque &gt; 5]</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>639</x>
+      <y>2772</y>
+      <w>243</w>
+      <h>234</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+[alguém atende]
+</panel_attributes>
+    <additional_attributes>10.0;240.0;140.0;240.0;140.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>621</x>
+      <y>3096</y>
+      <w>153</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+mensagem terminou</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>567</x>
+      <y>3177</y>
+      <w>126</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>gravando ligação</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>684</x>
+      <y>2754</y>
+      <w>333</w>
+      <h>459</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+ligação termina</panel_attributes>
+    <additional_attributes>10.0;490.0;250.0;490.0;250.0;10.0;110.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>702</x>
+      <y>2619</y>
+      <w>81</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>desligado</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>729</x>
+      <y>2547</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>702</x>
+      <y>2646</y>
+      <w>144</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+botão ligar/desligar</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>756</x>
+      <y>2646</y>
+      <w>225</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+botão ligar/desligar</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;30.0;100.0;30.0;100.0;90.0;10.0;90.0;10.0;110.0</additional_attributes>
   </element>
 </diagram>
