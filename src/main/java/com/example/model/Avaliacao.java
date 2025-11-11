@@ -58,14 +58,6 @@ public class Avaliacao {
 	@JoinColumn(name = "comentario_id")
 	private Comentario comentario;
 
-	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Avaliacao(Integer nota, Professor professor, Disciplina disciplina, Usuario usuario) {
-		this.nota = nota;
-		this.professor = professor;
-		this.disciplina = disciplina;
-		this.usuario = usuario;
-	}
-
 	/** Construtor completo com comentário. */
 	public Avaliacao(Integer nota, Professor professor, Disciplina disciplina, Usuario usuario, Comentario comentario) {
 		this.nota = nota;
@@ -77,32 +69,6 @@ public class Avaliacao {
 			comentario.setAvaliacao(this);
 		}
 	}
-
-	/** Construtor para comentário sem nota. */
-	public Avaliacao(Professor professor, Disciplina disciplina, Usuario usuario, Comentario comentario) {
-		this.professor = professor;
-		this.disciplina = disciplina;
-		this.usuario = usuario;
-		this.nota = -1; // Indica que a nota não foi definida
-		this.comentario = comentario;
-	}
-	
-	/* Construtor para a avaliação sem nota da disciplina*/
-	public Avaliacao(Disciplina disciplina, Usuario usuario, Comentario comentario) {
-		this.disciplina = disciplina;
-		this.usuario = usuario;
-		this.nota = -1; // Indica que a nota não foi definida
-		this.comentario = comentario;
-	}
-
-	/* Construtor para a avaliação com nota da disciplina*/
-	public Avaliacao(Disciplina disciplina, Usuario usuario, Integer nota, Comentario comentario) {
-		this.disciplina = disciplina;
-		this.usuario = usuario;
-		this.nota = nota;
-		this.comentario = comentario;
-	}
-
 
 	/** Construtor padrão necessário para JPA. */
 	public Avaliacao(){}
