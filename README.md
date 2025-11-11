@@ -29,7 +29,7 @@ Agora a barra de pesquisas está mais complexa porém bem melhor. O código e no
 
 - [X] Barra de pesquisa de disciplinas
 
-- [ ] Mapa curricular
+- [X] Mapa curricular
 	- O usuário guardará uma lista das matérias divididas por semestre. Cada matéria será uma tupla(String código, Boolean cursada, Boolean avaliada), e será usada para compor o mapa curricular.
 	- Inicialmente o usuário irá inserir as matérias de cada semestre, posteriormente pode haver algum sistema que capture as matérias padrões do curso, porém ainda permite a adição de matérias.
 
@@ -37,3 +37,12 @@ Agora a barra de pesquisas está mais complexa porém bem melhor. O código e no
 ## TO DO (Iteração 3)
 - [ ] Fetch dos cursos da UFSC (Necessário para montar o grafo das dependências entre disciplinas)
 	- Tentar usar isso aqui: https://cagr.sistemas.ufsc.br/relatorios/curriculoCurso?curso=603, separar o id do curso, nome e criar o grafo que relaciona as disciplinas.
+
+- [ ] O comentário precisa ter uma relação de muitos pra muitos com usuários para lidar com o upvote e downvote (O mesmo usuário não pode ter votos repetidos)
+
+
+## TO DO DIAGRAMAS
+- 2 Diagramas de sequência baseados em história de usuário
+	- Fazer sobre:
+		 Admin exclui comentário (HU 4) - Luam
+		 interação com comentário (Upvote, DownVote, comentar) - Kauan

@@ -33,6 +33,12 @@ public class AvaliacaoService {
     @Autowired
     private DisciplinaService disciplinaService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private ProfessorService professorService;
+
     // Criar nova avaliação
     public Avaliacao salvar(Avaliacao avaliacao) {
         Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
@@ -68,7 +74,7 @@ public class AvaliacaoService {
         avaliacaoRepository.deleteById(id);
     }
 
-    public Avaliacao create(Professor professor, Disciplina disciplina, Usuario usuario, Integer nota, Comentario comentario){
+    public Optional<Avaliacao> create(Professor professor, Disciplina disciplina, Usuario usuario, Integer nota, Comentario comentario){
         Optional<Avaliacao> avaliacaoExistente;
         if(disciplina == null || usuario == null){
             throw new IllegalArgumentException("Disciplina e usuario não podem ser nulos para criar avaliação.");
@@ -78,6 +84,7 @@ public class AvaliacaoService {
         }else{
             avaliacaoExistente = avaliacaoRepository.findByProfessorAndDisciplinaAndUsuario(professor, disciplina, usuario);
         }
+
         if(avaliacaoExistente.isPresent()){
             Avaliacao avaliacao = avaliacaoExistente.get();
             if(comentario != null && avaliacao.getComentario() == null){
@@ -86,34 +93,27 @@ public class AvaliacaoService {
             if(nota != -1){
                 avaliacao.setNota(nota);
             }
-            return salvar(avaliacao);
+            return Optional.of(salvar(avaliacao));
         } else {
             Avaliacao avaliacao = new Avaliacao(nota, professor, disciplina, usuario, comentario);
-            return salvar(avaliacao);
+            return Optional.of(salvar(avaliacao));
         }
     }
 
-    public Avaliacao create(Disciplina disciplina, Usuario usuario, Integer nota){
-        return create(null, disciplina, usuario, nota, null);
-    }
-    public Avaliacao create(Professor professor, Disciplina disciplina, Usuario usuario, Integer nota){
-        return create(professor, disciplina, usuario, nota, null);
+    public void addNota(String professorId, String disciplinaId, String usuarioEmail, Integer nota){
+        Optional<Professor> p = professorService.buscarPorId(professorId);
+        Optional<Disciplina> d = disciplinaService.buscarPorCodigo(disciplinaId);
+        Usuario u = userService.getUser(usuarioEmail);
+        if(p.isPresent() && d.isPresent() && u != null && nota >= 0 && nota <= 5){
+            create(p.get(), d.get(), u, nota, null);
+        } else {
+            throw new IllegalArgumentException("Professor, Disciplina ou Usuário não encontrados.");
+        }
     }
 
     // Verificar se existe avaliação
     public boolean existe(@NonNull Long id) {
         return avaliacaoRepository.existsById(id);
-    }
-
-    public boolean existe(Professor professor, Disciplina disciplina, Usuario usuario){
-        if (disciplina == null || usuario == null) {
-            throw new IllegalArgumentException("Disciplina e usuario não podem ser nulos para verificação.");
-        }
-        if (professor == null) {
-            return avaliacaoRepository.existsByProfessorIsNullAndDisciplinaAndUsuario(disciplina, usuario);
-        } else {
-            return avaliacaoRepository.existsByProfessorAndDisciplinaAndUsuario(professor, disciplina, usuario);
-        }
     }
 
     // Contar total de avaliações
