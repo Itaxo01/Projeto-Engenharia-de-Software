@@ -43,7 +43,7 @@ handleExcluirComentario(comentarioId)</panel_attributes>
       <w>90</w>
       <h>18</h>
     </coordinates>
-    <panel_attributes>_:DisciplinaService_</panel_attributes>
+    <panel_attributes>_:ComentarioService_</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
