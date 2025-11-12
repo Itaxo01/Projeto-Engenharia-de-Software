@@ -41,19 +41,32 @@ public class DisciplinaController {
 	// @Autowired
 	// private ProfessorService professorService;
 	
+	private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DisciplinaController.class);
+	
 	// Aqui o id utilizado é o mesmo que o codigo utilizado no banco de dados
 	@GetMapping("/class/{id}")
 	public String classDetails(HttpServletRequest request, @PathVariable("id") String classId, Model model) {
 		System.out.println(classId);
 		model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
+		
+		// Adicionar email do usuário logado
+		String userEmail = sessionService.getCurrentUser(request);
+		model.addAttribute("userEmail", userEmail);
+		
 		Optional<Disciplina> optDisciplina = disciplinaService.buscarPorCodigo(classId);
 		if (optDisciplina.isPresent()) {
 			Disciplina disciplina = optDisciplina.get();
 
+			logger.debug("Disciplina encontrada no /class/{id}");
+
 			List<Professor.ProfessorResumo> professors = new ArrayList<Professor.ProfessorResumo>(disciplina.getProfessores().stream().map(Professor.ProfessorResumo::from).toList());
 
-			List<AvaliacaoService.AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId);
-			
+			logger.debug("Lista de professores carregada no /class/{id}");
+
+			List<AvaliacaoService.AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId, userEmail);
+
+			logger.debug("Lista de avaliações carregada no /class/{id}");
+
 			model.addAttribute("disciplina", disciplina);
 			model.addAttribute("professors", professors);
 			model.addAttribute("classId", classId);
@@ -63,55 +76,5 @@ public class DisciplinaController {
 			return "error";
 		}
 	}
-
-
-	// A avaliação terá ou comentário ou nota, em primeira instância, visto que os dois serão criados separadamente
-	// Ao adicionar uma nota a uma avaliação que já existe, só se modifica a nota
-	// mesma coisa para o comentário
-
-	@PostMapping("/class/addNota")
-	@ResponseBody
-	public ResponseEntity<?> addNota(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
-
-		String usuarioEmail = sessionService.getCurrentUser(request);
-		String disciplinaId = (String) payload.get("disciplinaId");
-		String professorId = (String) payload.get("professorId");
-		Integer nota = (Integer) payload.get("nota");
-
-		try {
-			avaliacaoService.addNota(professorId, disciplinaId, usuarioEmail, nota);
-			return ResponseEntity.ok("Avaliação adicionada/atualizada com sucesso.");
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(400).body(e.getMessage());
-		}
-	}
-
-	@PostMapping("/class/addComentario")
-	@ResponseBody
-	public ResponseEntity<?> addComentario(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
-
-		String usuarioEmail = sessionService.getCurrentUser(request);
-		String disciplinaId = (String) payload.get("disciplinaId");
-		String professorId = (String) payload.get("professorId");
-		Integer nota = (Integer) payload.get("nota");
-
-		// Esse mapping precisa lidar com a chatisse de criar o comentário e depois a avaliação
-		
-		return null;
-	}
-
-	@PostMapping("/class/addComentarioFilho")
-	@ResponseBody
-	public ResponseEntity<?> addComentarioFilho(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
-
-		String userEmail = sessionService.getCurrentUser(request);
-		Long comentarioPaiId = (Long) payload.get("comentarioPaiId");
-		Integer nota = (Integer) payload.get("nota");
-
-		// Esse mapping só cria o comentário filho de outro comentário. Não há relação direta dele com a avaliação
-		
-		return null;
-	}
-
-
+	
 }

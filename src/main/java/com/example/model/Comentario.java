@@ -2,10 +2,14 @@ package com.example.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,9 +18,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 /**
  * Entidade de domínio que representa um comentário feito por um usuário em uma avaliação.
@@ -55,6 +61,19 @@ public class Comentario {
 
 	@Column(name = "down_votes")
 	private Integer downVotes = 0;
+
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(
+		name = "comentario_votes",
+		joinColumns = @JoinColumn(name = "comentario_id"),
+		uniqueConstraints = @UniqueConstraint(columnNames = {"comentario_id", "user_email"})
+	)
+	@MapKeyColumn(name = "user_email")
+	@Column(name = "is_upvote")
+	private Map<String, Boolean> votes = new HashMap<>();
+
+
 
 	@Column(nullable = false, length = 2000)
 	private String texto;
@@ -124,6 +143,29 @@ public class Comentario {
 	public Integer getDownVotes() { return downVotes; }
 	public void setDownVotes(Integer downVotes) { this.downVotes = downVotes; }
 
+
+	public Integer hasVoted(String userEmail) {
+		if(votes.containsKey(userEmail)){
+			return votes.get(userEmail) ? 1 : -1;
+		}
+		return 0;
+	}
+	
+	/**
+	 * Retorna o voto do usuário: true (upvote), false (downvote), null (sem voto)
+	 */
+	public Boolean getUserVote(String userEmail) {
+		return votes.get(userEmail);
+	}
+	
+	/**
+	 * Retorna o mapa de votos (para uso interno)
+	 */
+	public Map<String, Boolean> getVotes() {
+		return votes;
+	}
+
+
 	// Métodos de conveniência
 	public void addFilho(Comentario filho) {
 		filhos.add(filho);
@@ -179,5 +221,38 @@ public class Comentario {
 
 	public boolean hasArquivos() {
 		return arquivos != null && !arquivos.isEmpty();
+	}
+
+	public void addUserVote(String userEmail, Boolean isUpVote) throws Exception {
+		if(isUpVote == null) {
+			throw new IllegalArgumentException("isUpVote não pode ser nulo.");
+		}
+		Boolean votoExistente = votes.get(userEmail);
+		if(votoExistente != null) {
+			if(votoExistente.equals(isUpVote)) {
+				if(isUpVote) {
+					this.upVotes--;
+				} else {
+					this.downVotes--;
+				}
+				votes.remove(userEmail);
+			} else {
+				if(isUpVote) {
+					this.upVotes++;
+					this.downVotes--;
+				} else {
+					this.downVotes++;
+					this.upVotes--;
+				}
+				votes.put(userEmail, isUpVote);
+			}
+		} else {
+			if(isUpVote) {
+				this.upVotes++;
+			} else {
+				this.downVotes++;
+			}
+			votes.put(userEmail, isUpVote);
+		}
 	}
 }

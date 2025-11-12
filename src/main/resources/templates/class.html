@@ -101,8 +101,61 @@
                 <div class="section-card">
                     <div class="section-header">
                         <h2>Avaliações</h2>
-                        <button class="btn-add-review">Adicionar Avaliação</button>
+                        <button class="btn-add-review" onclick="toggleCommentEditor()">Adicionar Avaliação</button>
                     </div>
+                    
+                    <!-- Editor de Comentário Inline -->
+                    <div id="commentEditor" class="comment-editor">
+                        <div class="comment-editor-header">
+                            <div class="comment-editor-title">Nova Avaliação</div>
+                            <div class="comment-editor-subtitle" id="editorSubtitle">Avaliando a disciplina</div>
+                        </div>
+                        <form class="comment-form" onsubmit="submitComment(event)">
+                            <!-- Seletor de Rating -->
+                            <div class="rating-selector">
+                                <span class="rating-selector-label">Nota:</span>
+                                <div class="rating-selector-stars" id="ratingSelectorStars">
+                                    <span class="star" data-rating="1" onclick="selectRating(1)" onmouseenter="hoverRating(1)" onmouseleave="unhoverRating()">★</span>
+                                    <span class="star" data-rating="2" onclick="selectRating(2)" onmouseenter="hoverRating(2)" onmouseleave="unhoverRating()">★</span>
+                                    <span class="star" data-rating="3" onclick="selectRating(3)" onmouseenter="hoverRating(3)" onmouseleave="unhoverRating()">★</span>
+                                    <span class="star" data-rating="4" onclick="selectRating(4)" onmouseenter="hoverRating(4)" onmouseleave="unhoverRating()">★</span>
+                                    <span class="star" data-rating="5" onclick="selectRating(5)" onmouseenter="hoverRating(5)" onmouseleave="unhoverRating()">★</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Textarea -->
+                            <textarea 
+                                id="commentText" 
+                                class="comment-textarea" 
+                                placeholder="Compartilhe sua experiência com esta disciplina..."
+                                maxlength="2000"
+                            ></textarea>
+                            
+                            <!-- File Upload Section -->
+                            <div class="file-upload-section">
+                                <input 
+                                    type="file" 
+                                    id="fileInput" 
+                                    class="file-input" 
+                                    multiple 
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                                    onchange="handleFileSelect(event)"
+                                >
+                                <label for="fileInput" class="file-upload-label">
+                                    <span class="file-icon">📎</span>
+                                    <span class="file-text">Anexar arquivos (máx. 5MB cada)</span>
+                                </label>
+                                <div id="fileList" class="file-list"></div>
+                            </div>
+                            
+                            <!-- Botões de Ação -->
+                            <div class="comment-actions">
+                                <button type="button" class="btn-cancel" onclick="toggleCommentEditor()">Cancelar</button>
+                                <button type="submit" class="btn-submit" id="submitBtn" disabled>Publicar</button>
+                            </div>
+                        </form>
+                    </div>
+                    
                     <div class="reviews-list">
                         <!-- Placeholder quando não há avaliações -->
                         <div class="no-reviews">
@@ -120,6 +173,8 @@
         // Dados do backend
         const AVALIACOES_DATA = /*[[${avaliacoes}]]*/ [];
         const PROFESSORES_DATA = /*[[${professors}]]*/ [];
+        const CLASS_ID = /*[[${classId}]]*/ '';
+        const USER_EMAIL = /*[[${userEmail}]]*/ '';
     </script>
     <script src="/js/class.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.basic.min.js"></script>

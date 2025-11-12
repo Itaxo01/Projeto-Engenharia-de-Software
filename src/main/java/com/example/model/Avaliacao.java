@@ -54,7 +54,7 @@ public class Avaliacao {
 	private java.time.Instant createdAt = java.time.Instant.now();
 
 	// Comentário principal da avaliação
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "comentario_id")
 	private Comentario comentario;
 

@@ -39,10 +39,13 @@ public class AvaliacaoService {
     @Autowired
     private ProfessorService professorService;
 
+	 private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AvaliacaoService.class);
     // Criar nova avaliação
     public Avaliacao salvar(Avaliacao avaliacao) {
+		  logger.debug("A");
         Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
-        
+		  logger.debug("Avaliação salva com ID: " + avaliacaoSalva.getId());
+
         // Marcar disciplina como avaliada no mapa curricular
         if (avaliacao.getDisciplina() != null && avaliacao.getUsuario() != null) {
             try {
@@ -52,9 +55,12 @@ public class AvaliacaoService {
                 );
             } catch (Exception e) {
                 // Log do erro, mas não falha a operação principal
+					 logger.error("Erro ao marcar disciplina como avaliada para usuário {}: {}", 
+						  avaliacao.getUsuario().getUser_email(), e.getMessage());
                 System.err.println("Erro ao marcar disciplina como avaliada: " + e.getMessage());
             }
         }
+		  logger.debug("Avaliação salva com ID: " + avaliacaoSalva.getId());
         
         return avaliacaoSalva;
     }
@@ -74,8 +80,13 @@ public class AvaliacaoService {
         avaliacaoRepository.deleteById(id);
     }
 
+	 // Create na verdade cria, edita e verifica se existe.
     public Optional<Avaliacao> create(Professor professor, Disciplina disciplina, Usuario usuario, Integer nota, Comentario comentario){
         Optional<Avaliacao> avaliacaoExistente;
+		  logger.debug("Criando ou atualizando avaliação para usuário: " + usuario.getUser_email() +
+			  		   ", disciplina: " + disciplina.getCodigo() +
+			  		   (professor != null ? ", professor: " + professor.getProfessorId() : ", avaliação da disciplina"));
+
         if(disciplina == null || usuario == null){
             throw new IllegalArgumentException("Disciplina e usuario não podem ser nulos para criar avaliação.");
         }
@@ -84,19 +95,28 @@ public class AvaliacaoService {
         }else{
             avaliacaoExistente = avaliacaoRepository.findByProfessorAndDisciplinaAndUsuario(professor, disciplina, usuario);
         }
-
+		  
+		  logger.debug("Avaliação existente: " + avaliacaoExistente.isPresent());
+	
         if(avaliacaoExistente.isPresent()){
             Avaliacao avaliacao = avaliacaoExistente.get();
-            if(comentario != null && avaliacao.getComentario() == null){
+				
+            if(comentario != null){
+					logger.debug("Atualizando comentário da avaliação.");
                 avaliacao.setComentario(comentario);
+					logger.debug("Comentario atualizado.");
+
             }
             if(nota != -1){
                 avaliacao.setNota(nota);
             }
+				logger.debug("Salvando avaliação atualizada.");
             return Optional.of(salvar(avaliacao));
         } else {
+				logger.debug("Avaliação não encontrada, criando nova avaliação.");
             Avaliacao avaliacao = new Avaliacao(nota, professor, disciplina, usuario, comentario);
-            return Optional.of(salvar(avaliacao));
+
+				return Optional.of(salvar(avaliacao));
         }
     }
 
@@ -124,33 +144,35 @@ public class AvaliacaoService {
 
 	 /* O front-end vai usar isso aqui e processar para criar a página da disciplina */
 	@Transactional(readOnly = true)
-	public List<AvaliacaoDTO> buscarTodasAvaliacoesDisciplina(String disciplinaId) {
-        Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
+	public List<AvaliacaoDTO> buscarTodasAvaliacoesDisciplina(String disciplinaId, String sessionUsuarioEmail) {
+		Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
 
-        if (disciplinaOpt.isEmpty()) {
-            throw new IllegalArgumentException("Disciplina não existe.");
-        }
-		
-        List<Avaliacao> avaliacoes = avaliacaoRepository.findAllAvaliacoesByDisciplina(disciplinaOpt.get());
-        
+		if (disciplinaOpt.isEmpty()) {
+			throw new IllegalArgumentException("Disciplina não existe.");
+		}
+		List<Avaliacao> avaliacoes = avaliacaoRepository.findAllAvaliacoesByDisciplina(disciplinaOpt.get());
+		  
 		return avaliacoes.stream()
-			.map(this::converterParaDTO)
+			.map(avaliacao -> converterParaDTO(avaliacao, sessionUsuarioEmail))
 			.collect(Collectors.toList());
 	}
 
-	private AvaliacaoDTO converterParaDTO(Avaliacao avaliacao) {
+	private AvaliacaoDTO converterParaDTO(Avaliacao avaliacao, String sessionUsuarioEmail) {
         ComentarioDTO comentarioDTO = null;
         
         try {
+				Comentario comentario = avaliacao.getComentario();
             if (avaliacao.hasComentario()) {
                 comentarioDTO = new ComentarioDTO(
-                    avaliacao.getComentario().getComentarioId(),
-                    avaliacao.getComentario().getTexto(),
-                    avaliacao.getComentario().getUsuario() != null ? 
-                        avaliacao.getComentario().getUsuario().getNome() : "Usuário Anônimo",
-                    avaliacao.getComentario().getUpVotes(),
-                    avaliacao.getComentario().getDownVotes(),
-                    avaliacao.getComentario().getCreatedAt()
+                    comentario.getComentarioId(),
+                    comentario.getTexto(),
+                    comentario.getUsuario() != null ? 
+						  comentario.getUsuario().getNome() : "Usuário Anônimo",
+                    comentario.getUpVotes(),
+                    comentario.getDownVotes(),
+                    comentario.getCreatedAt(),
+						  comentario.getUsuario().getUser_email().equals(sessionUsuarioEmail),
+						  comentario.hasVoted(sessionUsuarioEmail) 
                 );
             }
         } catch (Exception e) {
@@ -162,7 +184,6 @@ public class AvaliacaoService {
             avaliacao.getId(),
             avaliacao.getDisciplina(),
             avaliacao.getProfessor(),
-            avaliacao.getUsuario(),
             avaliacao.getNota() != null ? avaliacao.getNota() : 0,
             comentarioDTO,
             avaliacao.getCreatedAt()
@@ -173,28 +194,32 @@ public class AvaliacaoService {
 	public static class ComentarioDTO {
         private final Long id;
         private final String texto;
-        private final String nomeUsuario;
         private final Integer upVotes;
         private final Integer downVotes;
         private final Instant createdAt;
+		  private final Boolean isOwner;
+		  private final Integer hasVoted; // -1 = downvote, 0 = no vote, 1 = upvote
+
         
         public ComentarioDTO(Long id, String texto, String nomeUsuario, 
-                           Integer upVotes, Integer downVotes, Instant createdAt) {
+                           Integer upVotes, Integer downVotes, Instant createdAt, Boolean isOwner, Integer hasVoted) {
             this.id = id;
             this.texto = texto;
-            this.nomeUsuario = nomeUsuario;
             this.upVotes = upVotes != null ? upVotes : 0;
             this.downVotes = downVotes != null ? downVotes : 0;
             this.createdAt = createdAt;
+				this.isOwner = isOwner;
+				this.hasVoted = hasVoted;
         }
         
         // Getters
         public Long getId() { return id; }
         public String getTexto() { return texto; }
-        public String getNomeUsuario() { return nomeUsuario; }
         public Integer getUpVotes() { return upVotes; }
         public Integer getDownVotes() { return downVotes; }
         public Instant getCreatedAt() { return createdAt; }
+        public Boolean getIsOwner() { return isOwner; }
+        public Integer getHasVoted() { return hasVoted; }
         
         public String getDataFormatada() {
             return createdAt.atZone(ZoneId.systemDefault())
@@ -207,18 +232,15 @@ public class AvaliacaoService {
         private final Long id;
         private final String disciplinaId;
         private final String professorId; // Null = avaliação da disciplina
-        private final String userEmail;
         private final Integer nota;
         private final ComentarioDTO comentario; // Null = sem comentário
         private final Instant createdAt;
         
-        public AvaliacaoDTO(Long id, Disciplina disciplina, Professor professor, 
-                           Usuario usuario, Integer nota, ComentarioDTO comentario, 
+        public AvaliacaoDTO(Long id, Disciplina disciplina, Professor professor, Integer nota, ComentarioDTO comentario, 
                            Instant createdAt) {
             this.id = id;
             this.disciplinaId = disciplina.getCodigo();
-            this.professorId = professor.getProfessorId();
-            this.userEmail = usuario.getUser_email();
+            this.professorId = professor != null ? professor.getProfessorId() : null;
             this.nota = nota;
             this.comentario = comentario;
             this.createdAt = createdAt;
@@ -228,7 +250,6 @@ public class AvaliacaoService {
         public Long getId() { return id; }
         public String getDisciplinaId() { return disciplinaId; }
         public String getProfessorId() { return professorId; }
-        public String getUserEmail() { return userEmail; }
         public Integer getNota() { return nota; }
         public ComentarioDTO getComentario() { return comentario; }
         public Instant getCreatedAt() { return createdAt; }

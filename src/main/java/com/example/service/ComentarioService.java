@@ -20,8 +20,12 @@ public class ComentarioService {
     // Criar comentário
     public Comentario criarComentario(Usuario usuario, String texto) {
         Comentario comentario = new Comentario(usuario, texto);
-        return comentarioRepository.save(comentario);
+		  return comentario; // não salva automaticamente
     }
+
+	 public Comentario salvar(Comentario comentario) {
+		  return comentarioRepository.save(comentario);
+	 }
     
     // Responder comentário
     public Comentario responderComentario(Usuario usuario, String texto, Long parentId) {
@@ -51,4 +55,13 @@ public class ComentarioService {
     public boolean existe(Long id) {
         return comentarioRepository.existsById(id);
     }
+
+	 public void vote(String userEmail, Long comentarioId, Boolean isUpVote) throws Exception {
+		  Comentario comentario = comentarioRepository.findById(comentarioId)
+					 .orElseThrow(() -> new IllegalArgumentException("Comentário não encontrado"));
+		  
+		  comentario.addUserVote(userEmail, isUpVote);
+		  
+		  comentarioRepository.save(comentario);
+	 }
 }
