@@ -7,8 +7,9 @@ console.log('✅ class.js carregado');
 let professorSelecionado = null;
 let selectedFiles = [];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-let currentUserEmail = null; // Email do usuário logado
 let isAdmin = false; // Flag de admin
+let editingCommentId = null; // Track if we're editing a comment
+let editingCommentData = null; // Store original comment data for editing
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof AVALIACOES_DATA === 'undefined') return;
@@ -18,14 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Obter email do usuário logado e status de admin
-    currentUserEmail = typeof USER_EMAIL !== 'undefined' ? USER_EMAIL : null;
     isAdmin = typeof IS_ADMIN !== 'undefined' ? IS_ADMIN : false;
     
     console.log('📊 Dados carregados:', {
         avaliacoes: AVALIACOES_DATA.length,
         comentarios: COMENTARIOS_DATA.length,
         professores: PROFESSORES_DATA?.length || 0,
-        usuarioLogado: currentUserEmail,
         isAdmin: isAdmin
     });
 
@@ -156,67 +155,10 @@ function makeStarsInteractive(starsContainer, professorId) {
         });
     }
     
-    freshStars.forEach((star, index) => {
-        const rating = index + 1;
-        
-        // Hover effect
-        star.addEventListener('mouseenter', () => {
-            highlightStars(freshStars, rating);
-        });
-        
-        star.addEventListener('mouseleave', () => {
-            // Always restore average rating display (with possible half stars)
-            clearStarsHighlight(freshStars);
-            // Re-apply the average rating
-            const avgRating = parseFloat(starsContainer.closest('.discipline-rating, .professor-rating')
-                ?.querySelector('.rating-value, .rating-score')?.textContent) || 0;
-            // Check again if user has voted (might have changed)
-            const userRating = getUserCurrentRating(professorId);
-            const hasUserVoted = userRating !== null;
-            
-            if (avgRating > 0) {
-                freshStars.forEach((s, idx) => {
-                    if (avgRating >= idx + 1) {
-                        s.classList.add('filled');
-                        if (hasUserVoted) {
-                            s.classList.add('user-voted');
-                        }
-                    } else if (avgRating >= idx + 0.5) {
-                        // Add appropriate half class based on whether user voted
-                        if (hasUserVoted) {
-                            s.classList.add('half-user-voted');
-                        } else {
-                            s.classList.add('half');
-                        }
-                    }
-                });
-            }
-        });
-        
-        // Click to submit rating - SINGLE listener per star
-        star.addEventListener('click', async () => {
-            // Disable clicking during submission
-            freshStars.forEach(s => {
-                s.style.pointerEvents = 'none';
-                s.style.opacity = '0.6';
-            });
-            
-            await submitRating(rating, professorId);
-            
-            // submitRating already calls setupInteractiveStars which will recreate this function
-            // So we don't need to manually update stars here anymore
-            
-            // Re-enable clicking after 1s - but setupInteractiveStars will recreate everything
-            setTimeout(() => {
-                freshStars.forEach(s => {
-                    s.style.pointerEvents = 'auto';
-                    s.style.opacity = '1';
-                });
-            }, 1000);
-        });
-        
-        // Make cursor pointer
-        star.style.cursor = 'pointer';
+    // ✅ REMOVED: Direct star clicking - now only visual display
+    // Stars are no longer clickable; users must use the "Adicionar avaliação" link
+    freshStars.forEach(star => {
+        star.style.cursor = 'default'; // Change cursor to indicate not clickable
     });
 }
 
@@ -238,14 +180,13 @@ function clearStarsHighlight(stars) {
 }
 
 function getUserCurrentRating(professorId) {
-    if (!currentUserEmail) return null;
     
     const avaliacao = AVALIACOES_DATA.find(a => {
-        const mesmoContexto = a.disciplinaId === CLASS_ID &&
-            String(a.professorId || '') === String(professorId || '');
-        return mesmoContexto && a.userEmail === currentUserEmail;
+        return a.isOwner && (String(a.professorId || '') === String(professorId || ''));
     });
-    
+
+	 
+	 console.log('Avaliação do usuário para professorId', professorId, ':', avaliacao?.nota);
     return avaliacao?.nota || null;
 }
 
@@ -263,8 +204,12 @@ function atualizarDisciplina(stats, comentarios) {
     document.querySelector('.discipline-rating .rating-score').textContent = 
         stats.total > 0 ? stats.media.toFixed(1) : 'N/A';
     
-    document.querySelector('.discipline-rating .rating-count').textContent = 
+    const ratingCountElement = document.querySelector('.discipline-rating .rating-count');
+    ratingCountElement.textContent = 
         `${stats.total} ${stats.total === 1 ? 'avaliação' : 'avaliações'}`;
+    
+    // Add "remove rating" link if user has voted
+    addRemoveRatingLink(ratingCountElement, null);
     
     preencherEstrelas(document.querySelector('.discipline-rating .rating-stars'), stats.media);
     
@@ -348,8 +293,14 @@ function atualizarProfessor(index, stats) {
     professorItem.querySelector('.rating-value').textContent = 
         stats.total > 0 ? stats.media.toFixed(1) : 'N/A';
     
-    professorItem.querySelector('.rating-count').textContent = 
+    const ratingCountElement = professorItem.querySelector('.rating-count');
+    ratingCountElement.textContent = 
         `${stats.total} ${stats.total === 1 ? 'avaliação' : 'avaliações'}`;
+    
+    // Add "remove rating" link if user has voted for this professor
+    const prof = PROFESSORES_DATA[index];
+    const profId = prof?.id || prof?.professorId || prof?.ID || index;
+    addRemoveRatingLink(ratingCountElement, profId);
     
     preencherEstrelas(professorItem.querySelector('.rating-stars'), stats.media);
 }
@@ -418,7 +369,7 @@ function mostrarComentarios(comentarios, professorNome) {
 				 <span>Responder</span>
 			</button>
 			${isOwner ? `
-			<button class="review-action-btn edit-btn" onclick="editComment(${comentario.id}, '${escapeHtml(comentario.texto)}')">
+			<button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
 				 <span class="vote-icon">✏️</span>
 				 <span>Editar</span>
 			</button>
@@ -576,7 +527,7 @@ function toggleCommentEditor() {
         editor.classList.add('show');
         button.classList.add('active');
         
-        // Update subtitle based on current context
+        // Update subtitle based on current context (or edit mode)
         updateEditorSubtitle();
         
         // Focus on textarea
@@ -588,6 +539,12 @@ function toggleCommentEditor() {
 
 function updateEditorSubtitle() {
     const subtitle = document.getElementById('editorSubtitle');
+    
+    // If editing, show edit message
+    if (editingCommentId !== null) {
+        subtitle.textContent = 'Editando comentário';
+        return;
+    }
     
     if (professorSelecionado !== null && PROFESSORES_DATA) {
         // Find professor name
@@ -613,6 +570,10 @@ function resetCommentEditor() {
     selectedFiles = [];
     document.getElementById('fileInput').value = '';
     renderFileList();
+    
+    // Clear edit mode
+    editingCommentId = null;
+    editingCommentData = null;
     
     // Disable submit button
     document.getElementById('submitBtn').disabled = true;
@@ -750,54 +711,335 @@ async function submitComment(event) {
         return;
     }
     
-    console.log('Submitting comment:', {
-        texto,
-        professorId: professorSelecionado,
-        disciplinaId: typeof CLASS_ID !== 'undefined' ? CLASS_ID : null,
+    // Check if we're editing or creating
+    if (editingCommentId !== null) {
+        // EDIT MODE
+        await submitEditComment(editingCommentId, texto);
+    } else {
+        // CREATE MODE
+        console.log('Submitting comment:', {
+            texto,
+            professorId: professorSelecionado,
+            disciplinaId: typeof CLASS_ID !== 'undefined' ? CLASS_ID : null,
+            files: selectedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
+        });
+        
+        // Prepare FormData for file upload
+        const formData = new FormData();
+        formData.append('texto', texto);
+        formData.append('disciplinaId', typeof CLASS_ID !== 'undefined' ? CLASS_ID : '');
+        if (professorSelecionado) {
+            formData.append('professorId', professorSelecionado);
+        } else {
+            formData.append('professorId', "");
+        }
+        selectedFiles.forEach((file, index) => {
+            formData.append(`files`, file);
+        });
+        
+        try {
+            const response = await fetch('/api/avaliacao/comentario', {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                alert('Erro ao enviar comentário: ' + errorText);
+                return;
+            }
+            const result = await response.json();
+            console.log('Comentário enviado com sucesso:', result);
+            
+            // Reload page to show new comment
+            window.location.reload();
+            
+        } catch (error) {
+            console.error('Erro ao enviar comentário:', error);
+            alert('Erro ao enviar comentário: ' + error.message);
+            return;
+        }
+    }
+}
+
+/**
+ * Submit edited comment
+ */
+async function submitEditComment(comentarioId, novoTexto) {
+    console.log('Editing comment:', {
+        comentarioId,
+        novoTexto,
         files: selectedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
     });
     
-    // Prepare FormData for file upload
+    // Prepare FormData
     const formData = new FormData();
-    formData.append('texto', texto);
-    formData.append('disciplinaId', typeof CLASS_ID !== 'undefined' ? CLASS_ID : '');
-    if (professorSelecionado) {
-        formData.append('professorId', professorSelecionado);
-    } else {
-        formData.append('professorId', "");
-    }
-    selectedFiles.forEach((file, index) => {
-        formData.append(`files`, file);
+    formData.append('novoTexto', novoTexto);
+    
+    // Add files (could be old files or new files)
+    selectedFiles.forEach((file) => {
+        formData.append('files', file);
     });
     
     try {
-        // ✅ Changed endpoint to /api/avaliacao/comentario
-        const response = await fetch('/api/avaliacao/comentario', {
+        const response = await fetch(`/api/comentarios/${comentarioId}/editar`, {
             method: 'POST',
             body: formData
         });
+        
         if (!response.ok) {
             const errorText = await response.text();
-            alert('Erro ao enviar comentário: ' + errorText);
+            alert('Erro ao editar comentário: ' + errorText);
             return;
         }
-        const result = await response.json();
-        console.log('Comentário enviado com sucesso:', result);
         
-        // ✅ Reload page to show attachments correctly
-        // This ensures all file attachments are properly loaded from the backend
+        const result = await response.json();
+        console.log('Comentário editado com sucesso:', result);
+        
+        // Reload page to show edited comment
         window.location.reload();
         
     } catch (error) {
-        console.error('Erro ao enviar comentário:', error);
-        alert('Erro ao enviar comentário: ' + error.message);
-        return;
+        console.error('Erro ao editar comentário:', error);
+        alert('Erro ao editar comentário: ' + error.message);
     }
 }
 
 // ============================================
 // VALIDATION & INTERACTION FUNCTIONS
 // ============================================
+
+/**
+ * Add "remove rating" or "add rating" link below rating count
+ */
+function addRemoveRatingLink(ratingCountElement, professorId) {
+    // Check if user has voted for this context
+    const userRating = getUserCurrentRating(professorId);
+    
+    // Remove existing link if present
+    const existingLink = ratingCountElement.parentElement.querySelector('.remove-rating-link, .add-rating-link');
+    if (existingLink) {
+        existingLink.remove();
+    }
+    
+    if (userRating !== null) {
+        // User has rated - show remove link
+        const removeLink = document.createElement('div');
+        removeLink.className = 'remove-rating-link';
+        // ✅ FIX: Use quotes to preserve professorId as string (prevents "0882497234989588" from becoming 882497234989588)
+        removeLink.innerHTML = `<span onclick="removeRating('${professorId}')">Remover minha avaliação</span>`;
+        ratingCountElement.parentElement.appendChild(removeLink);
+    } else {
+        // User hasn't rated - show add link
+        const addLink = document.createElement('div');
+        addLink.className = 'add-rating-link';
+        addLink.innerHTML = `<span onclick="openRatingModal('${professorId}')">Adicionar avaliação</span>`;
+        ratingCountElement.parentElement.appendChild(addLink);
+    }
+}
+
+/**
+ * Remove user's rating
+ */
+async function removeRating(professorId = null) {
+    
+    if (!confirm('Tem certeza que deseja remover sua avaliação?')) {
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('disciplinaId', CLASS_ID);
+        if (professorId) {
+            formData.append('professorId', professorId);
+        }
+        
+        const response = await fetch('/api/avaliacao/rating/delete', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            alert('Erro ao remover avaliação: ' + errorText);
+            return;
+        }
+        
+        console.log('Avaliação removida com sucesso');
+        
+        // Reload page to show updated ratings
+        window.location.reload();
+        
+    } catch (error) {
+        console.error('Erro ao remover avaliação:', error);
+        alert('Erro ao remover avaliação: ' + error.message);
+    }
+}
+
+/**
+ * Open rating modal for user to select stars
+ */
+function openRatingModal(professorId = null) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('ratingModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ratingModal';
+        modal.className = 'rating-modal';
+        modal.innerHTML = `
+            <div class="rating-modal-content">
+                <span class="rating-modal-close" onclick="closeRatingModal()">&times;</span>
+                <h3 id="ratingModalTitle">Avaliar</h3>
+                <p id="ratingModalSubtitle">Selecione sua nota:</p>
+                <div class="rating-modal-stars" id="ratingModalStars">
+                    <span class="modal-star" data-rating="1">★</span>
+                    <span class="modal-star" data-rating="2">★</span>
+                    <span class="modal-star" data-rating="3">★</span>
+                    <span class="modal-star" data-rating="4">★</span>
+                    <span class="modal-star" data-rating="5">★</span>
+                </div>
+                <div class="rating-modal-actions">
+                    <button class="btn-modal-cancel" onclick="closeRatingModal()">Cancelar</button>
+                    <button class="btn-modal-submit" id="btnModalSubmitRating" disabled onclick="submitModalRating()">Confirmar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Close on click outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeRatingModal();
+            }
+        });
+    }
+    
+    // Store the professor ID for later use
+    modal.dataset.professorId = professorId || '';
+    
+    // Update title based on context
+    const titleElement = document.getElementById('ratingModalTitle');
+    if (professorId !== null && professorId !== 'null' && PROFESSORES_DATA) {
+        const prof = PROFESSORES_DATA.find(p => {
+            const profId = p.id || p.professorId || p.ID;
+            return String(profId) === String(professorId);
+        });
+        const profNome = prof?.nome || prof?.name || 'Professor';
+        titleElement.textContent = `Avaliar ${profNome}`;
+    } else {
+        titleElement.textContent = 'Avaliar Disciplina';
+    }
+    
+    // Reset stars
+    const modalStars = document.querySelectorAll('.modal-star');
+    modalStars.forEach(star => {
+        star.classList.remove('selected', 'hover');
+        
+        // Add hover and click events
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            highlightModalStars(rating);
+        });
+        
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            selectModalRating(rating);
+        });
+    });
+    
+    // Reset on mouse leave
+    const starsContainer = document.getElementById('ratingModalStars');
+    starsContainer.addEventListener('mouseleave', function() {
+        const selectedRating = modal.dataset.selectedRating;
+        if (selectedRating) {
+            highlightModalStars(parseInt(selectedRating));
+        } else {
+            clearModalStars();
+        }
+    });
+    
+    // Reset selection
+    delete modal.dataset.selectedRating;
+    document.getElementById('btnModalSubmitRating').disabled = true;
+    
+    // Show modal
+    modal.style.display = 'flex';
+}
+
+/**
+ * Close rating modal
+ */
+function closeRatingModal() {
+    const modal = document.getElementById('ratingModal');
+    if (modal) {
+        modal.style.display = 'none';
+        delete modal.dataset.selectedRating;
+        delete modal.dataset.professorId;
+        clearModalStars();
+    }
+}
+
+/**
+ * Highlight modal stars on hover
+ */
+function highlightModalStars(rating) {
+    const stars = document.querySelectorAll('.modal-star');
+    stars.forEach((star, index) => {
+        star.classList.remove('hover');
+        if (index < rating) {
+            star.classList.add('hover');
+        }
+    });
+}
+
+/**
+ * Clear modal stars highlighting
+ */
+function clearModalStars() {
+    const stars = document.querySelectorAll('.modal-star');
+    stars.forEach(star => {
+        star.classList.remove('hover', 'selected');
+    });
+}
+
+/**
+ * Select a rating in the modal
+ */
+function selectModalRating(rating) {
+    const modal = document.getElementById('ratingModal');
+    modal.dataset.selectedRating = rating;
+    
+    // Update stars to show selection
+    const stars = document.querySelectorAll('.modal-star');
+    stars.forEach((star, index) => {
+        star.classList.remove('selected', 'hover');
+        if (index < rating) {
+            star.classList.add('selected');
+        }
+    });
+    
+    // Enable submit button
+    document.getElementById('btnModalSubmitRating').disabled = false;
+}
+
+/**
+ * Submit the rating from modal
+ */
+async function submitModalRating() {
+    const modal = document.getElementById('ratingModal');
+    const rating = parseInt(modal.dataset.selectedRating);
+    const professorId = modal.dataset.professorId;
+    
+    if (!rating || rating < 1 || rating > 5) {
+        alert('Por favor, selecione uma avaliação.');
+        return;
+    }
+    
+    // Close modal
+    closeRatingModal();
+    
+    // Submit rating
+    await submitRating(rating, professorId === '' ? null : professorId);
+}
 
 /**
  * Atualizar visualização após mudanças
@@ -850,10 +1092,6 @@ function atualizarVisualizacao() {
  * Submeter rating (estrelas clicáveis)
  */
 async function submitRating(rating, professorId = null) {
-    if (!currentUserEmail) {
-        alert('Você precisa estar logado para avaliar.');
-        return;
-    }
     
     if (rating < 1 || rating > 5) {
         alert('Nota inválida.');
@@ -884,64 +1122,8 @@ async function submitRating(rating, professorId = null) {
         const result = await response.json();
         console.log('Rating salvo:', result);
         
-        // ✅ Atualizar ou criar avaliação local
-        const avaliacaoExistente = AVALIACOES_DATA.find(a => {
-            const mesmoContexto = a.disciplinaId === CLASS_ID &&
-                String(a.professorId || '') === String(professorId || '');
-            return mesmoContexto && a.userEmail === currentUserEmail;
-        });
-
-        if (avaliacaoExistente) {
-            // Atualizar nota da avaliação existente
-            avaliacaoExistente.nota = rating;
-        } else {
-            // Criar nova avaliação (sem comentário)
-            const novaAvaliacao = {
-                id: result.avaliacaoId,
-                professorId: professorId,
-                disciplinaId: CLASS_ID,
-                userEmail: currentUserEmail,
-                nota: rating,
-                comentario: null,
-                createdAt: new Date().toISOString()
-            };
-            AVALIACOES_DATA.push(novaAvaliacao);
-        }
-        
-        // ✅ Atualizar display diretamente com valores do backend
-        const stats = {
-            media: result.novaMedia,
-            total: result.totalAvaliacoes
-        };
-        
-        if (professorId) {
-            // Atualizar professor
-            const profIndex = PROFESSORES_DATA.findIndex(p => {
-                const profId = p.id || p.professorId || p.ID;
-                return String(profId) === String(professorId);
-            });
-            if (profIndex !== -1) {
-                atualizarProfessor(profIndex, stats);
-            }
-        } else {
-            // Atualizar disciplina - apenas a parte do rating, não os comentários
-            document.querySelector('.discipline-rating .rating-score').textContent = 
-                stats.total > 0 ? stats.media.toFixed(1) : 'N/A';
-            
-            document.querySelector('.discipline-rating .rating-count').textContent = 
-                `${stats.total} ${stats.total === 1 ? 'avaliação' : 'avaliações'}`;
-            
-            preencherEstrelas(document.querySelector('.discipline-rating .rating-stars'), stats.media);
-        }
-        
-        // Re-setup interactive stars
-        setupInteractiveStars();
-        
-        // Visual feedback
-        console.log('✅ Avaliação atualizada com sucesso!');
-        
-        // Return the result for the caller to use
-        return result;
+        // ✅ Simplified: Just reload the page after successful rating
+        window.location.reload();
         
     } catch (error) {
         console.error('Erro ao enviar rating:', error);
@@ -954,10 +1136,6 @@ async function submitRating(rating, professorId = null) {
  * Votar em um comentário (upvote ou downvote)
  */
 async function voteComment(comentarioId, isUpVote) {
-    if (!currentUserEmail) {
-        alert('Você precisa estar logado para votar.');
-        return;
-    }
     
     try {
 		  const formData = new FormData();
@@ -1040,22 +1218,78 @@ function replyToComment(comentarioId) {
 /**
  * Editar um comentário existente
  */
-function editComment(comentarioId, textoAtual) {
-    // TODO: Implementar edição inline
-    const novoTexto = prompt('Editar comentário:', textoAtual);
+function editComment(comentarioId) {
+    // Find the comment data
+    const comentario = COMENTARIOS_DATA.find(c => c.id === comentarioId);
     
-    if (novoTexto === null || novoTexto.trim() === '') {
-        return; // Usuário cancelou
-    }
-    
-    if (novoTexto === textoAtual) {
-        alert('Nenhuma alteração foi feita.');
+    if (!comentario) {
+        alert('Comentário não encontrado.');
         return;
     }
     
-    // TODO: Enviar para backend
-    alert(`Funcionalidade de edição será implementada em breve.\nNovo texto: ${novoTexto.substring(0, 50)}...`);
-    console.log('Edit comment:', comentarioId, 'New text:', novoTexto);
+    // Store editing state
+    editingCommentId = comentarioId;
+    editingCommentData = comentario;
+    
+    // Populate the editor with existing comment text
+    document.getElementById('commentText').value = comentario.texto;
+    
+    // Convert existing files (arquivos) to File objects for selectedFiles
+    // Since we can't create File objects from URLs directly, we'll fetch them as blobs
+    selectedFiles = [];
+    
+    if (comentario.arquivos && comentario.arquivos.length > 0) {
+        // Show a loading state while fetching files
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '<div class="loading-files">Carregando arquivos existentes...</div>';
+        
+        // Fetch all existing files
+        const filePromises = comentario.arquivos.map(async (arquivo) => {
+            try {
+                const response = await fetch(`/api/arquivos/${arquivo.id}`);
+                if (!response.ok) throw new Error('Failed to fetch file');
+                
+                const blob = await response.blob();
+                // Create a File object from the blob
+                const file = new File([blob], arquivo.nomeOriginal, { type: arquivo.tipoMime });
+                return file;
+            } catch (error) {
+                console.error('Error fetching file:', arquivo.nomeOriginal, error);
+                return null;
+            }
+        });
+        
+        Promise.all(filePromises).then(files => {
+            selectedFiles = files.filter(f => f !== null);
+            renderFileList();
+            updateSubmitButton();
+        });
+    } else {
+        renderFileList();
+    }
+    
+    // Update submit button state
+    updateSubmitButton();
+    
+    // Open the editor
+    const editor = document.getElementById('commentEditor');
+    if (!editor.classList.contains('show')) {
+        toggleCommentEditor();
+    } else {
+        // If already open, just update the subtitle
+        updateEditorSubtitle();
+    }
+    
+    // Scroll to the top where the editor is
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    
+    // Focus on textarea after scroll
+    setTimeout(() => {
+        document.getElementById('commentText').focus();
+    }, 500);
 }
 
 /**

@@ -106,7 +106,7 @@ public class AvaliacaoController {
 			Disciplina disciplina = disciplinaOpt.get();
 
 			Professor professor = null;
-			if (professorId != null && !professorId.isEmpty()) {
+			if (professorId != null && !professorId.isEmpty() && !professorId.equals("null")) {
 				Optional<Professor> professorOpt = professorService.buscarPorId(professorId);
 				if (!professorOpt.isPresent()) {
 					return ResponseEntity.status(404).body("Professor não encontrado.");
@@ -153,6 +153,73 @@ public class AvaliacaoController {
 
 		} catch (Exception e) {
 			logger.error("Erro ao submeter rating: ", e);
+			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Endpoint para remover a avaliação (nota) do usuário
+	 */
+	@PostMapping("/api/avaliacao/rating/delete")
+	@ResponseBody
+	public ResponseEntity<?> deleteRating(@RequestParam("disciplinaId") String disciplinaId, 
+													  @RequestParam(value = "professorId", required=false) String professorId,
+													  HttpServletRequest request) {
+
+		String usuarioEmail = sessionService.getCurrentUser(request);
+		
+		if (usuarioEmail == null) {
+			return ResponseEntity.status(401).body("Usuário não autenticado.");
+		}
+
+		try {
+			logger.info("Removendo rating: disciplina={}, professor={}, usuario={}", 
+						  disciplinaId, professorId, usuarioEmail);
+			
+			Usuario usuario = userService.getUser(usuarioEmail);
+			if (usuario == null) {
+				return ResponseEntity.status(404).body("Usuário não encontrado.");
+			}
+			
+			Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
+			if (!disciplinaOpt.isPresent()) {
+				return ResponseEntity.status(404).body("Disciplina não encontrada.");
+			}
+			Disciplina disciplina = disciplinaOpt.get();
+
+			Professor professor = null;
+			if (professorId != null && !professorId.isEmpty() && !professorId.equals("null")) {
+				logger.info("Buscando professor para remoção de rating: ID={}", professorId);
+				Optional<Professor> professorOpt = professorService.buscarPorId(professorId);
+				if (!professorOpt.isPresent()) {
+					return ResponseEntity.status(404).body("Professor não encontrado.");
+				}
+				professor = professorOpt.get();
+			}
+
+			// Find and delete the user's rating
+			Optional<Avaliacao> avaliacaoOpt;
+			if (professor != null) {
+				avaliacaoOpt = avaliacaoRepository.findByDisciplinaAndProfessorAndUsuario(disciplina, professor, usuario);
+			} else {
+				avaliacaoOpt = avaliacaoRepository.findByDisciplinaAndProfessorIsNullAndUsuario(disciplina, usuario);
+			}
+			
+			if (!avaliacaoOpt.isPresent()) {
+				return ResponseEntity.status(404).body("Avaliação não encontrada.");
+			}
+
+			Avaliacao avaliacao = avaliacaoOpt.get();
+			avaliacaoRepository.delete(avaliacao);
+			logger.info("Rating removido com sucesso. Avaliacao ID: {}", avaliacao.getId());
+
+			return ResponseEntity.ok(Map.of(
+				"success", true,
+				"message", "Avaliação removida com sucesso"
+			));
+
+		} catch (Exception e) {
+			logger.error("Erro ao remover rating: ", e);
 			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
 		}
 	}

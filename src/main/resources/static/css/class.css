@@ -136,6 +136,40 @@
     color: #7f8c8d;
 }
 
+/* Remove Rating Link */
+.remove-rating-link {
+    margin-top: 4px;
+}
+
+.remove-rating-link span {
+    font-size: 11px;
+    color: #e74c3c;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.remove-rating-link span:hover {
+    color: #c0392b;
+}
+
+/* Add Rating Link */
+.add-rating-link {
+    margin-top: 4px;
+}
+
+.add-rating-link span {
+    font-size: 11px;
+    color: #3498db;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.add-rating-link span:hover {
+    color: #2980b9;
+}
+
 /* Layout em Duas Colunas */
 .two-column-layout {
     display: grid;
@@ -250,7 +284,7 @@
 }
 
 .professor-rating .star {
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .rating-value {
@@ -489,6 +523,14 @@
     padding: 4px 0;
 }
 
+.loading-files {
+    color: #3498db;
+    font-size: 13px;
+    padding: 8px 12px;
+    text-align: center;
+    font-style: italic;
+}
+
 /* Action Buttons */
 .comment-actions {
     display: flex;
@@ -615,6 +657,12 @@
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 12px;
+    /* Word wrapping and line breaks */
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap; /* Preserves line breaks and wraps text */
+    max-width: 100%;
 }
 
 /* Review Actions */
@@ -915,5 +963,135 @@
     
     .rating-score {
         font-size: 24px;
+    }
+}
+
+/* Rating Modal */
+.rating-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+}
+
+.rating-modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.rating-modal-close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #95a5a6;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating-modal-close:hover {
+    color: #7f8c8d;
+}
+
+.rating-modal-content h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 22px;
+}
+
+.rating-modal-content p {
+    margin: 0 0 20px 0;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.rating-modal-stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.modal-star {
+    font-size: 48px;
+    color: #ecf0f1;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.modal-star:hover,
+.modal-star.hover {
+    color: #f39c12;
+    transform: scale(1.1);
+}
+
+.modal-star.selected {
+    color: #f39c12;
+}
+
+.rating-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-modal-cancel,
+.btn-modal-submit {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-modal-cancel {
+    background: #ecf0f1;
+    color: #7f8c8d;
+}
+
+.btn-modal-cancel:hover {
+    background: #bdc3c7;
+}
+
+.btn-modal-submit {
+    background: #3498db;
+    color: white;
+}
+
+.btn-modal-submit:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+.btn-modal-submit:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Mobile responsiveness for rating modal */
+@media (max-width: 480px) {
+    .modal-star {
+        font-size: 40px;
+        gap: 8px;
+    }
+    
+    .rating-modal-content {
+        padding: 20px;
     }
 }

@@ -105,8 +105,8 @@ public class ArquivoComentarioService {
         // Salvar no banco de dados
         ArquivoComentario saved = arquivoComentarioRepository.save(arquivo);
         
-        // Adicionar ao comentário
-        comentario.addArquivo(saved);
+        // Note: No need to call comentario.addArquivo(saved) as the relationship is managed by JPA
+        // and it could cause lazy initialization exceptions outside of a transaction
         
         return saved;
     }
@@ -122,6 +122,10 @@ public class ArquivoComentarioService {
     public List<ArquivoComentario> buscarTodos() {
         return arquivoComentarioRepository.findAll();
     }
+
+	 public List<ArquivoComentario> buscarPorComentarioId(Long comentarioId) {
+		  return arquivoComentarioRepository.findByComentario_ComentarioId(comentarioId);
+	 }
 
     public void deletar(Long id) {
         Optional<ArquivoComentario> arquivoOpt = arquivoComentarioRepository.findById(id);

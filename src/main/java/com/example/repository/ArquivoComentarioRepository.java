@@ -10,4 +10,6 @@ import com.example.model.ArquivoComentario;
  */
 @Repository
 public interface ArquivoComentarioRepository extends JpaRepository<ArquivoComentario, Long> {
+
+	 java.util.List<ArquivoComentario> findByComentario_ComentarioId(Long comentarioId);
 }

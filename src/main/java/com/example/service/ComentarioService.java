@@ -73,6 +73,12 @@ public class ComentarioService {
 		  return comentarioRepository.save(comentario);
     }
 
+
+	 public Comentario editarComentario(Comentario comentario, String novoTexto) {
+		  comentario.edit(novoTexto);
+		  return comentarioRepository.save(comentario);
+	 }
+
 	 public Comentario salvar(Comentario comentario) {
 		  return comentarioRepository.save(comentario);
 	 }

@@ -16,10 +16,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.com.example.scr
 ---
 ## Recent changes
 
-Scrapper já funciona aparentemente sempre. A funcionalidade está implementada no front-end na aba de administrador, e o status do scrapping fica guardado em uma tabela, com o último status sendo exibido no front-end.
-
-Agora a barra de pesquisas está mais complexa porém bem melhor. O código e nome de todas as disciplinas é carregado no local storage do usuário quando ele faz o login, e fica salvo assim até ser atualizado. Da para forçar a atualização mudando a versão no js e html. O matching do código e nome é feito usando o fuse.js, direto no front-end. São cerca de 300KB de dados carregados na cache.
-
+Por enquanto a usabilidade da página da disciplina não está ideal, após receber a confirmação do servidor é feito um reload na página. Tentei fazer ser mais interativo, porém acabou dando trabalho demais e ainda gerando erros. 
 ---
 ## TO DO (Iteração 2)
 - [X] Implementar as páginas das disciplinas (localhost:8080/class/{CODE})
@@ -39,6 +36,8 @@ Agora a barra de pesquisas está mais complexa porém bem melhor. O código e no
 	- Tentar usar isso aqui: https://cagr.sistemas.ufsc.br/relatorios/curriculoCurso?curso=603, separar o id do curso, nome e criar o grafo que relaciona as disciplinas.
 
 - [ ] O comentário precisa ter uma relação de muitos pra muitos com usuários para lidar com o upvote e downvote (O mesmo usuário não pode ter votos repetidos)
+
+
 
 
 ## TO DO DIAGRAMAS

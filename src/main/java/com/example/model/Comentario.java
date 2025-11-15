@@ -97,6 +97,12 @@ public class Comentario {
 	@Column(name = "deleted_by")
 	private String deletedBy;
 
+	@Column(name = "is_edited", nullable = false)
+	private Boolean isEdited = false;
+
+	@Column(name = "edited_at")
+	private Instant editedAt;
+
 
 	// ✅ Relacionamento direto com Disciplina e Professor (comentários agora são independentes de Avaliacao)
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -184,6 +190,12 @@ public class Comentario {
 	public void setDeletedBy(String deletedBy) { this.deletedBy = deletedBy; }
 
 
+	public Boolean getIsEdited() { return isEdited; }
+	public void setIsEdited(Boolean isEdited) { this.isEdited = isEdited; }
+
+	public Instant getEditedAt() { return editedAt; }
+	public void setEditedAt(Instant editedAt) { this.editedAt = editedAt; }
+
 	public Integer hasVoted(String userEmail) {
 		if(votes.containsKey(userEmail)){
 			return votes.get(userEmail) ? 1 : -1;
@@ -215,6 +227,12 @@ public class Comentario {
 	public void addArquivo(ArquivoComentario arquivo) {
 		arquivos.add(arquivo);
 		arquivo.setComentario(this);
+	}
+
+	public void edit(String novoTexto) {
+		this.texto = novoTexto;
+		this.isEdited = true;
+		this.editedAt = Instant.now();
 	}
 
 	public boolean isResposta() {

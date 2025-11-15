@@ -31,6 +31,12 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
      Optional<Avaliacao> findByProfessorIsNullAndDisciplinaAndUsuario(Disciplina disciplina, Usuario usuario);
 
 	 /**
+	  * Find user's rating for a specific context (for deletion)
+	  */
+	 Optional<Avaliacao> findByDisciplinaAndProfessorAndUsuario(Disciplina disciplina, Professor professor, Usuario usuario);
+	 Optional<Avaliacao> findByDisciplinaAndProfessorIsNullAndUsuario(Disciplina disciplina, Usuario usuario);
+
+	 /**
 	  * Retorna avaliações de um professor específico em uma disciplina
 	  */
 	 List<Avaliacao> findByDisciplinaAndProfessor(Disciplina disciplina, Professor professor);

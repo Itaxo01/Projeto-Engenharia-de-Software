@@ -65,7 +65,7 @@ public class DisciplinaController {
 			logger.debug("Lista de professores carregada no /class/{id}");
 
 			// ✅ Carregar avaliações (apenas ratings)
-			List<AvaliacaoService.AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId);
+			List<AvaliacaoService.AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId, sessionService.getCurrentUser(request));
 
 			logger.debug("Lista de avaliações (ratings) carregada no /class/{id}");
 

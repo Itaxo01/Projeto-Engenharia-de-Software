@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import com.example.model.Professor;
 import com.example.model.Usuario;
 import com.example.model.Comentario;
 import com.example.model.Disciplina;
+import com.example.model.ArquivoComentario;
 import com.example.service.ComentarioService;
 import com.example.service.DisciplinaService;
 import com.example.service.ProfessorService;
@@ -172,7 +174,7 @@ public class ComentarioController {
 			Disciplina disciplina = disciplinaOpt.get();
 
 			Professor professor = null;
-			if (professorId != null && !professorId.isEmpty()) {
+			if (professorId != null && !professorId.isEmpty() && !professorId.equals("null")) {
 				Optional<Professor> professorOpt = professorService.buscarPorId(professorId);
 				if (!professorOpt.isPresent()) {
 					return ResponseEntity.status(404).body("Professor não encontrado.");
@@ -223,6 +225,86 @@ public class ComentarioController {
 		} catch (Exception e) {
 			logger.error("Erro interno: ", e);
 			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
+		}
+	}
+
+	@PostMapping("/api/comentarios/{id}/editar")
+	@ResponseBody
+	@Transactional // ✅ Needed to avoid lazy initialization exception when saving files
+	public ResponseEntity<?> editarComentario(@PathVariable("id") Long comentarioId, @RequestParam(value = "novoTexto", required=true) String novoTexto, @RequestParam(value = "files", required=false) MultipartFile[] files, HttpServletRequest request) {
+		String userEmail = sessionService.getCurrentUser(request);
+		
+		logger.debug("Iniciando edição do comentário ID " + comentarioId);
+
+		if (userEmail == null) {
+			return ResponseEntity.status(401).body("Usuário não autenticado.");
+		}
+
+		Usuario user = userService.getUser(userEmail);
+		if (user == null) {
+			return ResponseEntity.status(404).body("Usuário não encontrado.");
+		}
+		
+		Comentario comentario = comentarioService.buscarPorId(comentarioId).orElse(null);
+		if (comentario == null) {
+			return ResponseEntity.status(404).body("Comentário não encontrado.");
+		}
+
+		if (novoTexto == null || novoTexto.trim().isEmpty()) {
+			return ResponseEntity.status(400).body("O texto do comentário não pode ser vazio.");
+		}
+		if (novoTexto.length() > 2000) {
+			return ResponseEntity.status(400).body("O texto do comentário excede o limite de 2000 caracteres.");
+		}
+		if(!comentario.getUsuario().getUser_email().equals(userEmail)) {
+			return ResponseEntity.status(403).body("Permissão negada para editar este comentário.");
+		}
+
+		List<ArquivoComentario> arquivosSalvos = arquivoService.buscarPorComentarioId(comentarioId);
+		// Vou deletar os arquivos antigos e salvar os novos
+		logger.debug("Deletando " + arquivosSalvos.size() + " arquivos antigos associados ao comentário ID " + comentarioId);
+		for (ArquivoComentario arquivo : arquivosSalvos) {
+			try {
+				arquivoService.deletar(arquivo.getId());
+			} catch(Exception e) {
+				return ResponseEntity.status(500).body("Erro ao deletar arquivo antigo: " + e.getMessage());
+			}
+		}
+
+		try {
+			comentarioService.editarComentario(comentario, novoTexto);
+			logger.debug("Comentário ID " + comentarioId + " editado com sucesso.");
+			logger.debug("Salvando novos arquivos para o comentário ID " + comentarioId);
+			if (files != null && files.length > 0) {
+				// ✅ Refresh comentario to avoid lazy initialization issues
+				comentario = comentarioService.buscarPorId(comentarioId).orElse(null);
+				if (comentario == null) {
+					return ResponseEntity.status(404).body("Comentário não encontrado após edição.");
+				}
+				
+				for (MultipartFile file : files) {
+					if (!file.isEmpty()) {
+						if (file.getSize() > 5 * 1024 * 1024) { // 5MB
+							return ResponseEntity.status(400).body("O arquivo " + file.getOriginalFilename() + " excede o tamanho máximo de 5MB.");
+						}
+						try {
+							arquivoService.salvarArquivo(file, comentario);
+							logger.info("Arquivo " + file.getOriginalFilename() + " salvo com sucesso.");
+						} catch (Exception e) {
+							return ResponseEntity.status(500).body("Erro ao salvar o arquivo " + file.getOriginalFilename() + ": " + e.getMessage());
+						}
+					}
+				}
+			}
+			logger.debug("Edição do comentário ID " + comentarioId + " concluída com sucesso.");
+			// ✅ Return JSON response instead of plain text
+			return ResponseEntity.ok(Map.of(
+				"success", true,
+				"message", "Comentário editado com sucesso"
+			));
+		
+		} catch(Exception e) {
+			return ResponseEntity.status(500).body("Erro ao editar comentário: " + e.getMessage());
 		}
 	}
 	
