@@ -17,6 +17,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.com.example.scr
 ## Recent changes
 
 Por enquanto a usabilidade da página da disciplina não está ideal, após receber a confirmação do servidor é feito um reload na página. Tentei fazer ser mais interativo, porém acabou dando trabalho demais e ainda gerando erros. 
+
 ---
 ## TO DO (Iteração 2)
 - [X] Implementar as páginas das disciplinas (localhost:8080/class/{CODE})
