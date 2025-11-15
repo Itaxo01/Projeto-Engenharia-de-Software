@@ -32,12 +32,26 @@ Por enquanto a usabilidade da página da disciplina não está ideal, após rece
 
 
 ## TO DO (Iteração 3)
-- [ ] Fetch dos cursos da UFSC (Necessário para montar o grafo das dependências entre disciplinas)
+
+- [X] O comentário precisa ter uma relação de muitos pra muitos com usuários para lidar com o upvote e downvote (O mesmo usuário não pode ter votos repetidos). Implementar os upvotes e downvotes do comentário
+
+- [X] Implementar Arquivos do comentário (Incluso visualização dos mesmos no frontend). Limitado os tipos de arquivos aceitos para assegurar uma segurança ao usuário.
+
+- [X] Implementar edição do comentário (Com arquivos)
+
+- [X] Implementar deleção do comentário (Feito com soft delete e deleção periódica)
+
+- [X] Implementar rating dos professores/disciplina
+
+- [ ] Implementar resposta de comentário
+
+
+- [ ] (Optional) Melhorar a resposta das ações de comentário e rating no frontend (Atualmente se recarrega a página para assegurar as mudanças)
+
+- [ ] (Optional) Modificar a relação Disciplina Professor para uma entidade intermediária isolada. Com isso, implementar no scrapper o getter do semestre da relação, no frontend mostrar apenas os DisciplinaProfessor cuja distância de semestres em relação ao atual for menor igual a, por exemplo, cinco semestres.
+
+- [ ] (Optional )Fetch dos cursos da UFSC (Necessário para montar o grafo das dependências entre disciplinas)
 	- Tentar usar isso aqui: https://cagr.sistemas.ufsc.br/relatorios/curriculoCurso?curso=603, separar o id do curso, nome e criar o grafo que relaciona as disciplinas.
-
-- [ ] O comentário precisa ter uma relação de muitos pra muitos com usuários para lidar com o upvote e downvote (O mesmo usuário não pode ter votos repetidos)
-
-
 
 
 ## TO DO DIAGRAMAS
