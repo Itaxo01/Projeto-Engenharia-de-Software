@@ -6,7 +6,6 @@ import com.example.model.MapaCurricular;
 import com.example.model.Usuario;
 import com.example.repository.DisciplinaRepository;
 import com.example.repository.MapaCurricularRepository;
-import com.example.service.MapaCurricularService.MapaCurricularDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,6 +73,10 @@ public class MapaCurricularService {
 		
 		// Criar novo
 		MapaCurricular novo = new MapaCurricular(usuario, disciplina, semestre);
+
+		// verifica se ha alguma avaliacao de usuario para disciplina
+		novo.setAvaliada(Boolean.TRUE);
+	
 		return mapaCurricularRepository.save(novo);
 	}
 

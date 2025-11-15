@@ -188,12 +188,14 @@ async function adicionarNoServidor(cod, nome) {
             console.log(response)
             throw new Error('Erro ao adicionar disciplina');
         }
+
+        const disciplina = await response.json()
         
         // Adicionar localmente
         semestres[semestreAtual].disciplinas.push({ 
             codigo: cod, 
             nome: nome, 
-            avaliada: false 
+            avaliada: disciplina.avaliada 
         });
         renderizar();
         fecharModal();

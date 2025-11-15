@@ -73,6 +73,24 @@ public class AvaliacaoService {
         return avaliacaoRepository.findById(id);
     }
 
+    public Optional<Avaliacao> buscarPorUsuarioDisciplina(String usuarioEmail, String disciplinaCodigo) {
+        Usuario user = userService.getUser(usuarioEmail);
+        Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaCodigo);
+        if (user == null) {
+            throw new IllegalArgumentException("Usuário não existe.");
+        }
+
+        if (disciplinaOpt.isEmpty()) {
+            throw new IllegalArgumentException("Disciplina não existe.");
+        }
+
+        return avaliacaoRepository.findByDisciplinaAndProfessorIsNullAndUsuario(disciplinaOpt.get(), user);
+    }
+
+    public boolean possuiAvaliacaoPorUsuarioDisciplina(String usuarioEmail, String disciplinaCodigo) {
+        return buscarPorUsuarioDisciplina(usuarioEmail, disciplinaCodigo).isPresent();
+    }
+
     // Buscar todas as avaliações
     public List<Avaliacao> buscarTodas() {
         return avaliacaoRepository.findAll();
