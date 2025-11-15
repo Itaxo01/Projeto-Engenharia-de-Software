@@ -58,12 +58,12 @@
             </div>
             <div class="discipline-rating">
                 <div class="rating-score">N/A</div>
-                <div class="rating-stars">
-                    <span class="star">★</span>
-                    <span class="star">★</span>
-                    <span class="star">★</span>
-                    <span class="star">★</span>
-                    <span class="star">★</span>
+                <div class="rating-stars discipline-rating-stars" data-context="discipline">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
                 </div>
                 <div class="rating-count">0 avaliações</div>
             </div>
@@ -90,9 +90,14 @@
                                     <span class="star">★</span>
                                 </div>
                                 <div class="rating-value">N/A</div>
+                                <div class="rating-count">0 avaliações</div>
                             </div>
                         </div>
                     </div>
+						<div style="margin-top: 1rem; padding: 0.75rem; background-color: #f8f9fa; border-left: 3px solid #dee2e6; border-radius: 4px; text-align: center;">
+							<p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #6c757d;">Clique em algum professor para ver os comentários específicos</p>
+							<p style="margin: 0; font-size: 0.875rem; color: #6c757d;">Clique novamente para retornar aos comentários da disciplina</p>
+						</div>
                 </div>
             </div>
 
@@ -100,34 +105,23 @@
             <div class="right-column">
                 <div class="section-card">
                     <div class="section-header">
-                        <h2>Avaliações</h2>
-                        <button class="btn-add-review" onclick="toggleCommentEditor()">Adicionar Avaliação</button>
+                        <h2>Comentários</h2>
+                        <button class="btn-add-review" onclick="toggleCommentEditor()">Adicionar Comentário</button>
                     </div>
                     
                     <!-- Editor de Comentário Inline -->
                     <div id="commentEditor" class="comment-editor">
                         <div class="comment-editor-header">
-                            <div class="comment-editor-title">Nova Avaliação</div>
-                            <div class="comment-editor-subtitle" id="editorSubtitle">Avaliando a disciplina</div>
+                            <div class="comment-editor-title">Novo Comentário</div>
+                            <div class="comment-editor-subtitle" id="editorSubtitle">Comentando sobre a disciplina</div>
                         </div>
                         <form class="comment-form" onsubmit="submitComment(event)">
-                            <!-- Seletor de Rating -->
-                            <div class="rating-selector">
-                                <span class="rating-selector-label">Nota:</span>
-                                <div class="rating-selector-stars" id="ratingSelectorStars">
-                                    <span class="star" data-rating="1" onclick="selectRating(1)" onmouseenter="hoverRating(1)" onmouseleave="unhoverRating()">★</span>
-                                    <span class="star" data-rating="2" onclick="selectRating(2)" onmouseenter="hoverRating(2)" onmouseleave="unhoverRating()">★</span>
-                                    <span class="star" data-rating="3" onclick="selectRating(3)" onmouseenter="hoverRating(3)" onmouseleave="unhoverRating()">★</span>
-                                    <span class="star" data-rating="4" onclick="selectRating(4)" onmouseenter="hoverRating(4)" onmouseleave="unhoverRating()">★</span>
-                                    <span class="star" data-rating="5" onclick="selectRating(5)" onmouseenter="hoverRating(5)" onmouseleave="unhoverRating()">★</span>
-                                </div>
-                            </div>
                             
                             <!-- Textarea -->
                             <textarea 
                                 id="commentText" 
                                 class="comment-textarea" 
-                                placeholder="Compartilhe sua experiência com esta disciplina..."
+                                placeholder="Compartilhe sua experiência..."
                                 maxlength="2000"
                             ></textarea>
                             
@@ -138,12 +132,12 @@
                                     id="fileInput" 
                                     class="file-input" 
                                     multiple 
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.webp,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                     onchange="handleFileSelect(event)"
                                 >
                                 <label for="fileInput" class="file-upload-label">
                                     <span class="file-icon">📎</span>
-                                    <span class="file-text">Anexar arquivos (máx. 5MB cada)</span>
+                                    <span class="file-text">Anexar imagens ou documentos (máx. 5MB cada)</span>
                                 </label>
                                 <div id="fileList" class="file-list"></div>
                             </div>
@@ -159,8 +153,8 @@
                     <div class="reviews-list">
                         <!-- Placeholder quando não há avaliações -->
                         <div class="no-reviews">
-                            <p>Ainda não há avaliações para esta disciplina.</p>
-                            <p>Seja o primeiro a avaliar!</p>
+                            <p>Ainda não há comentários para esta disciplina.</p>
+                            <p>Seja o primeiro a comentar!</p>
                         </div>
                     </div>
                 </div>
@@ -172,12 +166,14 @@
     <script th:inline="javascript">
         // Dados do backend
         const AVALIACOES_DATA = /*[[${avaliacoes}]]*/ [];
+        const COMENTARIOS_DATA = /*[[${comentarios}]]*/ [];
         const PROFESSORES_DATA = /*[[${professors}]]*/ [];
         const CLASS_ID = /*[[${classId}]]*/ '';
         const USER_EMAIL = /*[[${userEmail}]]*/ '';
+        const IS_ADMIN = /*[[${isAdmin}]]*/ false;
     </script>
     <script src="/js/class.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.basic.min.js"></script>
-    <script src="/js/searchBar.js?v=1.0.3"></script>
+    <script src="/js/searchBar.js?v=1.0.4"></script>
 </body>
 </html>

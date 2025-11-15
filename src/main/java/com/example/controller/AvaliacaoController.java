@@ -25,6 +25,7 @@ import com.example.scrapper.DisciplinaScrapper;
 import com.example.model.Comentario;
 import com.example.model.Avaliacao;
 import com.example.model.Disciplina;
+import com.example.repository.AvaliacaoRepository;
 import com.example.service.ComentarioService;
 import com.example.service.AvaliacaoService;
 import com.example.service.SessionService;
@@ -48,6 +49,9 @@ public class AvaliacaoController {
 
 	@Autowired
 	private ComentarioService comentarioService;
+	
+	@Autowired
+	private AvaliacaoRepository avaliacaoRepository;
 
 	@Autowired
 	private AvaliacaoService avaliacaoService;
@@ -64,113 +68,99 @@ public class AvaliacaoController {
 	private static final Logger logger = LoggerFactory.getLogger(AvaliacaoController.class);
 
 
-	@PostMapping("/api/comentario/criar")
+	/**
+	 * Endpoint para adicionar/atualizar apenas a NOTA de uma avaliação
+	 * Cria uma nova Avaliacao se não existir, ou atualiza a nota se já existir
+	 */
+	@PostMapping("/api/avaliacao/rating")
 	@ResponseBody
-	public ResponseEntity<?> criarComentario(@RequestParam("texto") String texto,
-														 @RequestParam("disciplinaId") String disciplinaId, 
-														 @RequestParam(value = "professorId", required=false) String professorId,
-														 @RequestParam("nota") Integer nota,
-														 @RequestParam(value = "files", required=false) MultipartFile[] files, HttpServletRequest request) {
+	public ResponseEntity<?> submitRating(@RequestParam("disciplinaId") String disciplinaId, 
+													  @RequestParam(value = "professorId", required=false) String professorId,
+													  @RequestParam("nota") Integer nota, 
+													  HttpServletRequest request) {
 
-      try {
-			logger.info("Iniciando criação de comentário e avaliação.");
+		String usuarioEmail = sessionService.getCurrentUser(request);
+		
+		if (usuarioEmail == null) {
+			return ResponseEntity.status(401).body("Usuário não autenticado.");
+		}
+
+		try {
+			logger.info("Submetendo rating: nota={}, disciplina={}, professor={}, usuario={}", 
+						  nota, disciplinaId, professorId, usuarioEmail);
 			
-			String usuarioEmail = sessionService.getCurrentUser(request);
-			if(usuarioEmail == null) return ResponseEntity.status(403).body("Usuário não autenticado.");
+			// Validações
+			if (nota == null || nota < 1 || nota > 5) {
+				return ResponseEntity.status(400).body("Nota deve estar entre 1 e 5.");
+			}
 			
 			Usuario usuario = userService.getUser(usuarioEmail);
-			if(usuario == null) return ResponseEntity.status(403).body("Usuário não encontrado.");
+			if (usuario == null) {
+				return ResponseEntity.status(404).body("Usuário não encontrado.");
+			}
 			
 			Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
-			if(!disciplinaOpt.isPresent()) {
-				return ResponseEntity.status(400).body("Disciplina não encontrada.");
+			if (!disciplinaOpt.isPresent()) {
+				return ResponseEntity.status(404).body("Disciplina não encontrada.");
 			}
 			Disciplina disciplina = disciplinaOpt.get();
 
 			Professor professor = null;
-			if(professorId != null && !professorId.isEmpty()) {
+			if (professorId != null && !professorId.isEmpty()) {
 				Optional<Professor> professorOpt = professorService.buscarPorId(professorId);
-				if(!professorOpt.isPresent()) {
-					return ResponseEntity.status(400).body("Professor não encontrado.");
+				if (!professorOpt.isPresent()) {
+					return ResponseEntity.status(404).body("Professor não encontrado.");
 				}
 				professor = professorOpt.get();
 			}
 
-			if(texto == null || texto.trim().isEmpty()) {
-				return ResponseEntity.status(400).body("O texto do comentário não pode ser vazio.");
-			}
-
-			if(texto.length() > 2000) {
-				return ResponseEntity.status(400).body("O texto do comentário excede o limite de 2000 caracteres.");
-			}
-
+			// Cria ou atualiza avaliação
+			Optional<Avaliacao> avaliacaoOpt = avaliacaoService.create(professor, disciplina, usuario, nota);
 			
+			if (!avaliacaoOpt.isPresent()) {
+				return ResponseEntity.status(500).body("Erro ao salvar avaliação.");
+			}
+
+			Avaliacao avaliacao = avaliacaoOpt.get();
+			logger.info("Rating salvo com sucesso. Avaliacao ID: {}", avaliacao.getId());
+
+			// ✅ Calcular nova média para retornar ao frontend
+			List<Avaliacao> avaliacoesContexto;
+			if (professor != null) {
+				avaliacoesContexto = avaliacaoRepository.findByDisciplinaAndProfessor(disciplina, professor);
+			} else {
+				avaliacoesContexto = avaliacaoRepository.findByDisciplinaAndProfessorIsNull(disciplina);
+			}
 			
-			logger.info("Dados OK, criando comentário.");
-			Comentario comentario = comentarioService.criarComentario(usuario, texto);
-			logger.info("Comentário criado com ID: " + comentario.getComentarioId());
-
-			// Cria os arquivos associados ao comentário, se houver
-			if (files != null && files.length > 0) {
-				for (MultipartFile file : files) {
-					if(!file.isEmpty()) {
-						if(file.getSize() > 5 * 1024 * 1024) { // 5MB
-							return ResponseEntity.status(400).body("O arquivo " + file.getOriginalFilename() + " excede o tamanho máximo de 5MB.");
-						}
-
-						try {
-							arquivoService.salvarArquivo(file, comentario);
-							logger.info("Arquivo " + file.getOriginalFilename() + " salvo com sucesso.");
-						} catch (Exception e) {
-							return ResponseEntity.status(500).body("Erro ao salvar o arquivo " + file.getOriginalFilename() + ": " + e.getMessage());
-						}
-					}
-				}
-			}
-			logger.info("Criando avaliação associada ao comentário.");
-
-			Optional<Avaliacao> avaliacaoOpt = avaliacaoService.create(professor, disciplina, usuario, nota, comentario);
-			if(!avaliacaoOpt.isPresent()) {
-				return ResponseEntity.status(500).body("Erro ao criar avaliação.");
-			}
-			// comentario.setAvaliacao(avaliacaoOpt.get());
-			// comentarioService.salvar(comentario); // Atualiza o comentário com a avaliação
-
-			logger.info("Avaliação criada/achada com ID: " + avaliacaoOpt.get().getId());
+			double novaMedia = avaliacoesContexto.stream()
+				.filter(a -> a.getNota() != null && a.getNota() > 0)
+				.mapToInt(Avaliacao::getNota)
+				.average()
+				.orElse(0.0);
+			
+			int totalAvaliacoes = (int) avaliacoesContexto.stream()
+				.filter(a -> a.getNota() != null && a.getNota() > 0)
+				.count();
 
 			return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Avaliação criada com sucesso",
-                "avaliacaoId", avaliacaoOpt.get().getId(),
-                "comentarioId", comentario.getComentarioId(),
-                "nomeUsuario", usuario.getNome() != null ? usuario.getNome() : "Usuário"
-            ));
+				"success", true,
+				"message", "Nota registrada com sucesso",
+				"avaliacaoId", avaliacao.getId(),
+				"nota", avaliacao.getNota(),
+				"novaMedia", novaMedia,
+				"totalAvaliacoes", totalAvaliacoes
+			));
 
 		} catch (Exception e) {
-            logger.error("Erro interno: ", e);
-            return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
+			logger.error("Erro ao submeter rating: ", e);
+			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
 		}
 	}
 
-	// A avaliação terá ou comentário ou nota, em primeira instância, visto que os dois serão criados separadamente
-	// Ao adicionar uma nota a uma avaliação que já existe, só se modifica a nota
-	// mesma coisa para o comentário
-
-	@PostMapping("/class/addNota")
-	@ResponseBody
-	public ResponseEntity<?> addNota(@RequestParam("texto") String texto,
-												@RequestParam("disciplinaId") String disciplinaId, 
-												@RequestParam(value = "professorId", required=false) String professorId,
-												@RequestParam("nota") Integer nota, HttpServletRequest request) {
-
-		String usuarioEmail = sessionService.getCurrentUser(request);
-
-		try {
-			avaliacaoService.addNota(professorId, disciplinaId, usuarioEmail, nota);
-			return ResponseEntity.ok("Avaliação adicionada/atualizada com sucesso.");
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(400).body(e.getMessage());
-		}
-	}
+	/**
+	 * ✅ Endpoint para criar COMENTÁRIO (agora independente de Avaliacao)
+	 * Comentários não são mais únicos por tuple (usuario, disciplina, professor)
+	 */
+	
 
 }

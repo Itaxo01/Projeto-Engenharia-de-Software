@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.hibernate.annotations.Where;
+
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -47,6 +50,8 @@ import jakarta.persistence.UniqueConstraint;
 	@Index(name = "idx_user_created", columnList = "user_email, created_at"),
 	@Index(name = "idx_created", columnList = "created_at")
 })
+
+@Where(clause = "deleted = false")
 public class Comentario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,9 +86,26 @@ public class Comentario {
 	@Column(name = "created_at")
 	private Instant createdAt = Instant.now();
 
-	// Relacionamento com avaliação (comentário raiz)
-	@OneToOne(mappedBy = "comentario", fetch = FetchType.LAZY)
-	private Avaliacao avaliacao;
+
+	// Campos para soft delete
+	@Column(name = "deleted", nullable = false)
+	private Boolean deleted = false;
+
+	@Column(name = "deleted_at")
+	private Instant deletedAt;
+
+	@Column(name = "deleted_by")
+	private String deletedBy;
+
+
+	// ✅ Relacionamento direto com Disciplina e Professor (comentários agora são independentes de Avaliacao)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "disciplina_id", nullable = false)
+	private Disciplina disciplina;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "professor_id", nullable = true)
+	private Professor professor;
 
 	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ArquivoComentario> arquivos = new ArrayList<>();
@@ -94,22 +116,28 @@ public class Comentario {
 	private Comentario pai;
 
 	// Relacionamento autoreferencial - comentários filhos
-	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@Where(clause = "deleted = false")
 	private List<Comentario> filhos = new ArrayList<>();
 
 	public Comentario(){}
 
-	/** Construtor completo utilizado pelo serviço/repositório. */
-	public Comentario(Usuario usuario, String texto) {
+	/** Construtor para comentário principal (raiz) */
+	public Comentario(Usuario usuario, String texto, Disciplina disciplina, Professor professor) {
 		this.usuario = usuario;
 		this.texto = texto;
+		this.disciplina = disciplina;
+		this.professor = professor;
 	}
 
-	/** Construtor para comentário com pai */
+	/** Construtor para comentário com pai (resposta) */
 	public Comentario(Usuario usuario, String texto, Comentario pai) {
 		this.usuario = usuario;
 		this.texto = texto;
 		this.pai = pai;
+		// Herdar disciplina e professor do pai
+		this.disciplina = pai.getDisciplina();
+		this.professor = pai.getProfessor();
 	}
 
 
@@ -134,14 +162,26 @@ public class Comentario {
 	public List<Comentario> getFilhos() { return filhos; }
 	public void setFilhos(List<Comentario> filhos) { this.filhos = filhos; }
 
-	public Avaliacao getAvaliacao() { return avaliacao; }
-	public void setAvaliacao(Avaliacao avaliacao) { this.avaliacao = avaliacao; }
+	public Disciplina getDisciplina() { return disciplina; }
+	public void setDisciplina(Disciplina disciplina) { this.disciplina = disciplina; }
+
+	public Professor getProfessor() { return professor; }
+	public void setProfessor(Professor professor) { this.professor = professor; }
 
 	public Integer getUpVotes() { return upVotes; }
 	public void setUpVotes(Integer upVotes) { this.upVotes = upVotes; }
 
 	public Integer getDownVotes() { return downVotes; }
 	public void setDownVotes(Integer downVotes) { this.downVotes = downVotes; }
+
+	public Boolean getDeleted() { return deleted; }
+	public void setDeleted(Boolean deleted) { this.deleted = deleted; }
+
+	public Instant getDeletedAt() { return deletedAt; }
+	public void setDeletedAt(Instant deletedAt) { this.deletedAt = deletedAt; }
+
+	public String getDeletedBy() { return deletedBy; }
+	public void setDeletedBy(String deletedBy) { this.deletedBy = deletedBy; }
 
 
 	public Integer hasVoted(String userEmail) {
@@ -182,7 +222,7 @@ public class Comentario {
 	}
 
 	public boolean isComentarioPrincipal() {
-		return pai == null && avaliacao != null;
+		return pai == null;
 	}
 
 	public boolean isComentarioAninhado() {

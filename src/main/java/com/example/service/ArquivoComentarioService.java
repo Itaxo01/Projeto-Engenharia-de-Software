@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,11 +28,57 @@ public class ArquivoComentarioService {
     // Diretório onde os arquivos serão salvos (configurável via application.properties)
     @Value("${app.upload.dir:uploads/comentarios}")
     private String uploadDir;
+    
+    // Security: List of allowed MIME types
+    private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList(
+        // Images
+        "image/jpeg",
+        "image/jpg",
+        "image/png", 
+        "image/gif",
+        "image/webp",
+        // Documents
+        "application/pdf",
+        "application/msword", // .doc
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+        "application/vnd.ms-excel", // .xls
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+        "text/plain"
+    );
+    
+    // Security: List of allowed file extensions
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(
+        ".jpg", ".jpeg", ".png", ".gif", ".webp",
+        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt"
+    );
 
     /**
      * Salva um arquivo enviado via MultipartFile
      */
     public ArquivoComentario salvarArquivo(MultipartFile file, Comentario comentario) throws IOException {
+        // Security validation: check MIME type
+        String mimeType = file.getContentType();
+        if (mimeType == null || !ALLOWED_MIME_TYPES.contains(mimeType)) {
+            throw new IllegalArgumentException("Tipo de arquivo não permitido: " + mimeType + 
+                ". Apenas imagens (JPG, PNG, GIF, WebP) e documentos (PDF, DOC, DOCX, XLS, XLSX, TXT) são permitidos.");
+        }
+        
+        // Security validation: check file extension
+        String nomeOriginal = file.getOriginalFilename();
+        if (nomeOriginal == null) {
+            throw new IllegalArgumentException("Nome do arquivo inválido");
+        }
+        
+        String extensao = "";
+        if (nomeOriginal.contains(".")) {
+            extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf(".")).toLowerCase();
+        }
+        
+        if (!ALLOWED_EXTENSIONS.contains(extensao)) {
+            throw new IllegalArgumentException("Extensão de arquivo não permitida: " + extensao +
+                ". Apenas " + String.join(", ", ALLOWED_EXTENSIONS) + " são permitidos.");
+        }
+        
         // Criar diretório se não existir
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
@@ -39,11 +86,6 @@ public class ArquivoComentarioService {
         }
         
         // Gerar nome único para o arquivo
-        String nomeOriginal = file.getOriginalFilename();
-        String extensao = "";
-        if (nomeOriginal != null && nomeOriginal.contains(".")) {
-            extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
-        }
         String nomeUnico = UUID.randomUUID().toString() + extensao;
         
         // Salvar arquivo no sistema de arquivos
