@@ -27,9 +27,22 @@
 hs_err_pid*
 replay_pid*
 
+# enviromnment variables
+.env
+
+# Uploads directory
+uploads/
+/uploads
+
+# Testes directory
 Testes/
 .pdf
-.env
+
+# Database files
+*.db
+*.db-journal
+
+
 ### Maven ###
 target/
 pom.xml.tag
@@ -53,6 +66,11 @@ buildNumber.properties
 
 
 ## VSCODE
+
+# IDE
+.idea/
+.vscode/
+*.iml
 
 .vscode
 /src/main/resources/users.json 
