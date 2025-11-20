@@ -62,7 +62,7 @@ public class DisciplinaService {
         }
 
         int professoresDepois = d.getProfessores().size();
-        logger.info("Disciplina {}: {} professores antes, {} adicionados, {} total",
+        logger.debug("Disciplina {}: {} professores antes, {} adicionados, {} total",
                    codigo, professoresAntes, (professoresDepois - professoresAntes), professoresDepois);
 
         Disciplina disciplinaSalva = disciplinaRepository.save(d);

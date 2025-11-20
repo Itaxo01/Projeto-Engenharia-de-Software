@@ -39,8 +39,8 @@ Testes/
 .pdf
 
 # Database files
-*.db
-*.db-journal
+/data/*.db
+/data/*.db-journal
 
 
 ### Maven ###
