@@ -38,8 +38,6 @@ import okhttp3.Response;
  */
 @Service
 public class DisciplinaScrapper { 
-    private final boolean DEBUG = true;
-    
     private static final Logger logger = LoggerFactory.getLogger(DisciplinaScrapper.class);
     
     private static final Object lock = new Object();
@@ -131,8 +129,6 @@ public class DisciplinaScrapper {
 											processarPaginas(resultDoc, semestre, centroId, result);
 										}
 
-										Thread.sleep(500);
-										
 								} catch (InterruptedException e) {
 										Thread.currentThread().interrupt();
 										logger.warn("Scraping interrompido");
@@ -280,7 +276,7 @@ public class DisciplinaScrapper {
                     
                     if (!id.isEmpty() && !nome.isEmpty()) {
                         centros.put(id, nome);
-                        logger.debug("Centro encontrado: {} -> {}", id, nome);
+                        // logger.debug("Centro encontrado: {} -> {}", id, nome);
                     }
                 }
                 dados.setCentros(centros);
@@ -360,7 +356,7 @@ public class DisciplinaScrapper {
 			
 			// Extrair ID do botão de busca dinamicamente
 			String botaoBuscarId = extrairIdBotaoBusca(doc);
-			logger.debug("Botao de busca encontrado = {}", botaoBuscarId);
+			// logger.debug("Botao de busca encontrado = {}", botaoBuscarId);
 			
 			// ÚNICA REQUISIÇÃO: Submeter busca diretamente
 			FormBody.Builder formBuilder = new FormBody.Builder();
@@ -411,7 +407,7 @@ public class DisciplinaScrapper {
 			String name = botao.attr("name");
 			if (id.contains("formBusca") || name.contains("formBusca")) {
 					String botaoBuscarId = !id.isEmpty() ? id : name;
-					logger.debug("ID do botão de busca encontrado: {}", botaoBuscarId);
+					// logger.debug("ID do botão de busca encontrado: {}", botaoBuscarId);
 					return botaoBuscarId;
 			}
 		}
@@ -425,16 +421,15 @@ public class DisciplinaScrapper {
 		Document currentDoc = doc;
 
 		while(currentDoc != null){
-			logger.debug("Processando página {} para semestre={}, centro={}", paginaAtual, semestre, centro);
+			logger.info("Processando página {} para semestre={}, centro={}", paginaAtual, semestre, centro);
 
-            processarTabelaPagina(currentDoc, semestre, centro, result);
-			logger.debug("total de {} disciplinas processadas até a página {}", result.getNumDisciplinasSalvas(), paginaAtual);
+			processarTabelaPagina(currentDoc, semestre, centro, result);
+			logger.info("total de {} disciplinas processadas até a página {}", result.getNumDisciplinasSalvas(), paginaAtual);
 
 			Element nextButton = temProximaPagina(currentDoc);
 			if(nextButton != null) {
 				currentDoc = proximaPagina(nextButton, currentDoc, semestre, centro);
 				paginaAtual++;
-				Thread.sleep(500);
 			} else {
 				logger.info("Ultima página alcançada para o semestre={}, centro={}", semestre, centro);
 				break;
@@ -465,7 +460,7 @@ public class DisciplinaScrapper {
                     if (info != null && !info.getCodigo().isEmpty()) {
 							  Set<Professor> professores = new HashSet<>();
 								for(ProfessorInfo professorInfo: info.getProfessores()){
-									logger.debug("Processando professor: {} ({})", professorInfo.getNome(), professorInfo.getLattesId());
+									// logger.debug("Processando professor: {} ({})", professorInfo.getNome(), professorInfo.getLattesId());
 									try{
 										Professor professor = professorService.criarOuObter(professorInfo.getLattesId(), professorInfo.getNome());
 										professores.add(professor);
@@ -478,7 +473,7 @@ public class DisciplinaScrapper {
 								try{
 									Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores);
 									result.addDisciplina(disciplina);
-                                    logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
+                                    // logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
 								} catch(Exception e){
 									logger.warn("Erro ao criar/atualizar disciplina {}: {}", info.getNome(),
 											e.getMessage());
@@ -578,7 +573,7 @@ public class DisciplinaScrapper {
 			}
 		}
 		
-		logger.debug("Próxima página não disponível");
+		// logger.debug("Próxima página não disponível");
 		return null;
 	 }
 
@@ -626,7 +621,7 @@ public class DisciplinaScrapper {
             
             if (value != null && !value.isEmpty()) {
                 formBuilder.add(name, value);
-                logger.debug("Campo mantido: {} = {}", name, value);
+               //  logger.debug("Campo mantido: {} = {}", name, value);
             }
         }
     }
@@ -645,10 +640,10 @@ public class DisciplinaScrapper {
             .addHeader("X-Requested-With", "XMLHttpRequest")
             .build();
     
-    logger.debug("Enviando requisição AJAX para DataScroller...");
+    logger.info("Enviando requisição AJAX para DataScroller...");
     
     try (Response response = httpClient.newCall(nextPageRequest).execute()) {
-        logger.debug("Resposta recebida. Status: {}", response.code());
+      //   logger.debug("Resposta recebida. Status: {}", response.code());
         
         if (!response.isSuccessful()) {
             logger.error("Erro na requisição: {}", response.code());
@@ -656,7 +651,7 @@ public class DisciplinaScrapper {
         }
         
         String responseBody = response.body().string();
-        logger.debug("Resposta recebida. Tamanho: {} chars", responseBody.length());
+      //   logger.debug("Resposta recebida. Tamanho: {} chars", responseBody.length());
         
         // Para RichFaces, a resposta pode ser XML com updates parciais
         // Vamos tentar primeiro como HTML normal
@@ -664,33 +659,32 @@ public class DisciplinaScrapper {
         
         // Verificar se temos uma tabela de dados na resposta
         Elements newTable = newDoc.select("table#formBusca\\:dataTable tr");
-        if(DEBUG) {
-			if (newTable.size() > 1) {
-            logger.debug("Nova página carregada com {} linhas", newTable.size());
-            
-            // Verificar se o conteúdo realmente mudou
-            Elements oldTable = currentDoc.select("table#formBusca\\:dataTable tr");
-            if (oldTable.size() > 1 && newTable.size() > 1) {
-                String primeiraLinhaAntiga = oldTable.get(1).text();
-                String primeiraLinhaNova = newTable.get(1).text();
-                
-                boolean mudou = !primeiraLinhaAntiga.equals(primeiraLinhaNova);
-                logger.debug("Página mudou: {}", mudou);
-                
-                if (!mudou) {
-                    logger.warn("ATENÇÃO: A página parece não ter mudado!");
-                }
-            }
-            return newDoc;
+		  if (newTable.size() > 1) {
+				// logger.debug("Nova página carregada com {} linhas", newTable.size());
+				
+				// Verificar se o conteúdo realmente mudou
+				Elements oldTable = currentDoc.select("table#formBusca\\:dataTable tr");
+				if (oldTable.size() > 1 && newTable.size() > 1) {
+						String primeiraLinhaAntiga = oldTable.get(1).text();
+						String primeiraLinhaNova = newTable.get(1).text();
+						
+						boolean mudou = !primeiraLinhaAntiga.equals(primeiraLinhaNova);
+						// logger.debug("Página mudou: {}", mudou);
+						
+						if (!mudou) {
+							logger.warn("ATENÇÃO: A página parece não ter mudado!");
+						}
+				}
+				return newDoc;
         } else {
             // Se não encontrou tabela, pode ser uma resposta XML do RichFaces
-            logger.debug("Resposta não contém tabela HTML direta, pode ser resposta AJAX XML");
+            // logger.debug("Resposta não contém tabela HTML direta, pode ser resposta AJAX XML");
             
             // Tentar extrair HTML da resposta XML se necessário
             if (responseBody.contains("formBusca:dataTable")) {
                 // A resposta contém dados da tabela, mas em formato XML
                 // Vamos tentar uma nova requisição para obter a página completa
-                logger.debug("Fazendo nova requisição para obter página completa...");
+               //  logger.debug("Fazendo nova requisição para obter página completa...");
                 
                 Request fullPageRequest = new Request.Builder()
                         .url(actionUrl)
@@ -704,7 +698,7 @@ public class DisciplinaScrapper {
                         Elements fullTable = fullDoc.select("table#formBusca\\:dataTable tr");
                         
                         if (fullTable.size() > 1) {
-                            logger.debug("Página completa obtida com {} linhas", fullTable.size());
+                           //  logger.debug("Página completa obtida com {} linhas", fullTable.size());
                             return fullDoc;
                         }
                     }
@@ -713,9 +707,6 @@ public class DisciplinaScrapper {
 		  }   
 			logger.warn("Não foi possível obter nova página válida");
 			return null;
-        } else {
-			return newDoc;
-		  }
     	}
 	 }
 }

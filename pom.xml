@@ -66,9 +66,17 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<scope>runtime</scope>
+			</dependency>
+			
+			<!-- H2 only for local development (optional) -->
+			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
 				<scope>runtime</scope>
+				<optional>true</optional>
 			</dependency>
 			
 			<!-- Dependências para Web Scraping -->
@@ -97,13 +105,6 @@
 				<optional>true</optional>
 			</dependency>
 
-
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<scope>runtime</scope>
-			</dependency>
-			
     </dependencies>
 
     <build>

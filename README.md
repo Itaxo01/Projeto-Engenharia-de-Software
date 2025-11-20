@@ -1,11 +1,76 @@
-## Run
+## Setup
+
+
+### Prerequisites
+- Java 21
+- Maven 3.9+
+- Docker (If running on production mode)
+
+### Environment Variables
+
+Create a `.env` file on root with default the values for the project
+```bash
+# Admin User Configuration (Required)
+ADMIN_EMAIL=defaultadmin@admin.com
+ADMIN_PASSWORD=admin123
+ADMIN_NOME=admin
+ADMIN_MATRICULA=000000
+ADMIN_CURSO=admin
+
+# Database Configuration
+DATABASE_URL=jdbc:postgresql://localhost:5432/academic_system
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
+```
+**Note:** Load the variables before running with:
+```bash
+source .env
+```
+
+## Development Mode (H2 database)
+Just run the application with
 ```bash
 mvn spring-boot:run
 ```
-## or for debug 
+The H2 database is set by default and should not require further configuration
+
+## Production Mode (PostgreSQL)
+### 1. Start PostgreSQL with Docker
+
+```bash
+# Start PostgreSQL container
+sudo docker compose up -d postgres
+
+# Verify it's running
+sudo docker ps
 ```
-mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.com.example.scrapper=DEBUG"
+
+### 2. Run the application in production profile
+
+```bash
+# Load environment variables
+source .env
+
+# Run with production profile
+SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run
 ```
+#### Useful info for the postgres terminal 
+
+```bash
+# Connect to database via terminal
+sudo docker exec -it academic-system-db psql -U postgres -d academic_system
+
+# Common psql commands:
+# \dt                    - List all tables
+# \d table_name         - Describe table structure
+# SELECT * FROM usuarios; - Query
+# \q                    - Exit
+
+
+# stops the PostgreSQL
+sudo docker compose down
+```
+
 
 ## Then open http://localhost:8080/
 
@@ -16,7 +81,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.com.example.scr
 ---
 ## Recent changes
 
-Por enquanto a usabilidade da página da disciplina não está ideal, após receber a confirmação do servidor é feito um reload na página. Tentei fazer ser mais interativo, porém acabou dando trabalho demais e ainda gerando erros. 
+Fiz as mudanças necessárias para migrar para o postgreSQL. O método para rodar está no run.
 
 ---
 ## TO DO (Iteração 2)

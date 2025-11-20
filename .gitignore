@@ -29,6 +29,7 @@ replay_pid*
 
 Testes/
 .pdf
+.env
 ### Maven ###
 target/
 pom.xml.tag
