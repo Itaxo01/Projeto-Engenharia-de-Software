@@ -1,9 +1,11 @@
 package com.example.scrapper;
 
+import java.util.concurrent.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -32,16 +34,21 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+
 /**
  * Web Scraper para capturar disciplinas e professores do sistema CAGR da UFSC.
  * Mantém controle da última execução para evitar requisições desnecessárias.
  */
 @Service
 public class DisciplinaScrapper { 
+
+
     private static final Logger logger = LoggerFactory.getLogger(DisciplinaScrapper.class);
     
     private static final Object lock = new Object();
     
+	 private final ExecutorService semestreExecutor; // Executor para tarefas assíncronas
+
     // URLs e configurações
     private static final String BASE_URL = "https://cagr.sistemas.ufsc.br";
     private static final String LOGIN_URL = "https://sistemas.ufsc.br/login?service=https%3A%2F%2Fcagr.sistemas.ufsc.br%2Fj_spring_cas_security_check&userType=padrao&convertToUserType=alunoGraduacao&lockUserType=1";
@@ -74,6 +81,8 @@ public class DisciplinaScrapper {
                 .readTimeout(60, TimeUnit.SECONDS)
                 .cookieJar(new okhttp3.JavaNetCookieJar(cookieManager))
                 .build();
+			
+		  this.semestreExecutor = Executors.newFixedThreadPool(10); // Pool de threads para tarefas assíncronas
     }
     
     /**
@@ -98,60 +107,57 @@ public class DisciplinaScrapper {
             // Atualiza status para executando
             
             ScrapingResult result = new ScrapingResult();
+	
             try {
-                // 1. Fazer login
-                if (!fazerLogin(user, pass)) {
-                    result.setErro("Falha no login");
-                    scrapperStatusService.marcarFimExecucao(false, 0, 0, "Falha no login");
-                    return result;
-                }
-                
-                // 2. Selecionar os semestres e centros do formulário.
-					 DadosIniciais dadosIniciais = obterDadosIniciais();
-					 ArrayList<String> semestres = gerarSemestres(dadosIniciais.getSemestreAtual());
-					 logger.info("Semestres a processar: {}", semestres);
-					 Map<String, String> centros = dadosIniciais.getCentros();
-					 logger.info("Centros encontrados: {}", centros.keySet());
+					// 1. Fazer login
+					if (!fazerLogin(user, pass)) {
+						result.setErro("Falha no login");
+						scrapperStatusService.marcarFimExecucao(false, 0, 0, "Falha no login");
+						return result;
+					}
+					
+					// 2. Selecionar os semestres e centros do formulário.
+					DadosIniciais dadosIniciais = obterDadosIniciais();
+					ArrayList<String> semestres = gerarSemestres(dadosIniciais.getSemestreAtual());
+					logger.info("Semestres a processar: {}", semestres);
+					Map<String, String> centros = dadosIniciais.getCentros();
+					logger.info("Centros encontrados: {}", centros.keySet());
 
-					 // 3. Efetuar a busca para cada semestre e centro
-					 for (String semestre : semestres) {
-						logger.info("Processando semestre: {}", semestre);
-						for (Map.Entry<String, String> centro : centros.entrySet()) {
-							String centroId = centro.getKey();
-							String centroNome = centro.getValue();
-							logger.info("Processando centro: {} ({})", centroNome, centroId);
-							
-								try {
-										Document resultDoc = efetuarBusca(semestre, centroId, result);
-										if(resultDoc != null){
-											// 4. Processar a tabela de dados
-											logger.info("Busca feita com sucesso, iniciando processamento das tabelas");
-											processarPaginas(resultDoc, semestre, centroId, result);
-										}
 
-								} catch (InterruptedException e) {
-										Thread.currentThread().interrupt();
-										logger.warn("Scraping interrompido");
-								} catch (Exception e) {
-										logger.warn("Erro ao processar semestre {} centro {}: {}", 
-												semestre, centroNome, e.getMessage());
-										continue; // Continua com o próximo curso
-								}
-							}
+					// 3. Efetuar a busca para cada semestre e centro (Em paralelo)
+
+					List<Future<?>> semestreFutures = new ArrayList<>();
+
+					for (String semestre : semestres) {
+						Future<?> future = semestreExecutor.submit(() -> {
+							processarSemestre(semestre, centros, result);
+						});
+						semestreFutures.add(future);
+					}
+
+					for(Future<?> future: semestreFutures){
+						try {
+							future.get(30, TimeUnit.MINUTES);
+						} catch (TimeoutException e){
+							logger.error("Timeout ao processar semestre durante o scraping");
+							future.cancel(true);
+						} catch (Exception e){
+							logger.error("Erro ao processar semestre durante o scraping: {}", e.getMessage());
 						}
-						
-						logger.info("Scraping concluído. Disciplinas: {}, Professores: {}", 
-						result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos());
+					}
+
+					logger.info("Scraping concluído. Disciplinas: {}, Professores: {}", 
+					result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos());
                 
-						// Atualiza status de sucesso
-                scrapperStatusService.marcarFimExecucao(true, result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos(), null);
+					// Atualiza status de sucesso
+					scrapperStatusService.marcarFimExecucao(true, result.getNumDisciplinasSalvas(), result.getNumProfessoresSalvos(), null);
 
             } catch (Exception e) {
-                logger.error("Erro durante o scraping", e);
-                scrapperStatusService.marcarFimExecucao(false, 0, 0, "Erro durante o scraping: " + e.getMessage());
+					logger.error("Erro durante o scraping", e);
+					scrapperStatusService.marcarFimExecucao(false, 0, 0, "Erro durante o scraping: " + e.getMessage());
             } finally {
-                // Sempre marca como não executando ao final
-                scrapperStatusService.setExecucao(false);
+					// Sempre marca como não executando ao final
+					scrapperStatusService.setExecucao(false);
             }
             return result;
         }
@@ -288,7 +294,7 @@ public class DisciplinaScrapper {
     }
     
     /**
-     * Gera os últimos 7 semestres a partir de um semestre específico
+     * Gera os últimos 10 semestres a partir de um semestre específico
      */
     private ArrayList<String> gerarSemestres(String semestreAtual) {
         ArrayList<String> semestres = new ArrayList<>();
@@ -306,8 +312,8 @@ public class DisciplinaScrapper {
             // Adicionar semestre atual
             semestres.add(semestreAtual);
             
-            // Gerar 6 semestres anteriores
-            for (int i = 1; i < 7; i++) {
+            // Gerar 9 semestres anteriores
+            for (int i = 1; i < 10; i++) {
                 periodo--;
                 if (periodo < 1) {
                     periodo = 3; // Volta para período 3 do ano anterior
@@ -329,10 +335,39 @@ public class DisciplinaScrapper {
             semestres.add("20243");
             semestres.add("20242");
             semestres.add("20241");
+            semestres.add("20233");
+            semestres.add("20232");
+				semestres.add("20231");
         }
         
         return semestres;
     }
+
+	 private void processarSemestre(String semestre, Map<String, String> centros, ScrapingResult result){
+		logger.info("Thread {} Processando semestre: {}", Thread.currentThread().getName(), semestre);
+		for (Map.Entry<String, String> centro : centros.entrySet()) {
+			String centroId = centro.getKey();
+			String centroNome = centro.getValue();
+			// logger.info("Processando centro: {} ({})", centroNome, centroId);
+	
+			try {
+					Document resultDoc = efetuarBusca(semestre, centroId, result);
+					if(resultDoc != null){
+						// 4. Processar a tabela de dados
+						logger.info("Busca feita com sucesso, iniciando processamento das tabelas");
+						processarPaginas(resultDoc, semestre, centroId, result);
+					}
+
+			} catch (Exception e) {
+					logger.warn("Erro ao processar semestre {} centro {}: {}", 
+							semestre, centroNome, e.getMessage());
+					continue; // Continua com o próximo curso
+			}
+		}
+
+		logger.info("Thread {} Concluído processamento do semestre: {}", Thread.currentThread().getName(), semestre);
+	}
+	 
     
     private Document efetuarBusca(String semestre, String centro, ScrapingResult result) throws Exception {
 		logger.info("Processando: Semestre={}, Centro={}", semestre, centro);
