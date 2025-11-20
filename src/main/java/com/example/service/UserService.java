@@ -24,7 +24,9 @@ public class UserService {
      * Senha é armazenada com hash BCrypt.
      */
     public QueryResult createUser(String email, String password, String nome, String matricula, String curso) {
-        if (userRepository.emailExists(email)) {
+		email = normalizeEmail(email);
+		
+		if (userRepository.emailExists(email)) {
             return new QueryResult(false, "Email já registrado.");
         }
 		  if (userRepository.idExists(matricula)){
@@ -39,6 +41,8 @@ public class UserService {
 	 * Deleta o usuário identificado pelo email.
 	 */
 	 public QueryResult deleteUser(String email){
+		email = normalizeEmail(email);
+
 		if(!userRepository.emailExists(email)){
 			return new QueryResult(false, "Essa conta não existe");
 		}
@@ -50,7 +54,9 @@ public class UserService {
      * Valida login comparando a senha informada com o hash armazenado.
      */
     public boolean validateUser(String email, String password) {
-		  if (!userRepository.emailExists(email)) {
+		email = normalizeEmail(email);
+		  
+		if (!userRepository.emailExists(email)) {
 				System.out.println("Email não encontrado: " + email);
 				return false;
 		  }
@@ -59,6 +65,8 @@ public class UserService {
     }
 
 	 public Usuario getUser(String email){
+		email = normalizeEmail(email);
+		
 		if(!userRepository.emailExists(email)) return null;
 		return userRepository.getUser(email);
 	 }
@@ -66,6 +74,8 @@ public class UserService {
 		return userRepository.getUsers();
 	}
 	 public boolean toggleAdmin(String email){
+		email = normalizeEmail(email);
+
 		if(!userRepository.emailExists(email)) return false;
 		boolean currentAdmin = userRepository.getAdmin(email);
 		userRepository.setAdmin(email, !currentAdmin);
@@ -74,6 +84,7 @@ public class UserService {
 
 
 	 public boolean getAdmin(String email){
+		email = normalizeEmail(email);
 		return userRepository.getAdmin(email);
 	 }
 	/**
@@ -102,6 +113,8 @@ public class UserService {
 	 * Altera senha de usuário
 	 */
 	public boolean changePassword (String email, String password, String newPassword) throws Exception {
+		email = normalizeEmail(email);
+		
 		if (!userRepository.emailExists(email)) throw new Exception("401");
 		String userPassword = userRepository.getPassword(email);
 		if (!HashingService.verifyPassword(password, userPassword)) throw new Exception("400");;
