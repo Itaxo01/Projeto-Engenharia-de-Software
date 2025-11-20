@@ -40,8 +40,7 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("==============================================");
             System.out.println("🔧 Criando usuário administrador...");
             
-            String hashedPassword = HashingService.hashPassword(adminPassword);
-            userService.createUser(adminEmail, hashedPassword, adminNome, adminMatricula, adminCurso);
+            userService.createUser(adminEmail, adminPassword, adminNome, adminMatricula, adminCurso);
             
             System.out.println("✅ Usuário administrador criado com sucesso!");
             System.out.println("==============================================");

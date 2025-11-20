@@ -80,7 +80,7 @@ public class UserService {
 		boolean currentAdmin = userRepository.getAdmin(email);
 		userRepository.setAdmin(email, !currentAdmin);
 		return true;
-}
+	}
 
 
 	 public boolean getAdmin(String email){
@@ -114,7 +114,7 @@ public class UserService {
 	 */
 	public boolean changePassword (String email, String password, String newPassword) throws Exception {
 		email = normalizeEmail(email);
-		
+
 		if (!userRepository.emailExists(email)) throw new Exception("401");
 		String userPassword = userRepository.getPassword(email);
 		if (!HashingService.verifyPassword(password, userPassword)) throw new Exception("400");;
