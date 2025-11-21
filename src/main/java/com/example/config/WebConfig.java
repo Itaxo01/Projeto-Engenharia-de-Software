@@ -12,8 +12,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AuthenticationInterceptor authenticationInterceptor;
 
+	 @Autowired
+	 private DelayInterceptor delayInterceptor;
+
     @Override
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
-        registry.addInterceptor(authenticationInterceptor);
+        registry.addInterceptor(authenticationInterceptor)
+		  			 .addPathPatterns("/**")
+					 .order(1); // Executes first
+
+        registry.addInterceptor(delayInterceptor)
+					 .addPathPatterns("/api/**")
+					 .order(2); // Executes second
     }
 }

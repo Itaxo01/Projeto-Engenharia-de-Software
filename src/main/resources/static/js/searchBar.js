@@ -18,11 +18,14 @@ class DisciplinasCache {
         try {
             // Check if we have valid cached data
             const cachedData = this.getCachedData();
-            if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
-                return cachedData;
+
+				// *** IMPORTANT ***
+				// The length of the cache is hard coded to be greater than 4000, it may not be the case, but it is better than making a request every time
+            if (cachedData && Array.isArray(cachedData) && cachedData.length > 4000) {
+					return cachedData;
             }
 
-            // Cache miss or expired - fetch from server
+            // Cache miss, expired, or invalid - fetch from server
             const freshData = await this.fetchFromServer();
             // Store in cache
 				if(freshData && Array.isArray(freshData) && freshData.length > 0) {
@@ -39,6 +42,33 @@ class DisciplinasCache {
                 return expiredCache;
             }
             throw error;
+        }
+    }
+    
+    /**
+     * Validate if cached count matches server's expected count
+     */
+    async validateCacheCount(cachedLength) {
+        try {
+            const response = await fetch('/api/search/count');
+            
+            if (!response.ok) {
+                console.warn('⚠️ Could not validate cache count, assuming valid');
+                return true; // Don't invalidate if validation fails
+            }
+            
+            const expectedCount = await response.json();
+            
+            if (cachedLength !== expectedCount) {
+                console.log(`📊 Count mismatch: cached=${cachedLength}, expected=${expectedCount}`);
+                return false;
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.warn('⚠️ Cache validation error:', error);
+            return true; // Don't invalidate on error
         }
     }
 

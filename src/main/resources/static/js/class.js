@@ -834,7 +834,7 @@ async function submitEditComment(comentarioId, novoTexto) {
     });
     
     try {
-        const response = await fetch(`/api/comentario/${comentarioId}/editar`, {
+        const response = await fetch(`/api/comentario/editar/${comentarioId}`, {
             method: 'POST',
             body: formData
         });
@@ -879,7 +879,7 @@ function addRemoveRatingLink(ratingCountElement, professorId) {
         const removeLink = document.createElement('div');
         removeLink.className = 'remove-rating-link';
         // ✅ FIX: Use quotes to preserve professorId as string (prevents "0882497234989588" from becoming 882497234989588)
-        removeLink.innerHTML = `<span onclick="removeRating('${professorId}')">Remover minha avaliação</span>`;
+        removeLink.innerHTML = `<span onclick="removeRating(event, '${professorId}')">Remover minha avaliação</span>`;
         ratingCountElement.parentElement.appendChild(removeLink);
     } else {
         // User hasn't rated - show add link
@@ -893,16 +893,62 @@ function addRemoveRatingLink(ratingCountElement, professorId) {
 /**
  * Remove user's rating
  */
-async function removeRating(professorId = null) {
+async function removeRating(event, professorId = null) {
     
     if (!confirm('Tem certeza que deseja remover sua avaliação?')) {
         return;
     }
     
+    // Find the clicked element and its parent link
+    const clickedSpan = event?.target;
+    const removeLink = clickedSpan?.closest('.remove-rating-link');
+    
+    // Find the rating section based on context
+    let ratingSection = null;
+    if (professorId && professorId !== 'null') {
+        // For professor rating - find the professor card
+        const professorCards = document.querySelectorAll('.professor-item');
+        for (let card of professorCards) {
+            const profData = PROFESSORES_DATA[Array.from(professorCards).indexOf(card)];
+            if (profData) {
+                const profId = String(profData.id || profData.professorId || profData.ID || '');
+                if (profId === String(professorId)) {
+                    ratingSection = card.querySelector('.professor-rating');
+                    break;
+                }
+            }
+        }
+    } else {
+        // For discipline rating
+        ratingSection = document.querySelector('.discipline-rating');
+    }
+    
+    // Disable the link immediately to prevent double-clicks
+    if (removeLink) {
+        removeLink.style.pointerEvents = 'none';
+        removeLink.style.opacity = '0.6';
+        const originalHtml = clickedSpan.innerHTML;
+        clickedSpan.dataset.originalHtml = originalHtml;
+        clickedSpan.innerHTML = '<span class="loading-inline" style="display: inline-flex; align-items: center; gap: 4px;"><div class="spinner spinner-small"></div><span>Removendo...</span></span>';
+    }
+    
+    // Add loading overlay to rating section
+    let overlay = null;
+    if (ratingSection) {
+        overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
+            <div class="spinner"></div>
+            <div class="loading-overlay-text">Removendo avaliação...</div>
+        `;
+        ratingSection.style.position = 'relative';
+        ratingSection.appendChild(overlay);
+    }
+    
     try {
         const formData = new FormData();
         formData.append('disciplinaId', CLASS_ID);
-        if (professorId) {
+        if (professorId && professorId !== 'null') {
             formData.append('professorId', professorId);
         }
         
@@ -913,17 +959,36 @@ async function removeRating(professorId = null) {
         
         if (!response.ok) {
             const errorText = await response.text();
+            
+            // Restore UI on error
+            if (removeLink && clickedSpan.dataset.originalHtml) {
+                removeLink.style.pointerEvents = '';
+                removeLink.style.opacity = '';
+                clickedSpan.innerHTML = clickedSpan.dataset.originalHtml;
+            }
+            if (overlay) overlay.remove();
+            
             alert('Erro ao remover avaliação: ' + errorText);
             return;
         }
         
         console.log('Avaliação removida com sucesso');
         
+        // Keep loading state while page reloads
         // Reload page to show updated ratings
         window.location.reload();
         
     } catch (error) {
         console.error('Erro ao remover avaliação:', error);
+        
+        // Restore UI on error
+        if (removeLink && clickedSpan.dataset.originalHtml) {
+            removeLink.style.pointerEvents = '';
+            removeLink.style.opacity = '';
+            clickedSpan.innerHTML = clickedSpan.dataset.originalHtml;
+        }
+        if (overlay) overlay.remove();
+        
         alert('Erro ao remover avaliação: ' + error.message);
     }
 }
@@ -1087,8 +1152,27 @@ async function submitModalRating() {
         return;
     }
     
-    // Close modal
-    closeRatingModal();
+    // Don't close modal yet - show loading state
+    const modalContent = modal.querySelector('.modal-content');
+    const submitButton = document.getElementById('btnModalSubmitRating');
+    
+    // Add loading overlay to modal
+    if (modalContent && !modalContent.querySelector('.loading-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
+            <div class="spinner"></div>
+            <div class="loading-overlay-text">Enviando avaliação...</div>
+        `;
+        modalContent.style.position = 'relative';
+        modalContent.appendChild(overlay);
+    }
+    
+    // Disable submit button
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('btn-loading');
+    }
     
     // Submit rating
     await submitRating(rating, professorId === '' ? null : professorId);
@@ -1175,7 +1259,11 @@ async function submitRating(rating, professorId = null) {
         
         if (!response.ok) {
             const errorText = await response.text();
-            alert('Erro ao enviar avaliação: ' + errorText);
+            
+            // Remove loading overlay
+            const modal = document.getElementById('ratingModal');
+            const overlay = modal?.querySelector('.loading-overlay');
+            if (overlay) overlay.remove();
             
             // Re-enable button
             if (submitButton) {
@@ -1183,6 +1271,8 @@ async function submitRating(rating, professorId = null) {
                 submitButton.classList.remove('btn-loading');
                 submitButton.textContent = 'Confirmar';
             }
+            
+            alert('Erro ao enviar avaliação: ' + errorText);
             return;
         }
         
@@ -1194,7 +1284,11 @@ async function submitRating(rating, professorId = null) {
         
     } catch (error) {
         console.error('Erro ao enviar rating:', error);
-        alert('Erro ao enviar avaliação: ' + error.message);
+        
+        // Remove loading overlay
+        const modal = document.getElementById('ratingModal');
+        const overlay = modal?.querySelector('.loading-overlay');
+        if (overlay) overlay.remove();
         
         // Re-enable button
         if (submitButton) {
@@ -1202,6 +1296,8 @@ async function submitRating(rating, professorId = null) {
             submitButton.classList.remove('btn-loading');
             submitButton.textContent = 'Confirmar';
         }
+        
+        alert('Erro ao enviar avaliação: ' + error.message);
         return null;
     }
 }
@@ -1284,7 +1380,7 @@ async function voteComment(comentarioId, isUpVote) {
         
         console.log(`Votando no comentário ${comentarioId} - Upvote: ${isUpVote}`);
 
-        const response = await fetch(`/api/comentario/${comentarioId}/votar`, {
+        const response = await fetch(`/api/comentario/votar/${comentarioId}`, {
             method: 'POST',
             body: formData
         });
@@ -1379,6 +1475,9 @@ function editComment(comentarioId) {
     // Populate the editor with existing comment text
     document.getElementById('commentText').value = comentario.texto;
     
+    // Update submit button state immediately after setting text
+    updateSubmitButton();
+    
     // Convert existing files (arquivos) to File objects for selectedFiles
     // Since we can't create File objects from URLs directly, we'll fetch them as blobs
     selectedFiles = [];
@@ -1446,50 +1545,91 @@ async function deleteComment(comentarioId) {
         return;
     }
     
+    // Find the comment card and delete button
+    const commentCard = document.querySelector(`[data-comment-id="${comentarioId}"]`);
+    const deleteButton = commentCard?.querySelector('.delete-btn');
+    
+    // Add loading state to button
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.classList.add('btn-loading');
+        const originalText = deleteButton.innerHTML;
+        deleteButton.dataset.originalHtml = originalText;
+        deleteButton.innerHTML = '<span class="vote-icon">⏳</span><span>Deletando...</span>';
+    }
+    
+    // Add loading overlay to card
+    if (commentCard) {
+        commentCard.classList.add('optimistic-pending');
+    }
+    
     try {
         console.log(`Deletando comentário ${comentarioId}...`);
         
-        const response = await fetch(`/api/comentario/${comentarioId}/delete`, {
+        const response = await fetch(`/api/comentario/delete/${comentarioId}`, {
             method: 'POST'
         });
         
         if (!response.ok) {
             const errorText = await response.text();
+            
+            // Restore button state on error
+            if (deleteButton) {
+                deleteButton.disabled = false;
+                deleteButton.classList.remove('btn-loading');
+                deleteButton.innerHTML = deleteButton.dataset.originalHtml || originalText;
+            }
+            
+            if (commentCard) {
+                commentCard.classList.remove('optimistic-pending');
+                commentCard.classList.add('optimistic-error');
+                setTimeout(() => commentCard.classList.remove('optimistic-error'), 500);
+            }
+            
             alert('Erro ao deletar comentário: ' + errorText);
             return;
         }
         
         console.log('Comentário deletado com sucesso');
         
-        // ✅ Remover comentário do array global
-        const indexGlobal = COMENTARIOS_DATA.findIndex(c => c.id === comentarioId);
-        if (indexGlobal !== -1) {
-            COMENTARIOS_DATA.splice(indexGlobal, 1);
+        // Success animation before removal
+        if (commentCard) {
+            commentCard.classList.remove('optimistic-pending');
+            commentCard.classList.add('optimistic-success');
         }
         
-        // ✅ Atualizar visualização baseado no contexto atual
-        if (professorSelecionado === null) {
-            // Atualizar comentários da disciplina
-            const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
-            mostrarComentarios(comentariosDisciplina, null);
-        } else {
-            // Atualizar comentários do professor
-            const comentariosProfessor = COMENTARIOS_DATA.filter(c => 
-                String(c.professorId) === String(professorSelecionado)
-            );
+        // Wait for animation before removing from DOM
+        setTimeout(() => {
+            // ✅ Remover comentário do array global
+            const indexGlobal = COMENTARIOS_DATA.findIndex(c => c.id === comentarioId);
+            if (indexGlobal !== -1) {
+                COMENTARIOS_DATA.splice(indexGlobal, 1);
+            }
             
-            // Encontrar nome do professor
-            const profIndex = PROFESSORES_DATA.findIndex(p => {
-                const profId = p.id || p.professorId || p.ID;
-                return String(profId) === String(professorSelecionado);
-            });
-            
-            const profNome = profIndex !== -1 
-                ? (PROFESSORES_DATA[profIndex]?.nome || PROFESSORES_DATA[profIndex]?.name || 'Professor')
-                : 'Professor';
-            
-            mostrarComentarios(comentariosProfessor, profNome);
-        }
+            // ✅ Atualizar visualização baseado no contexto atual
+            if (professorSelecionado === null) {
+                // Atualizar comentários da disciplina
+                const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
+                mostrarComentarios(comentariosDisciplina, null);
+            } else {
+                // Atualizar comentários do professor
+                const comentariosProfessor = COMENTARIOS_DATA.filter(c => 
+                    String(c.professorId) === String(professorSelecionado)
+                );
+                
+                // Encontrar nome do professor
+                const profIndex = PROFESSORES_DATA.findIndex(p => {
+                    const profId = p.id || p.professorId || p.ID;
+                    return String(profId) === String(professorSelecionado);
+                });
+                
+                const profNome = profIndex !== -1 
+                    ? (PROFESSORES_DATA[profIndex]?.nome || PROFESSORES_DATA[profIndex]?.name || 'Professor')
+                    : 'Professor';
+                
+                mostrarComentarios(comentariosProfessor, profNome);
+            }
+        }, 300); // Small delay for animation
         
         // ✅ Feedback visual
         alert('Comentário deletado com sucesso!');

@@ -29,7 +29,8 @@ public class DelayInterceptor implements HandlerInterceptor {
         
         // Only apply delay to API endpoints
         String uri = request.getRequestURI();
-        
+		  logger.debug("DelayInterceptor checking request URI: {}", uri);
+		  
         if (delayEnabled && uri.startsWith("/api/")) {
             logger.debug("🐌 Simulating delay of {}ms for: {}", delayMilliseconds, uri);
             

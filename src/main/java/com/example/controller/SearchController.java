@@ -1,7 +1,9 @@
 package com.example.controller;
 
 import com.example.model.Disciplina;
+import com.example.model.ScrapperStatus;
 import com.example.service.DisciplinaService;
+import com.example.service.ScrapperStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,9 @@ public class SearchController {
     @Autowired
     private DisciplinaService disciplinaService;
     
+    @Autowired
+    private ScrapperStatusService scrapperStatusService;
+    
     @GetMapping("/disciplinas")
     public ResponseEntity<List<DisciplinaSearchDTO>> searchDisciplinas() {
         List<Disciplina> resultados = disciplinaService.buscarTodas();
@@ -22,6 +27,17 @@ public class SearchController {
 				.map(d -> DisciplinaSearchDTO.from(d))
 				.toList();
         return ResponseEntity.ok(dtoList);
+    }
+    
+    /**
+     * Returns the expected count of disciplinas from last successful scrape
+     */
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getExpectedCount() {
+        ScrapperStatus status = scrapperStatusService.getUltimoStatus();
+        int count = status.getDisciplinasCapturadas();
+        
+        return ResponseEntity.ok(count);
     }
 	
 	private record DisciplinaSearchDTO (String codigo, String nome) {
