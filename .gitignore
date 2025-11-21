@@ -42,6 +42,9 @@ Testes/
 /data/*.db
 /data/*.db-journal
 
+*.db
+*.mv.db
+*.trace.db
 
 ### Maven ###
 target/
