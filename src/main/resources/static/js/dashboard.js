@@ -10,6 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Carregar dados do servidor
 async function carregarDados() {
+    const container = document.getElementById('semestresContainer');
+    
+    // Show skeleton loading
+    container.innerHTML = Array(8).fill(0).map((_, i) => `
+        <div class="semestre-row">
+            <div class="fase-label">Fase ${i + 1}</div>
+            <div class="skeleton skeleton-card" style="width: 200px; height: 100px; display: inline-block; margin-right: 10px;"></div>
+            <div class="skeleton skeleton-card" style="width: 200px; height: 100px; display: inline-block; margin-right: 10px;"></div>
+        </div>
+    `).join('');
+    
     try {
         const response = await fetch('/api/mapa/listar');
         if (!response.ok) {
@@ -82,6 +93,10 @@ async function removerDisciplina(event, semestreIdx, codigo) {
         return;
     }
     
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.style.opacity = '0.5';
+    
     try {
         const response = await fetch(`/api/mapa/remover/${codigo}`, {
             method: 'DELETE'
@@ -97,6 +112,8 @@ async function removerDisciplina(event, semestreIdx, codigo) {
     } catch (error) {
         console.error('Erro ao remover disciplina:', error);
         alert('Erro ao remover disciplina. Tente novamente.');
+        button.disabled = false;
+        button.style.opacity = '1';
     }
 }
 
@@ -152,6 +169,11 @@ function fecharModal() {
 
 function buscar(termo) {
     const results = document.getElementById('modalSearchResults');
+    
+    // Show loading
+    results.innerHTML = '<div class="loading-inline"><div class="spinner spinner-small"></div><span>Buscando...</span></div>';
+    results.classList.add('show');
+    
     const dados = window.searchDisciplinas(termo);
     
     if (!dados || dados.length === 0) {
@@ -164,7 +186,6 @@ function buscar(termo) {
             </div>
         `).join('');
     }
-    results.classList.add('show');
 }
 
 function adicionar(cod, nome) {
@@ -172,6 +193,12 @@ function adicionar(cod, nome) {
 }
 
 async function adicionarNoServidor(cod, nome) {
+    const results = document.getElementById('modalSearchResults');
+    const originalContent = results.innerHTML;
+    
+    // Show loading overlay
+    results.innerHTML = '<div class="loading-inline"><div class="spinner"></div><span>Adicionando...</span></div>';
+    
     try {
         const response = await fetch('/api/mapa/adicionar', {
             method: 'POST',
@@ -202,5 +229,6 @@ async function adicionarNoServidor(cod, nome) {
     } catch (error) {
         console.error('Erro ao adicionar disciplina:', error);
         alert('Erro ao adicionar disciplina. Tente novamente.');
+        results.innerHTML = originalContent;
     }
 }

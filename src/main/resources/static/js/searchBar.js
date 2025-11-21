@@ -280,6 +280,12 @@ async function loadDisciplinasData() {
     
     isLoading = true;
     
+    // Show loading indicator in search input
+    const originalPlaceholder = searchInput.placeholder;
+    searchInput.placeholder = 'Carregando disciplinas...';
+    searchInput.disabled = true;
+    searchInput.classList.add('loading');
+    
     try {
         // Check if localStorage is supported
         if (!DisciplinasCache.isStorageAvailable()) {
@@ -303,6 +309,10 @@ async function loadDisciplinasData() {
         showError('Erro ao carregar disciplinas');
     } finally {
         isLoading = false;
+        // Reset search input
+        searchInput.placeholder = originalPlaceholder;
+        searchInput.disabled = false;
+        searchInput.classList.remove('loading');
     }
 }
 

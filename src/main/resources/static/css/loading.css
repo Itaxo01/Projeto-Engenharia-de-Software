@@ -1,0 +1,262 @@
+/* Loading States - Consistent across all pages */
+
+/* Spinner Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+/* Generic Spinner */
+.spinner {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top: 3px solid var(--primary-color, #007bff);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+.spinner-large {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+}
+
+.spinner-small {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+/* Button Loading State */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading .btn-text {
+    visibility: hidden;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* Inline Loading (for text/search) */
+.loading-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 14px;
+}
+
+.loading-inline .spinner {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+/* Card/Section Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 10;
+    border-radius: inherit;
+}
+
+.loading-overlay-dark {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+}
+
+.loading-overlay .spinner {
+    width: 32px;
+    height: 32px;
+}
+
+.loading-overlay-text {
+    font-size: 14px;
+    color: #666;
+}
+
+.loading-overlay-dark .loading-overlay-text {
+    color: #fff;
+}
+
+/* Skeleton Loading (for content placeholders) */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+}
+
+.skeleton-text-large {
+    height: 24px;
+}
+
+.skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.skeleton-card {
+    height: 120px;
+    border-radius: 8px;
+}
+
+/* Pulsing Dots Loading */
+.loading-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.4s infinite;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* Disabled state for forms */
+.form-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.form-disabled input,
+.form-disabled textarea,
+.form-disabled button {
+    cursor: not-allowed;
+}
+
+/* Search Bar Loading State */
+.search-loading {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #666;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Comment/Card Action Loading */
+.action-loading {
+    position: relative;
+}
+
+.action-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+/* Optimistic UI State */
+.optimistic-pending {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.optimistic-success {
+    animation: successFlash 0.5s;
+}
+
+@keyframes successFlash {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(40, 167, 69, 0.1); }
+}
+
+.optimistic-error {
+    animation: errorShake 0.5s;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Page Loading Overlay */
+.page-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 9999;
+}
+
+.page-loading .spinner {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+}
+
+.page-loading-text {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}

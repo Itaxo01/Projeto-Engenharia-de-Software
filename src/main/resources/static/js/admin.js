@@ -12,6 +12,35 @@ async function httpPost(url, body) {
 }
 
 async function fetchAndDisplayUsers() {
+	const usersSection = document.querySelector('.users-section');
+	if (!usersSection) {
+		console.error('Users section container not found');
+		return;
+	}
+
+	// Show skeleton loading
+	usersSection.innerHTML = `
+		<div class="users-table-container">
+			<table class="users-table">
+				<thead>
+					<tr>
+						<th>Nome</th>
+						<th>Email</th>
+						<th>Matrícula</th>
+						<th>Curso</th>
+						<th>Tipo</th>
+						<th>Ações</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr><td colspan="6"><div class="skeleton skeleton-text"></div></td></tr>
+					<tr><td colspan="6"><div class="skeleton skeleton-text"></div></td></tr>
+					<tr><td colspan="6"><div class="skeleton skeleton-text"></div></td></tr>
+				</tbody>
+			</table>
+		</div>
+	`;
+
 	try {
 		const response = await fetch('/api/admin/users', { 
 			credentials: 'same-origin'
@@ -118,7 +147,18 @@ async function fetchAndDisplayUsers() {
 				toggleButton.onclick = async (event) => {
 					event.preventDefault();
 					
+					// Add loading state
+					toggleButton.disabled = true;
+					const originalText = toggleButton.textContent;
+					toggleButton.classList.add('btn-loading');
+					toggleButton.textContent = 'Processando...';
+					
 					const code = await httpPost("/api/admin/toggle-admin", JSON.stringify({ email: user.email }));
+					
+					// Remove loading state
+					toggleButton.disabled = false;
+					toggleButton.classList.remove('btn-loading');
+					
 					if (code === 200) {
 						// Refresh the user list to reflect changes
 						typeSpan.className = !user.admin ? 'user-type admin' : 'user-type user';
@@ -127,11 +167,13 @@ async function fetchAndDisplayUsers() {
 						user.admin = !user.admin; // Update local state
 						// fetchAndDisplayUsers();
 					} else if (code === 400) {
+						toggleButton.textContent = originalText;
 						alert('Erro: Não é possível alterar o status de admin do próprio usuário.');
 					} else if (code === 401) {
 						alert('Sessão expirada. Por favor refaça login.');
 						document.location.href = '/login?error=notAuthenticated';
 					} else {
+						toggleButton.textContent = originalText;
 						alert('Erro ao alterar status de admin. Tente novamente.');
 					}
 				}
@@ -145,7 +187,19 @@ async function fetchAndDisplayUsers() {
 				deleteButton.onclick = async (event) => {
 					event.preventDefault();
 					if (confirm(`Confirma a exclusão do usuário ${user.nome}? Esta ação não pode ser desfeita.`)) {
+						// Add loading state
+						deleteButton.disabled = true;
+						deleteButton.classList.add('btn-loading');
+						const originalText = deleteButton.textContent;
+						deleteButton.textContent = 'Excluindo...';
+						
 						const code = await httpPost("/api/admin/delete-user", JSON.stringify({ email: user.email }));
+						
+						// Remove loading state
+						deleteButton.disabled = false;
+						deleteButton.classList.remove('btn-loading');
+						deleteButton.textContent = originalText;
+						
 						if (code === 200) {
 							// Refresh the user list to reflect changes
 							row.remove();
@@ -275,6 +329,16 @@ async function executeScrapper() {
 }
 
 async function refreshScrapperStatus() {
+	const statusDiv = document.getElementById('scrapper-status');
+	
+	// Show loading
+	statusDiv.innerHTML = `
+		<div class="loading-overlay">
+			<div class="spinner"></div>
+			<div class="loading-overlay-text">Carregando status...</div>
+		</div>
+	`;
+	
 	try {
 		const response = await fetch('/api/admin/scrapper/status', {
 			credentials: 'same-origin'
@@ -295,7 +359,6 @@ async function refreshScrapperStatus() {
 		
 	} catch (error) {
 		console.error('Error fetching scrapper status:', error);
-		const statusDiv = document.getElementById('scrapper-status');
 		statusDiv.innerHTML = `
 			<div class="status-error">
 				<span class="error-icon">⚠️</span>

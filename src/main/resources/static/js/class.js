@@ -733,10 +733,25 @@ async function submitComment(event) {
     event.preventDefault();
     
     const texto = document.getElementById('commentText').value.trim();
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    const commentForm = document.getElementById('commentForm');
     
     if (!texto) {
         alert('Por favor, escreva um comentário.');
         return;
+    }
+    
+    // Disable form and show loading
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('btn-loading');
+        const originalText = submitButton.textContent;
+        submitButton.dataset.originalText = originalText;
+        submitButton.textContent = editingCommentId !== null ? 'Salvando...' : 'Enviando...';
+    }
+    
+    if (commentForm) {
+        commentForm.classList.add('form-disabled');
     }
     
     // Check if we're editing or creating
@@ -784,6 +799,16 @@ async function submitComment(event) {
         } catch (error) {
             console.error('Erro ao enviar comentário:', error);
             alert('Erro ao enviar comentário: ' + error.message);
+            
+            // Re-enable form on error
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('btn-loading');
+                submitButton.textContent = submitButton.dataset.originalText || 'Enviar';
+            }
+            if (commentForm) {
+                commentForm.classList.remove('form-disabled');
+            }
             return;
         }
     }
@@ -1128,6 +1153,13 @@ async function submitRating(rating, professorId = null) {
     
     console.log(`Submetendo rating: ${rating} estrelas para ${professorId ? 'professor' : 'disciplina'}`);
     
+    const submitButton = document.getElementById('btnModalSubmitRating');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('btn-loading');
+        submitButton.textContent = 'Enviando...';
+    }
+    
     try {
         const formData = new FormData();
         formData.append('nota', rating);
@@ -1144,6 +1176,13 @@ async function submitRating(rating, professorId = null) {
         if (!response.ok) {
             const errorText = await response.text();
             alert('Erro ao enviar avaliação: ' + errorText);
+            
+            // Re-enable button
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('btn-loading');
+                submitButton.textContent = 'Confirmar';
+            }
             return;
         }
         
@@ -1156,6 +1195,13 @@ async function submitRating(rating, professorId = null) {
     } catch (error) {
         console.error('Erro ao enviar rating:', error);
         alert('Erro ao enviar avaliação: ' + error.message);
+        
+        // Re-enable button
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.classList.remove('btn-loading');
+            submitButton.textContent = 'Confirmar';
+        }
         return null;
     }
 }
@@ -1164,12 +1210,79 @@ async function submitRating(rating, professorId = null) {
  * Votar em um comentário (upvote ou downvote)
  */
 async function voteComment(comentarioId, isUpVote) {
+    // Find the comment card and buttons
+    const commentCard = document.querySelector(`[data-comment-id="${comentarioId}"]`);
+    if (!commentCard) return;
+    
+    const upvoteBtn = commentCard.querySelector('.upvote-btn');
+    const downvoteBtn = commentCard.querySelector('.downvote-btn');
+    const comentario = COMENTARIOS_DATA.find(c => c.id === comentarioId);
+    
+    if (!comentario) return;
+    
+    // Store original state for rollback
+    const originalUpVotes = comentario.upVotes || 0;
+    const originalDownVotes = comentario.downVotes || 0;
+    const originalHasVoted = comentario.hasVoted || 0;
+    
+    // OPTIMISTIC UI UPDATE - Immediate visual feedback
+    const currentVote = comentario.hasVoted;
+    
+    // Calculate new state optimistically
+    if (isUpVote) {
+        if (currentVote === 1) {
+            // Remove upvote
+            comentario.upVotes = originalUpVotes - 1;
+            comentario.hasVoted = 0;
+            upvoteBtn.classList.remove('voted');
+        } else if (currentVote === -1) {
+            // Switch from downvote to upvote
+            comentario.upVotes = originalUpVotes + 1;
+            comentario.downVotes = originalDownVotes - 1;
+            comentario.hasVoted = 1;
+            upvoteBtn.classList.add('voted');
+            downvoteBtn.classList.remove('voted');
+        } else {
+            // Add upvote
+            comentario.upVotes = originalUpVotes + 1;
+            comentario.hasVoted = 1;
+            upvoteBtn.classList.add('voted');
+        }
+    } else {
+        if (currentVote === -1) {
+            // Remove downvote
+            comentario.downVotes = originalDownVotes - 1;
+            comentario.hasVoted = 0;
+            downvoteBtn.classList.remove('voted');
+        } else if (currentVote === 1) {
+            // Switch from upvote to downvote
+            comentario.downVotes = originalDownVotes + 1;
+            comentario.upVotes = originalUpVotes - 1;
+            comentario.hasVoted = -1;
+            downvoteBtn.classList.add('voted');
+            upvoteBtn.classList.remove('voted');
+        } else {
+            // Add downvote
+            comentario.downVotes = originalDownVotes + 1;
+            comentario.hasVoted = -1;
+            downvoteBtn.classList.add('voted');
+        }
+    }
+    
+    // Update vote counts in UI
+    upvoteBtn.querySelector('.vote-count').textContent = comentario.upVotes || 0;
+    downvoteBtn.querySelector('.vote-count').textContent = comentario.downVotes || 0;
+    
+    // Add pending state
+    commentCard.classList.add('optimistic-pending');
+    upvoteBtn.disabled = true;
+    downvoteBtn.disabled = true;
     
     try {
-		  const formData = new FormData();
-   	  formData.append('isUpVote', isUpVote);
-		  
-		  console.log(`Votando no comentário ${comentarioId} - Upvote: ${isUpVote}`);
+        const formData = new FormData();
+        formData.append('isUpVote', isUpVote);
+        
+        console.log(`Votando no comentário ${comentarioId} - Upvote: ${isUpVote}`);
 
         const response = await fetch(`/api/comentarios/${comentarioId}/votar`, {
             method: 'POST',
@@ -1178,6 +1291,20 @@ async function voteComment(comentarioId, isUpVote) {
         
         if (!response.ok) {
             const errorText = await response.text();
+            // ROLLBACK on error
+            comentario.upVotes = originalUpVotes;
+            comentario.downVotes = originalDownVotes;
+            comentario.hasVoted = originalHasVoted;
+            upvoteBtn.querySelector('.vote-count').textContent = originalUpVotes;
+            downvoteBtn.querySelector('.vote-count').textContent = originalDownVotes;
+            
+            if (originalHasVoted === 1) upvoteBtn.classList.add('voted');
+            else upvoteBtn.classList.remove('voted');
+            if (originalHasVoted === -1) downvoteBtn.classList.add('voted');
+            else downvoteBtn.classList.remove('voted');
+            
+            commentCard.classList.add('optimistic-error');
+            setTimeout(() => commentCard.classList.remove('optimistic-error'), 500);
             alert('Erro ao votar: ' + errorText);
             return;
         }
@@ -1185,52 +1312,42 @@ async function voteComment(comentarioId, isUpVote) {
         const result = await response.json();
         console.log('Voto registrado:', result);
         
-        // Atualizar contadores no frontend - agora usando COMENTARIOS_DATA
-        const comentario = COMENTARIOS_DATA.find(c => c.id === comentarioId);
-        if (comentario) {
-            comentario.upVotes = result.upVotes || 0;
-            comentario.downVotes = result.downVotes || 0;
-            
-            // ✅ Atualizar estado de voto (hasVoted)
-            // Se o backend retornar o novo estado de voto
-            if (result.userVote !== undefined) {
-                // Backend pode retornar 1, -1, ou 0
-                if (result.userVote === 0) {
-                    comentario.hasVoted = 0;
-                } else {
-                    comentario.hasVoted = result.userVote;
-                }
-            } else {
-                // Se backend não retornar, inferir baseado no clique
-                // Se clicou no mesmo voto, remove (null), senão define o voto
-                if (comentario.hasVoted === (isUpVote ? 1 : -1)) {
-                    comentario.hasVoted = 0; // Toggle off
-                } else {
-                    comentario.hasVoted = isUpVote ? 1 : -1; // Set new vote
-                }
-            }
-				console.log('Estado atualizado do comentário após voto:', comentario);
-            
-            // Atualizar visualização
-            if (professorSelecionado === null) {
-                const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
-                mostrarComentarios(comentariosDisciplina, null);
-            } else {
-                const comentariosProfessor = COMENTARIOS_DATA.filter(c => 
-                    String(c.professorId) === String(professorSelecionado)
-                );
-                const prof = PROFESSORES_DATA.find(p => {
-                    const profId = p.id || p.professorId || p.ID;
-                    return String(profId) === String(professorSelecionado);
-                });
-                const profNome = prof?.nome || prof?.name || 'Professor';
-                mostrarComentarios(comentariosProfessor, profNome);
-            }
+        // Update with actual server values
+        comentario.upVotes = result.upVotes || 0;
+        comentario.downVotes = result.downVotes || 0;
+        if (result.userVote !== undefined) {
+            comentario.hasVoted = result.userVote;
         }
+        
+        upvoteBtn.querySelector('.vote-count').textContent = comentario.upVotes;
+        downvoteBtn.querySelector('.vote-count').textContent = comentario.downVotes;
+        
+        // Success animation
+        commentCard.classList.remove('optimistic-pending');
+        commentCard.classList.add('optimistic-success');
+        setTimeout(() => commentCard.classList.remove('optimistic-success'), 500);
         
     } catch (error) {
         console.error('Erro ao votar:', error);
+        // ROLLBACK on error
+        comentario.upVotes = originalUpVotes;
+        comentario.downVotes = originalDownVotes;
+        comentario.hasVoted = originalHasVoted;
+        upvoteBtn.querySelector('.vote-count').textContent = originalUpVotes;
+        downvoteBtn.querySelector('.vote-count').textContent = originalDownVotes;
+        
+        if (originalHasVoted === 1) upvoteBtn.classList.add('voted');
+        else upvoteBtn.classList.remove('voted');
+        if (originalHasVoted === -1) downvoteBtn.classList.add('voted');
+        else downvoteBtn.classList.remove('voted');
+        
+        commentCard.classList.add('optimistic-error');
+        setTimeout(() => commentCard.classList.remove('optimistic-error'), 500);
         alert('Erro ao votar: ' + error.message);
+    } finally {
+        commentCard.classList.remove('optimistic-pending');
+        upvoteBtn.disabled = false;
+        downvoteBtn.disabled = false;
     }
 }
 
