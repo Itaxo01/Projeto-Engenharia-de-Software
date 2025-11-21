@@ -3,7 +3,9 @@ package com.example.model;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.annotations.Where;
 
@@ -23,7 +25,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -67,6 +68,8 @@ public class Comentario {
 	@Column(name = "down_votes")
 	private Integer downVotes = 0;
 
+	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL)
+	private Set<Notificacao> notificacoes = new HashSet<>();
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(
@@ -78,14 +81,11 @@ public class Comentario {
 	@Column(name = "is_upvote")
 	private Map<String, Boolean> votes = new HashMap<>();
 
-
-
 	@Column(nullable = false, length = 2000)
 	private String texto;
 
 	@Column(name = "created_at")
 	private Instant createdAt = Instant.now();
-
 
 	// Campos para soft delete
 	@Column(name = "deleted", nullable = false)
@@ -140,10 +140,13 @@ public class Comentario {
 	public Comentario(Usuario usuario, String texto, Comentario pai) {
 		this.usuario = usuario;
 		this.texto = texto;
-		this.pai = pai;
+		pai.addFilho(this);
 		// Herdar disciplina e professor do pai
 		this.disciplina = pai.getDisciplina();
 		this.professor = pai.getProfessor();
+		// Gera o notificação para resposta para o dono do comentário
+		Notificacao notificacao = this.pai.usuario.generateAlert(this);
+		addNotificacao(notificacao);
 	}
 
 
@@ -195,6 +198,18 @@ public class Comentario {
 
 	public Instant getEditedAt() { return editedAt; }
 	public void setEditedAt(Instant editedAt) { this.editedAt = editedAt; }
+
+	public Set<Notificacao> getNotificacoes() {
+		return notificacoes;
+	}
+
+	public void setNotificacoes(Set<Notificacao> notificacoes) {
+		this.notificacoes = notificacoes;
+	}
+	
+	public void addNotificacao(Notificacao notificacao) {
+		this.notificacoes.add(notificacao);
+	}
 
 	public Integer hasVoted(String userEmail) {
 		if(votes.containsKey(userEmail)){

@@ -59,15 +59,70 @@ public class ComentarioController {
 
 	@PostMapping("/class/comentario/addComentarioFilho")
 	@ResponseBody
-	public ResponseEntity<?> addComentarioFilho(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
-
-		String userEmail = sessionService.getCurrentUser(request);
-		Long comentarioPaiId = (Long) payload.get("comentarioPaiId");
-		Integer nota = (Integer) payload.get("nota");
+	public ResponseEntity<?> addComentarioFilho(@RequestParam("texto") String texto
+													,@RequestParam("comentarioPaiId") Long comentarioPaiId
+													,@RequestParam(value = "files", required=false) MultipartFile[] files
+													,HttpServletRequest request) {
 
 		// Esse mapping só cria o comentário filho de outro comentário. Não há relação direta dele com a avaliação
 		
-		return null;
+		try {
+			logger.info("Iniciando criação de comentário filho.");
+			
+			String usuarioEmail = sessionService.getCurrentUser(request);
+			if (usuarioEmail == null) {
+				return ResponseEntity.status(401).body("Usuário não autenticado.");
+			}
+			
+			Usuario usuario = userService.getUser(usuarioEmail);
+			if (usuario == null) {
+				return ResponseEntity.status(404).body("Usuário não encontrado.");
+			}
+			
+			if (texto == null || texto.trim().isEmpty()) {
+				return ResponseEntity.status(400).body("O texto do comentário não pode ser vazio.");
+			}
+
+			if (texto.length() > 2000) {
+				return ResponseEntity.status(400).body("O texto do comentário excede o limite de 2000 caracteres.");
+			}
+
+			logger.info("Dados validados, criando resposta.");
+			// ✅ Criar resposta de comentario
+			Comentario comentario = comentarioService.responderComentario(usuario, texto, comentarioPaiId);
+			logger.info("Comentário criado com ID: " + comentario.getComentarioId());
+
+			// Cria os arquivos associados ao comentário, se houver
+			if (files != null && files.length > 0) {
+				for (MultipartFile file : files) {
+					if (!file.isEmpty()) {
+						if (file.getSize() > 5 * 1024 * 1024) { // 5MB
+							return ResponseEntity.status(400).body("O arquivo " + file.getOriginalFilename() + " excede o tamanho máximo de 5MB.");
+						}
+
+						try {
+							arquivoService.salvarArquivo(file, comentario);
+							logger.info("Arquivo " + file.getOriginalFilename() + " salvo com sucesso.");
+						} catch (Exception e) {
+							return ResponseEntity.status(500).body("Erro ao salvar o arquivo " + file.getOriginalFilename() + ": " + e.getMessage());
+						}
+					}
+				}
+			}
+
+			logger.info("Comentário salvo com sucesso.");
+
+			return ResponseEntity.ok(Map.of(
+				"success", true,
+				"message", "Comentário publicado com sucesso",
+				"comentarioId", comentario.getComentarioId(),
+				"nomeUsuario", usuario.getNome() != null ? usuario.getNome() : "Usuário"
+			));
+
+		} catch (Exception e) {
+			logger.error("Erro interno: ", e);
+			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
+		}
 	}
 
 	@PostMapping("/api/comentarios/{id}/votar")
@@ -153,7 +208,6 @@ public class ComentarioController {
 														  @RequestParam(value = "professorId", required=false) String professorId,
 														  @RequestParam(value = "files", required=false) MultipartFile[] files, 
 														  HttpServletRequest request) {
-
 		try {
 			logger.info("Iniciando criação de comentário.");
 			

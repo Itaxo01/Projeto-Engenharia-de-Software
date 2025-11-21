@@ -157,6 +157,50 @@
                             <p>Seja o primeiro a comentar!</p>
                         </div>
                     </div>
+                    
+                    <!-- Reply Editor Modal (will be shown when user clicks "Responder") -->
+                    <div id="replyEditor" class="reply-editor-modal">
+                        <div class="reply-editor-overlay"></div>
+                        <div class="reply-editor-container">
+                            <div class="reply-editor-header">
+                                <h3>Responder Comentário</h3>
+                                <button class="btn-close-reply" onclick="closeReplyEditor()">&times;</button>
+                            </div>
+                            
+                            <form class="reply-form" onsubmit="submitReply(event)">
+                                <!-- Reply Textarea -->
+                                <textarea 
+                                    id="replyText" 
+                                    class="reply-textarea" 
+                                    placeholder="Escreva sua resposta..."
+                                    maxlength="2000"
+                                ></textarea>
+                                
+                                <!-- File Upload Section for Reply -->
+                                <div class="file-upload-section">
+                                    <input 
+                                        type="file" 
+                                        id="replyFileInput" 
+                                        class="file-input" 
+                                        multiple 
+                                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.webp,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                        onchange="handleReplyFileSelect(event)"
+                                    >
+                                    <label for="replyFileInput" class="file-upload-label">
+                                        <span class="file-icon">📎</span>
+                                        <span class="file-text">Anexar imagens ou documentos (máx. 5MB cada)</span>
+                                    </label>
+                                    <div id="replyFileList" class="file-list"></div>
+                                </div>
+                                
+                                <!-- Reply Actions -->
+                                <div class="reply-actions">
+                                    <button type="button" class="btn-cancel" onclick="closeReplyEditor()">Cancelar</button>
+                                    <button type="submit" class="btn-submit" id="replySubmitBtn" disabled>Enviar Resposta</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

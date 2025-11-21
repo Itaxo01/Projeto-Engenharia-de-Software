@@ -1,5 +1,8 @@
 package com.example.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 
 /**
@@ -15,7 +18,7 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "usuarios")
-public class Usuario {
+public class Usuario implements ComentarioObserver{
 	@Id
 	private String user_email;
 	
@@ -30,6 +33,9 @@ public class Usuario {
 
 	@Column(nullable = false)
 	private String curso;
+
+	@OneToMany(mappedBy = "usuario")
+	private Set<Notificacao> notificacoes = new HashSet<>();;
 
 	@Column(name = "is_admin")
 	private boolean isAdmin = false;
@@ -71,4 +77,18 @@ public class Usuario {
 
 	public boolean getAdmin() { return isAdmin; }
 	public void setAdmin(boolean admin) { isAdmin = admin; }
+
+	public Set<Notificacao> getNotificacoes() {
+		return notificacoes;
+	}
+	public void setNotificacoes(Set<Notificacao> notificacoes) {
+		this.notificacoes = notificacoes;
+	}
+
+	@Override
+	public Notificacao generateAlert(Comentario comentario) {
+		Notificacao notificacao = new Notificacao(this, comentario);
+		notificacoes.add(notificacao);
+		return notificacao;
+	}
 }

@@ -325,65 +325,93 @@ function mostrarComentarios(comentarios, professorNome) {
         return;
     }
     
-    lista.innerHTML = comentarios.map(comentario => {
-        const isOwner = comentario.isOwner || false;
-        const hasVoted = comentario.hasVoted; // 1 (upvote), -1 (downvote), 0 (no vote)
+    // Filter only parent comments (those without a pai/parent)
+    const comentariosPais = comentarios.filter(c => !c.pai);
+    
+    lista.innerHTML = comentariosPais.map(comentario => {
+        // Render parent comment
+        let html = renderCommentCard(comentario, false);
         
-        // Classes para destacar botões de voto
-        const upvoteClass = hasVoted === 1 ? 'voted' : '';
-        const downvoteClass = hasVoted === -1 ? 'voted' : '';
+        // Render child comments if they exist
+        if (comentario.filhos && comentario.filhos.length > 0) {
+            html += `<div class="child-comments-container">`;
+            comentario.filhos.forEach(filho => {
+                html += renderCommentCard(filho, true);
+            });
+            html += `</div>`;
+        }
         
-        // ✅ Show delete button if user is owner OR admin
-        const canDelete = isOwner || isAdmin;
-        
-        // ✅ Render attached files
-        const arquivosHTML = comentario.arquivos && comentario.arquivos.length > 0 
-            ? `<div class="comment-attachments">${renderArquivos(comentario.arquivos)}</div>`
-            : '';
-        
-		return `
-		<div class="review-card" data-comment-id="${comentario.id}">
-			 <div class="review-header">
-			<div class="reviewer-info">
-				 <div class="reviewer-avatar">${String.fromCharCode(65 + (comentario.id % 26))}</div>
-				 <span class="reviewer-date">${formatarData(comentario.createdAt)}</span>
-			</div>
-			 </div>
-			 <div class="review-content">${escapeHtml(comentario.texto)}</div>
-			 
-			 <!-- Arquivos Anexados -->
-			 ${arquivosHTML}
-			 
-			 <!-- Botões de Ação -->
-			 <div class="review-actions">
-			<button class="review-action-btn upvote-btn ${upvoteClass}" onclick="voteComment(${comentario.id}, true)">
-				 <span class="vote-icon">👍</span>
-				 <span class="vote-count">${comentario.upVotes || 0}</span>
-			</button>
-			<button class="review-action-btn downvote-btn ${downvoteClass}" onclick="voteComment(${comentario.id}, false)">
-				 <span class="vote-icon">👎</span>
-				 <span class="vote-count">${comentario.downVotes || 0}</span>
-			</button>
-			<button class="review-action-btn reply-btn" onclick="replyToComment(${comentario.id})">
-				 <span class="vote-icon">💬</span>
-				 <span>Responder</span>
-			</button>
-			${isOwner ? `
-			<button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
-				 <span class="vote-icon">✏️</span>
-				 <span>Editar</span>
-			</button>
-			` : ''}
-			${canDelete ? `
-			<button class="review-action-btn delete-btn" onclick="deleteComment(${comentario.id})">
-				 <span class="vote-icon">🗑️</span>
-				 <span>Deletar</span>
-			</button>
-			` : ''}
-			 </div>
-		</div>
-		`;
+        return html;
     }).join('');
+}
+
+/**
+ * Render a single comment card (parent or child)
+ * @param {Object} comentario - The comment object
+ * @param {Boolean} isChild - Whether this is a child comment
+ */
+function renderCommentCard(comentario, isChild = false) {
+    const isOwner = comentario.isOwner || false;
+    const hasVoted = comentario.hasVoted; // 1 (upvote), -1 (downvote), 0 (no vote)
+    
+    // Classes para destacar botões de voto
+    const upvoteClass = hasVoted === 1 ? 'voted' : '';
+    const downvoteClass = hasVoted === -1 ? 'voted' : '';
+    
+    // ✅ Show delete button if user is owner OR admin
+    const canDelete = isOwner || isAdmin;
+    
+    // ✅ Render attached files
+    const arquivosHTML = comentario.arquivos && comentario.arquivos.length > 0 
+        ? `<div class="comment-attachments">${renderArquivos(comentario.arquivos)}</div>`
+        : '';
+    
+    // Add child class for styling
+    const childClass = isChild ? 'child-comment' : 'parent-comment';
+    
+    return `
+    <div class="review-card ${childClass}" data-comment-id="${comentario.id}">
+         <div class="review-header">
+        <div class="reviewer-info">
+             ${isChild ? '<span class="reply-indicator">↳ Resposta</span>' : ''}
+             <div class="reviewer-avatar">${String.fromCharCode(65 + (comentario.id % 26))}</div>
+             <span class="reviewer-date">${formatarData(comentario.createdAt)}</span>
+        </div>
+         </div>
+         <div class="review-content">${escapeHtml(comentario.texto)}</div>
+         
+         <!-- Arquivos Anexados -->
+         ${arquivosHTML}
+         
+         <!-- Botões de Ação -->
+         <div class="review-actions">
+        <button class="review-action-btn upvote-btn ${upvoteClass}" onclick="voteComment(${comentario.id}, true)">
+             <span class="vote-icon">👍</span>
+             <span class="vote-count">${comentario.upVotes || 0}</span>
+        </button>
+        <button class="review-action-btn downvote-btn ${downvoteClass}" onclick="voteComment(${comentario.id}, false)">
+             <span class="vote-icon">👎</span>
+             <span class="vote-count">${comentario.downVotes || 0}</span>
+        </button>
+        <button class="review-action-btn reply-btn" onclick="replyToComment(${comentario.id})">
+             <span class="vote-icon">💬</span>
+             <span>Responder</span>
+        </button>
+        ${isOwner ? `
+        <button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
+             <span class="vote-icon">✏️</span>
+             <span>Editar</span>
+        </button>
+        ` : ''}
+        ${canDelete ? `
+        <button class="review-action-btn delete-btn" onclick="deleteComment(${comentario.id})">
+             <span class="vote-icon">🗑️</span>
+             <span>Deletar</span>
+        </button>
+        ` : ''}
+         </div>
+    </div>
+    `;
 }
 
 // Formatar data
@@ -1370,3 +1398,255 @@ function escapeHtml(text) {
     };
     return text.replace(/[&<>"'`\\]/g, char => map[char]);
 }
+
+// ============================================
+// REPLY TO COMMENT FUNCTIONS
+// ============================================
+
+let selectedReplyFiles = [];
+let replyingToCommentId = null;
+
+/**
+ * Open reply editor for a specific comment
+ */
+function replyToComment(comentarioId) {
+    console.log('Opening reply editor for comment:', comentarioId);
+    
+    // Reset reply editor
+    resetReplyEditor();
+
+
+    // Store which comment we're replying to
+    replyingToCommentId = comentarioId;
+    
+    
+    console.log(replyingToCommentId)
+    // Show modal
+    const replyEditor = document.getElementById('replyEditor');
+    if (replyEditor) {
+        replyEditor.classList.add('show');
+        // Focus on textarea
+        setTimeout(() => {
+            document.getElementById('replyText').focus();
+        }, 100);
+    }
+    console.log("AAA" ,replyingToCommentId)
+}
+
+/**
+ * Close reply editor
+ */
+function closeReplyEditor() {
+    console.log('Closing reply editor');
+    const replyEditor = document.getElementById('replyEditor');
+    if (replyEditor) {
+        replyEditor.classList.remove('show');
+    }
+    resetReplyEditor();
+}
+
+/**
+ * Reset reply editor state
+ */
+function resetReplyEditor() {
+    document.getElementById('replyText').value = '';
+    selectedReplyFiles = [];
+    document.getElementById('replyFileInput').value = '';
+    renderReplyFileList();
+    document.getElementById('replySubmitBtn').disabled = true;
+    replyingToCommentId = null;
+}
+
+/**
+ * Handle file selection for reply
+ */
+function handleReplyFileSelect(event) {
+    const files = Array.from(event.target.files);
+    const fileList = document.getElementById('replyFileList');
+    
+    // Allowed file types for security
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
+    const allowedMimeTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain'
+    ];
+    
+    // Clear error messages
+    fileList.querySelectorAll('.file-error').forEach(el => el.remove());
+    
+    files.forEach(file => {
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+            const error = document.createElement('div');
+            error.className = 'file-error';
+            error.textContent = `❌ Arquivo "${file.name}" excede o tamanho máximo de 5MB`;
+            fileList.appendChild(error);
+            return;
+        }
+        
+        // Check file extension
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(extension)) {
+            const error = document.createElement('div');
+            error.className = 'file-error';
+            error.textContent = `❌ Tipo de arquivo não permitido: "${file.name}". Apenas imagens (JPG, PNG, GIF, WebP) e documentos (PDF, DOC, DOCX, XLS, XLSX, TXT) são permitidos.`;
+            fileList.appendChild(error);
+            return;
+        }
+        
+        // Check MIME type
+        if (!allowedMimeTypes.includes(file.type)) {
+            const error = document.createElement('div');
+            error.className = 'file-error';
+            error.textContent = `❌ Tipo de arquivo não permitido: "${file.name}". Apenas imagens e documentos seguros são permitidos.`;
+            fileList.appendChild(error);
+            return;
+        }
+        
+        // Check if file already exists
+        const exists = selectedReplyFiles.some(f => f.name === file.name && f.size === file.size);
+        if (!exists) {
+            selectedReplyFiles.push(file);
+        }
+    });
+    
+    // Clear input to allow selecting the same file again
+    event.target.value = '';
+    
+    renderReplyFileList();
+}
+
+/**
+ * Remove file from reply
+ */
+function removeReplyFile(index) {
+    selectedReplyFiles.splice(index, 1);
+    renderReplyFileList();
+}
+
+/**
+ * Render list of files for reply
+ */
+function renderReplyFileList() {
+    const fileList = document.getElementById('replyFileList');
+    const errors = fileList.querySelectorAll('.file-error');
+    
+    if (selectedReplyFiles.length === 0 && errors.length === 0) {
+        fileList.innerHTML = '';
+        return;
+    }
+    
+    const filesHTML = selectedReplyFiles.map((file, index) => `
+        <div class="file-item">
+            <div class="file-item-info">
+                <span class="file-item-icon">${getFileIcon(file.name)}</span>
+                <span class="file-item-name">${file.name}</span>
+                <span class="file-item-size">${formatFileSize(file.size)}</span>
+            </div>
+            <button type="button" class="file-item-remove" onclick="removeReplyFile(${index})" title="Remover arquivo">×</button>
+        </div>
+    `).join('');
+    
+    // Preserve error messages
+    const errorsHTML = Array.from(errors).map(el => el.outerHTML).join('');
+    
+    fileList.innerHTML = filesHTML + errorsHTML;
+}
+
+/**
+ * Setup reply editor events
+ */
+function setupReplyEditor() {
+    const textarea = document.getElementById('replyText');
+    const submitBtn = document.getElementById('replySubmitBtn');
+    const overlay = document.querySelector('.reply-editor-overlay');
+    
+    if (textarea && submitBtn) {
+        textarea.addEventListener('input', function() {
+            updateReplySubmitButton();
+        });
+    }
+    
+    // Close reply editor when clicking overlay
+    if (overlay) {
+        overlay.addEventListener('click', closeReplyEditor);
+    }
+}
+
+/**
+ * Update reply submit button state
+ */
+function updateReplySubmitButton() {
+    const textarea = document.getElementById('replyText');	
+    const submitBtn = document.getElementById('replySubmitBtn');
+    const hasText = textarea.value.trim().length > 0;
+    submitBtn.disabled = !hasText;
+}
+
+/**
+ * Submit reply to comment
+ */
+async function submitReply(event) {
+    event.preventDefault();
+    console.log(replyingToCommentId)
+    if (!replyingToCommentId) {
+        alert('Erro: Nenhum comentário selecionado para resposta.');
+        return;
+    }
+    
+    const texto = document.getElementById('replyText').value.trim();
+    
+    if (!texto) {
+        alert('Por favor, escreva uma resposta.');
+        return;
+    }
+    
+    console.log('Submitting reply:', {
+        texto,
+        comentarioPaiId: replyingToCommentId,
+        files: selectedReplyFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
+    });
+    
+    // Prepare FormData for file upload
+    const formData = new FormData();
+    formData.append('texto', texto);
+    formData.append('comentarioPaiId', replyingToCommentId);
+    selectedReplyFiles.forEach((file) => {
+        formData.append('files', file);
+    });
+    
+    try {
+        const response = await fetch('/class/comentario/addComentarioFilho', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            alert('Erro ao enviar resposta: ' + errorText);
+            return;
+        }
+        
+        const result = await response.json();
+        console.log('Resposta enviada com sucesso:', result);
+        
+        // Reload page to show new reply
+        window.location.reload();
+        
+    } catch (error) {
+        console.error('Erro ao enviar resposta:', error);
+        alert('Erro ao enviar resposta: ' + error.message);
+        return;
+    }
+}
+
+// Initialize reply editor on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupReplyEditor();
+}, { once: false });
+
