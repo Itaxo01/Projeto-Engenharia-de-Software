@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * Exibe detalhes da disciplina via path parameter.
 */
 @Controller
+@RequestMapping("/api/avaliacao")
 public class AvaliacaoController {
 	@Autowired
 	private SessionService sessionService;
@@ -72,7 +74,7 @@ public class AvaliacaoController {
 	 * Endpoint para adicionar/atualizar apenas a NOTA de uma avaliação
 	 * Cria uma nova Avaliacao se não existir, ou atualiza a nota se já existir
 	 */
-	@PostMapping("/api/avaliacao/rating")
+	@PostMapping("/rating")
 	@ResponseBody
 	public ResponseEntity<?> submitRating(@RequestParam("disciplinaId") String disciplinaId, 
 													  @RequestParam(value = "professorId", required=false) String professorId,
@@ -160,7 +162,7 @@ public class AvaliacaoController {
 	/**
 	 * Endpoint para remover a avaliação (nota) do usuário
 	 */
-	@PostMapping("/api/avaliacao/rating/delete")
+	@PostMapping("/rating/delete")
 	@ResponseBody
 	public ResponseEntity<?> deleteRating(@RequestParam("disciplinaId") String disciplinaId, 
 													  @RequestParam(value = "professorId", required=false) String professorId,

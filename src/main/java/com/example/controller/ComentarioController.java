@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +37,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * Exibe detalhes da disciplina via path parameter.
 */
 @Controller
+@RequestMapping("/api/comentario")
 public class ComentarioController {
 	@Autowired
 	private SessionService sessionService;
@@ -57,7 +59,7 @@ public class ComentarioController {
 	@Autowired
 	private ComentarioService comentarioService;
 
-	@PostMapping("/class/comentario/addComentarioFilho")
+	@PostMapping("/addComentarioFilho")
 	@ResponseBody
 	public ResponseEntity<?> addComentarioFilho(@RequestParam("texto") String texto
 													,@RequestParam("comentarioPaiId") Long comentarioPaiId
@@ -125,7 +127,7 @@ public class ComentarioController {
 		}
 	}
 
-	@PostMapping("/api/comentarios/{id}/votar")
+	@PostMapping("/votar/{id}")
 	@ResponseBody
 	public ResponseEntity<?> vote(@PathVariable("id") Long comentarioId, @RequestParam("isUpVote") Boolean isUpVote, HttpServletRequest request){
 		String userEmail = sessionService.getCurrentUser(request);
@@ -169,7 +171,7 @@ public class ComentarioController {
 		}
 	}
 
-	@PostMapping("/api/comentarios/{id}/delete")
+	@PostMapping("/delete/{id}")
 	@ResponseBody
 	public ResponseEntity<?> delete(@PathVariable("id") Long comentarioId, HttpServletRequest request){
 		String userEmail = sessionService.getCurrentUser(request);
@@ -201,7 +203,7 @@ public class ComentarioController {
 		}
 	}
 
-	@PostMapping("/api/avaliacao/comentario")
+	@PostMapping("/comentar")
 	@ResponseBody
 	public ResponseEntity<?> submitComentario(@RequestParam("texto") String texto,
 														  @RequestParam("disciplinaId") String disciplinaId, 
@@ -282,7 +284,7 @@ public class ComentarioController {
 		}
 	}
 
-	@PostMapping("/api/comentarios/{id}/editar")
+	@PostMapping("/editar/{id}")
 	@ResponseBody
 	@Transactional // ✅ Needed to avoid lazy initialization exception when saving files
 	public ResponseEntity<?> editarComentario(@PathVariable("id") Long comentarioId, @RequestParam(value = "novoTexto", required=true) String novoTexto, @RequestParam(value = "files", required=false) MultipartFile[] files, HttpServletRequest request) {

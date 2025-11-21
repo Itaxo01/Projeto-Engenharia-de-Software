@@ -781,7 +781,7 @@ async function submitComment(event) {
         });
         
         try {
-            const response = await fetch('/api/avaliacao/comentario', {
+            const response = await fetch('/api/comentario/comentar', {
                 method: 'POST',
                 body: formData
             });
@@ -834,7 +834,7 @@ async function submitEditComment(comentarioId, novoTexto) {
     });
     
     try {
-        const response = await fetch(`/api/comentarios/${comentarioId}/editar`, {
+        const response = await fetch(`/api/comentario/${comentarioId}/editar`, {
             method: 'POST',
             body: formData
         });
@@ -1284,7 +1284,7 @@ async function voteComment(comentarioId, isUpVote) {
         
         console.log(`Votando no comentário ${comentarioId} - Upvote: ${isUpVote}`);
 
-        const response = await fetch(`/api/comentarios/${comentarioId}/votar`, {
+        const response = await fetch(`/api/comentario/${comentarioId}/votar`, {
             method: 'POST',
             body: formData
         });
@@ -1449,7 +1449,7 @@ async function deleteComment(comentarioId) {
     try {
         console.log(`Deletando comentário ${comentarioId}...`);
         
-        const response = await fetch(`/api/comentarios/${comentarioId}/delete`, {
+        const response = await fetch(`/api/comentario/${comentarioId}/delete`, {
             method: 'POST'
         });
         
@@ -1738,7 +1738,7 @@ async function submitReply(event) {
     });
     
     try {
-        const response = await fetch('/class/comentario/addComentarioFilho', {
+        const response = await fetch('/api/comentario/addComentarioFilho', {
             method: 'POST',
             body: formData
         });
