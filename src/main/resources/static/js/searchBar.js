@@ -18,14 +18,18 @@ class DisciplinasCache {
         try {
             // Check if we have valid cached data
             const cachedData = this.getCachedData();
-            if (cachedData) {
+            if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
                 return cachedData;
             }
 
             // Cache miss or expired - fetch from server
             const freshData = await this.fetchFromServer();
             // Store in cache
-            this.setCachedData(freshData);
+				if(freshData && Array.isArray(freshData) && freshData.length > 0) {
+					this.setCachedData(freshData);
+				} else {
+					console.warn('⚠️ Disciplinas não retornaram dados válidos do servidor.');
+				}
             
             return freshData;
 
@@ -123,6 +127,7 @@ class DisciplinasCache {
      * Fetch fresh data from server
      */
     async fetchFromServer() {
+		  console.log('Carregando disciplinas no local storage');
         const response = await fetch('/api/search/disciplinas', {
             headers: {
                 'Cache-Control': 'no-cache',
@@ -131,6 +136,7 @@ class DisciplinasCache {
         });
 
         if (!response.ok) {
+				console.error(`❌ Failed to fetch disciplinas: HTTP ${response.status} - ${response.statusText}`);
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
