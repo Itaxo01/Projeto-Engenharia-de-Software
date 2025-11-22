@@ -26,19 +26,17 @@ public class MapaCurricularService {
 	private DisciplinaRepository disciplinaRepository;
 
 	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private DisciplinaService disciplinaService;
 
 	@Autowired
 	@Lazy
 	private AvaliacaoService avaliacaoService;
    
+	@Autowired
+	private AvaliacaoService avaliacaoService;
 	
 	@Transactional(readOnly = true)
-	public List<MapaCurricularDTO> getMapaDoUsuario(String usuarioId) {
-		Usuario usuario = userService.getUser(usuarioId);
+	public List<MapaCurricularDTO> getMapaDoUsuario(Usuario usuario) {
 		List<MapaCurricular> mapaCurricular = mapaCurricularRepository.findByUsuario(usuario);
 		
 		return mapaCurricular.stream().map(item -> {
@@ -49,24 +47,21 @@ public class MapaCurricularService {
                 disciplina.getCodigo(),
                 disciplina.getNome(),
                 item.getSemestre(),
-                item.getAvaliada()
+                avaliacaoService.possuiAvaliacaoPorUsuarioDisciplina(usuario, disciplina)
             );
         }).filter(dto -> dto != null).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public MapaCurricular adicionarDisciplina(String usuarioEmail, String disciplinaCodigo, Integer semestre) {
+	public MapaCurricular adicionarDisciplina(Usuario usuario, Disciplina disciplina, Integer semestre) {
 		// Verificar se já existe
 
-		Usuario usuario = userService.getUser(usuarioEmail);
-		Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaCodigo);
-		
-		if (disciplinaOpt.isEmpty()) {
-			System.out.println();
-			throw new IllegalArgumentException("Código de disciplina não existe.");
+		if (disciplina == null) {
+			throw new IllegalArgumentException("Disciplina não existe.");
 		}
-
-		Disciplina disciplina = disciplinaOpt.get();
+		if(usuario == null) {
+			throw new IllegalArgumentException("Usuário não existe.");
+		}
 
 		var existente = mapaCurricularRepository.findByUsuarioAndDisciplina(usuario, disciplina);
 		if (existente.isPresent()) {
@@ -86,15 +81,15 @@ public class MapaCurricularService {
 	}
 
 	@Transactional
-	public void removerDisciplina(String userEmail, String disciplinaId) {
-		Usuario usuario = userService.getUser(userEmail);
-		Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaId);
-
-		if (disciplinaOpt.isEmpty()) {
-			throw new IllegalArgumentException("Código de disciplina não existe.");
+	public void removerDisciplina(Usuario usuario, Disciplina disciplina) {
+		if (disciplina == null) {
+			throw new IllegalArgumentException("Disciplina não existe.");
+		}
+		if(usuario == null) {
+			throw new IllegalArgumentException("Usuário não existe.");
 		}
 
-		mapaCurricularRepository.deleteByUsuarioAndDisciplina(usuario, disciplinaOpt.get());
+		mapaCurricularRepository.deleteByUsuarioAndDisciplina(usuario, disciplina);
 	}
 
 	@Transactional

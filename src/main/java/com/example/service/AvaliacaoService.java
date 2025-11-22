@@ -28,13 +28,7 @@ public class AvaliacaoService {
     private AvaliacaoRepository avaliacaoRepository;
 
     @Autowired
-    private MapaCurricularService mapaCurricularService;
-
-    @Autowired
     private DisciplinaService disciplinaService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private ProfessorService professorService;
@@ -70,22 +64,20 @@ public class AvaliacaoService {
         return avaliacaoRepository.findById(id);
     }
 
-    public Optional<Avaliacao> buscarPorUsuarioDisciplina(String usuarioEmail, String disciplinaCodigo) {
-        Usuario user = userService.getUser(usuarioEmail);
-        Optional<Disciplina> disciplinaOpt = disciplinaService.buscarPorCodigo(disciplinaCodigo);
+    public Optional<Avaliacao> buscarPorUsuarioDisciplina(Usuario user, Disciplina disciplina) {
         if (user == null) {
             throw new IllegalArgumentException("Usuário não existe.");
         }
 
-        if (disciplinaOpt.isEmpty()) {
+        if (disciplina == null) {
             throw new IllegalArgumentException("Disciplina não existe.");
         }
 
-        return avaliacaoRepository.findByDisciplinaAndProfessorIsNullAndUsuario(disciplinaOpt.get(), user);
+        return avaliacaoRepository.findByDisciplinaAndProfessorIsNullAndUsuario(disciplina, user);
     }
 
-    public boolean possuiAvaliacaoPorUsuarioDisciplina(String usuarioEmail, String disciplinaCodigo) {
-        return buscarPorUsuarioDisciplina(usuarioEmail, disciplinaCodigo).isPresent();
+    public boolean possuiAvaliacaoPorUsuarioDisciplina(Usuario user, Disciplina disciplina) {
+        return buscarPorUsuarioDisciplina(user, disciplina).isPresent();
     }
 
     // Buscar todas as avaliações
@@ -130,17 +122,6 @@ public class AvaliacaoService {
 				logger.debug("Avaliação não encontrada, criando nova avaliação.");
             Avaliacao avaliacao = new Avaliacao(nota, professor, disciplina, usuario);
 				return Optional.of(salvar(avaliacao));
-        }
-    }
-
-    public void addNota(String professorId, String disciplinaId, String usuarioEmail, Integer nota){
-        Optional<Professor> p = professorService.buscarPorId(professorId);
-        Optional<Disciplina> d = disciplinaService.buscarPorCodigo(disciplinaId);
-        Usuario u = userService.getUser(usuarioEmail);
-        if(p.isPresent() && d.isPresent() && u != null && nota >= 1 && nota <= 5){
-            create(p.get(), d.get(), u, nota);
-        } else {
-            throw new IllegalArgumentException("Professor, Disciplina ou Usuário não encontrados, ou nota inválida.");
         }
     }
 

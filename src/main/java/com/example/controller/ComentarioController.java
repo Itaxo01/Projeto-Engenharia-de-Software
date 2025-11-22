@@ -69,7 +69,7 @@ public class ComentarioController {
 		// Esse mapping só cria o comentário filho de outro comentário. Não há relação direta dele com a avaliação
 		
 		try {
-			logger.info("Iniciando criação de comentário filho.");
+			logger.debug("Iniciando criação de comentário filho para " + comentarioPaiId);
 			
 			String usuarioEmail = sessionService.getCurrentUser(request);
 			if (usuarioEmail == null) {
@@ -89,10 +89,10 @@ public class ComentarioController {
 				return ResponseEntity.status(400).body("O texto do comentário excede o limite de 2000 caracteres.");
 			}
 
-			logger.info("Dados validados, criando resposta.");
+			logger.debug("Dados validados, criando resposta.");
 			// ✅ Criar resposta de comentario
 			Comentario comentario = comentarioService.responderComentario(usuario, texto, comentarioPaiId);
-			logger.info("Comentário criado com ID: " + comentario.getComentarioId());
+			logger.debug("Comentário criado com ID: " + comentario.getComentarioId());
 
 			// Cria os arquivos associados ao comentário, se houver
 			if (files != null && files.length > 0) {
@@ -124,82 +124,6 @@ public class ComentarioController {
 		} catch (Exception e) {
 			logger.error("Erro interno: ", e);
 			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
-		}
-	}
-
-	@PostMapping("/votar/{id}")
-	@ResponseBody
-	public ResponseEntity<?> vote(@PathVariable("id") Long comentarioId, @RequestParam("isUpVote") Boolean isUpVote, HttpServletRequest request){
-		String userEmail = sessionService.getCurrentUser(request);
-		
-		if (userEmail == null) {
-			return ResponseEntity.status(401).body("Usuário não autenticado.");
-		}
-
-		
-		logger.debug("isUpVote recebido: " + isUpVote);
-		if (isUpVote == null) {
-			return ResponseEntity.status(400).body("isUpVote não recebido.");
-		}
-		
-		logger.debug("Registrando voto para comentário ID " + comentarioId + " por usuário " + userEmail + " como " + (isUpVote ? "upvote" : "downvote"));
-		try {
-			comentarioService.vote(userEmail, comentarioId, isUpVote);
-			
-			// Buscar comentário atualizado para retornar contadores
-			Optional<com.example.model.Comentario> comentarioOpt = comentarioService.buscarPorId(comentarioId);
-			if (comentarioOpt.isEmpty()) {
-				return ResponseEntity.status(404).body("Comentário não encontrado.");
-			}
-			
-			com.example.model.Comentario comentario = comentarioOpt.get();
-			
-			// ✅ Buscar o voto atual do usuário
-			Boolean userVote = comentario.getVotes().get(userEmail); // true (upvote), false (downvote), null (no vote)
-			
-			return ResponseEntity.ok(Map.of(
-				"success", true,
-				"upVotes", comentario.getUpVotes(),
-				"downVotes", comentario.getDownVotes(),
-				"userVote", userVote != null ? (userVote ? 1 : -1) : 0, // Enviar 0 se for null
-				"message", "Voto registrado com sucesso."
-			));
-		} catch(IllegalArgumentException e) {
-			return ResponseEntity.status(404).body(e.getMessage());
-		} catch(Exception e) {
-			return ResponseEntity.status(500).body("Erro ao registrar voto: " + e.getMessage());
-		}
-	}
-
-	@PostMapping("/delete/{id}")
-	@ResponseBody
-	public ResponseEntity<?> delete(@PathVariable("id") Long comentarioId, HttpServletRequest request){
-		String userEmail = sessionService.getCurrentUser(request);
-		
-		if (userEmail == null) {
-			return ResponseEntity.status(401).body("Usuário não autenticado.");
-		}
-
-		Usuario user = userService.getUser(userEmail);
-		if (user == null) {
-			return ResponseEntity.status(401).body("Usuário não encontrado.");
-		}
-		
-		Comentario comentario = comentarioService.buscarPorId(comentarioId).orElse(null);
-		if (comentario == null) {
-			return ResponseEntity.status(404).body("Comentário não encontrado.");
-		}
-
-		if(user.getAdmin() || comentario.getUsuario().getUserEmail().equals(userEmail)) {
-			try {
-				comentarioService.softDelete(comentarioId, userEmail);
-				return ResponseEntity.ok("Comentário deletado com sucesso.");
-			} catch(Exception e) {
-				return ResponseEntity.status(500).body("Erro ao deletar comentário: " + e.getMessage());
-			}
-		} 
-		else {
-				return ResponseEntity.status(403).body("Permissão negada para deletar este comentário.");
 		}
 	}
 
@@ -283,11 +207,87 @@ public class ComentarioController {
 			return ResponseEntity.status(500).body("Erro interno: " + e.getMessage());
 		}
 	}
+	
+	@PostMapping("/votar/{id}")
+	@ResponseBody
+	public ResponseEntity<?> vote(@PathVariable("id") Long comentarioId, @RequestParam("isUpVote") Boolean isUpVote, HttpServletRequest request){
+		String userEmail = sessionService.getCurrentUser(request);
+		
+		if (userEmail == null) {
+			return ResponseEntity.status(401).body("Usuário não autenticado.");
+		}
+
+		
+		logger.debug("isUpVote recebido: " + isUpVote);
+		if (isUpVote == null) {
+			return ResponseEntity.status(400).body("isUpVote não recebido.");
+		}
+		
+		logger.debug("Registrando voto para comentário ID " + comentarioId + " por usuário " + userEmail + " como " + (isUpVote ? "upvote" : "downvote"));
+		try {
+			comentarioService.vote(userEmail, comentarioId, isUpVote);
+			
+			// Buscar comentário atualizado para retornar contadores
+			Optional<com.example.model.Comentario> comentarioOpt = comentarioService.buscarPorId(comentarioId);
+			if (comentarioOpt.isEmpty()) {
+				return ResponseEntity.status(404).body("Comentário não encontrado.");
+			}
+			
+			com.example.model.Comentario comentario = comentarioOpt.get();
+			
+			// ✅ Buscar o voto atual do usuário
+			Boolean userVote = comentario.getVotes().get(userEmail); // true (upvote), false (downvote), null (no vote)
+			
+			return ResponseEntity.ok(Map.of(
+				"success", true,
+				"upVotes", comentario.getUpVotes(),
+				"downVotes", comentario.getDownVotes(),
+				"userVote", userVote != null ? (userVote ? 1 : -1) : 0, // Enviar 0 se for null
+				"message", "Voto registrado com sucesso."
+			));
+		} catch(IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(e.getMessage());
+		} catch(Exception e) {
+			return ResponseEntity.status(500).body("Erro ao registrar voto: " + e.getMessage());
+		}
+	}
+
+	@PostMapping("/delete/{id}")
+	@ResponseBody
+	public ResponseEntity<?> delete(@PathVariable("id") Long comentarioId, HttpServletRequest request){
+		String userEmail = sessionService.getCurrentUser(request);
+		
+		if (userEmail == null) {
+			return ResponseEntity.status(401).body("Usuário não autenticado.");
+		}
+
+		Usuario user = userService.getUser(userEmail);
+		if (user == null) {
+			return ResponseEntity.status(401).body("Usuário não encontrado.");
+		}
+		
+		Comentario comentario = comentarioService.buscarPorId(comentarioId).orElse(null);
+		if (comentario == null) {
+			return ResponseEntity.status(404).body("Comentário não encontrado.");
+		}
+
+		if(user.getAdmin() || comentario.getUsuario().getUserEmail().equals(userEmail)) {
+			try {
+				comentarioService.softDelete(comentarioId, userEmail);
+				return ResponseEntity.ok("Comentário deletado com sucesso.");
+			} catch(Exception e) {
+				return ResponseEntity.status(500).body("Erro ao deletar comentário: " + e.getMessage());
+			}
+		} 
+		else {
+				return ResponseEntity.status(403).body("Permissão negada para deletar este comentário.");
+		}
+	}
 
 	@PostMapping("/editar/{id}")
 	@ResponseBody
 	@Transactional // ✅ Needed to avoid lazy initialization exception when saving files
-	public ResponseEntity<?> editarComentario(@PathVariable("id") Long comentarioId, @RequestParam(value = "novoTexto", required=true) String novoTexto, @RequestParam(value = "files", required=false) MultipartFile[] files, HttpServletRequest request) {
+	public ResponseEntity<?> edit(@PathVariable("id") Long comentarioId, @RequestParam(value = "novoTexto", required=true) String novoTexto, @RequestParam(value = "files", required=false) MultipartFile[] files, HttpServletRequest request) {
 		String userEmail = sessionService.getCurrentUser(request);
 		
 		logger.debug("Iniciando edição do comentário ID " + comentarioId);
@@ -328,7 +328,7 @@ public class ComentarioController {
 		}
 
 		try {
-			comentarioService.editarComentario(comentario, novoTexto);
+			comentarioService.edit(comentario, novoTexto);
 			logger.debug("Comentário ID " + comentarioId + " editado com sucesso.");
 			logger.debug("Salvando novos arquivos para o comentário ID " + comentarioId);
 			if (files != null && files.length > 0) {

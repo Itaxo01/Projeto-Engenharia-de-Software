@@ -133,18 +133,58 @@ async function changePassword() {
 		  return;
     }
     
+    // Get the submit button and modal content
+    const submitButton = document.querySelector('#passwordModal .btn-primary');
+    const modalContent = document.querySelector('#passwordModal .modal-content');
+    
+    // Disable form inputs
+    const inputs = document.querySelectorAll('#passwordModal input');
+    inputs.forEach(input => input.disabled = true);
+    
+    // Add loading state to button
+    submitButton.disabled = true;
+    const originalButtonText = submitButton.textContent;
+    submitButton.classList.add('btn-loading');
+    submitButton.innerHTML = '<div class="spinner spinner-small"></div><span>Alterando senha...</span>';
+    
+    // Add loading overlay to modal
+    let overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="spinner"></div>
+        <div class="loading-overlay-text">Alterando senha...</div>
+    `;
+    modalContent.style.position = 'relative';
+    modalContent.appendChild(overlay);
+    
 	 console.log("Changing password...");
     const code = await httpPost("/api/changePassword", JSON.stringify({"currentPassword": currentPassword, "newPassword": newPassword}));
     
+    // Remove loading overlay
+    if (overlay) overlay.remove();
+    
     if (code == 400){
+        // Restore UI on error
+        submitButton.disabled = false;
+        submitButton.classList.remove('btn-loading');
+        submitButton.textContent = originalButtonText;
+        inputs.forEach(input => input.disabled = false);
+        
 		errorMessage.textContent = 'Senha atual incorreta.';
 	} else if (code == 401) {
         alert("Sessão expirada. Por favor refaça login.");
         document.location.href = "/";
     } else {
+        // Success - keep loading state while page/modal closes
         alert("Senha alterada com sucesso.")
         resetPasswordForm();
         closePasswordModal();
+        
+        // Restore UI state after closing
+        submitButton.disabled = false;
+        submitButton.classList.remove('btn-loading');
+        submitButton.textContent = originalButtonText;
+        inputs.forEach(input => input.disabled = false);
     }
 }
 

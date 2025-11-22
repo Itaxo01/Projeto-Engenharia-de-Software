@@ -16,6 +16,12 @@ public class UserService {
     @Autowired
 	 private UserRepository userRepository;
 
+	 @Autowired
+	 private ComentarioService comentarioService;
+
+	 @Autowired
+	 private AvaliacaoService avaliacaoService;
+
 	/** Resultado padrão de operações de escrita. */
 	public record QueryResult(boolean success, String message) {}
     
@@ -39,6 +45,7 @@ public class UserService {
 
 	/**
 	 * Deleta o usuário identificado pelo email.
+	 * Um pouco mais complicado pois precisa deletar todas as relações do usuário com outras entidades.
 	 */
 	 public QueryResult deleteUser(String email){
 		email = normalizeEmail(email);
@@ -46,6 +53,8 @@ public class UserService {
 		if(!userRepository.emailExists(email)){
 			return new QueryResult(false, "Essa conta não existe");
 		}
+
+
 		userRepository.deleteUser(email);
 		return new QueryResult(true, "Conta deletada com sucesso!");
 	 }

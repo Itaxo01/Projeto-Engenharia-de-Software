@@ -94,8 +94,26 @@ async function removerDisciplina(event, semestreIdx, codigo) {
     }
     
     const button = event.currentTarget;
+    const disciplinaCard = button.closest('.disciplina-card');
+    
+    // Disable button and add loading state
     button.disabled = true;
     button.style.opacity = '0.5';
+    const originalButtonText = button.textContent;
+    button.textContent = '⏳';
+    
+    // Add loading overlay to the card
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="spinner"></div>
+        <div class="loading-overlay-text">Removendo...</div>
+    `;
+    disciplinaCard.style.position = 'relative';
+    disciplinaCard.appendChild(overlay);
+    
+    // Add optimistic pending animation
+    disciplinaCard.classList.add('optimistic-pending');
     
     try {
         const response = await fetch(`/api/mapa/remover/${codigo}`, {
@@ -106,14 +124,37 @@ async function removerDisciplina(event, semestreIdx, codigo) {
             throw new Error('Erro ao remover disciplina');
         }
         
-        // Remover localmente
+        // Success animation
+        disciplinaCard.classList.remove('optimistic-pending');
+        disciplinaCard.classList.add('optimistic-success');
+        
+        // Wait for animation to complete
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Remove from local state
         semestres[semestreIdx].disciplinas = semestres[semestreIdx].disciplinas.filter(d => d.codigo !== codigo);
+        
+        // Re-render the view
         renderizar();
     } catch (error) {
         console.error('Erro ao remover disciplina:', error);
-        alert('Erro ao remover disciplina. Tente novamente.');
+        
+        // Remove overlay and restore button
+        if (overlay) overlay.remove();
+        disciplinaCard.classList.remove('optimistic-pending');
+        disciplinaCard.classList.add('optimistic-error');
+        
+        // Restore button state
         button.disabled = false;
         button.style.opacity = '1';
+        button.textContent = originalButtonText;
+        
+        alert('Erro ao remover disciplina. Tente novamente.');
+        
+        // Remove error animation after delay
+        setTimeout(() => {
+            disciplinaCard.classList.remove('optimistic-error');
+        }, 1000);
     }
 }
 

@@ -74,7 +74,7 @@ public class ComentarioService {
     }
 
 
-	 public Comentario editarComentario(Comentario comentario, String novoTexto) {
+	 public Comentario edit(Comentario comentario, String novoTexto) {
 		  comentario.edit(novoTexto);
 		  return comentarioRepository.save(comentario);
 	 }

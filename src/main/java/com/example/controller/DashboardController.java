@@ -2,6 +2,7 @@ package com.example.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,9 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import com.example.model.MapaCurricular;
+import com.example.model.Usuario;
+import com.example.model.Disciplina;
 import com.example.service.MapaCurricularService;
 import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
+import com.example.service.UserService;
+import com.example.service.DisciplinaService;
 
 import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +39,12 @@ public class DashboardController {
 	@Autowired
 	private SessionService sessionService;
 
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private DisciplinaService disciplinaService;
+
 	@GetMapping("/dashboard")
 	public String dashboard(Model model, HttpServletRequest request) {
 		String userEmail = sessionService.getCurrentUser(request);
@@ -43,7 +54,13 @@ public class DashboardController {
 		}
 		
 		// Buscar mapa curricular do usuário
-		List<MapaCurricularService.MapaCurricularDTO> mapa = mapaCurricularService.getMapaDoUsuario(userEmail);
+		Usuario usuario = userService.getUser(userEmail);
+
+		if(usuario == null) { // possivel erro fatal
+			return "redirect:/login";
+		}
+		
+		List<MapaCurricularService.MapaCurricularDTO> mapa = mapaCurricularService.getMapaDoUsuario(usuario);
 		model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		model.addAttribute("mapaCurricular", mapa);
 		model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
@@ -59,7 +76,12 @@ public class DashboardController {
 			return ResponseEntity.status(401).body("Não autenticado");
 		}
 		
-		List<MapaCurricularService.MapaCurricularDTO> mapa = mapaCurricularService.getMapaDoUsuario(userEmail);
+		Usuario usuario = userService.getUser(userEmail);
+		if (usuario == null) {
+			return ResponseEntity.status(401).body("Usuário não encontrado");
+		}
+		
+		List<MapaCurricularService.MapaCurricularDTO> mapa = mapaCurricularService.getMapaDoUsuario(usuario);
 		return ResponseEntity.ok(mapa);
 	}
 
@@ -75,9 +97,18 @@ public class DashboardController {
 		String disciplinaId = (String) payload.get("disciplinaId");
 		Integer semestre = (Integer) payload.get("semestre");
 
+		Usuario usuario = userService.getUser(userEmail);
+		if (usuario == null) {
+			return ResponseEntity.status(404).body("Usuário não encontrado");
+		}
+		Optional<Disciplina> disciplina = disciplinaService.buscarPorCodigo(disciplinaId);
+		
+		if (disciplina.isEmpty()) {
+			return ResponseEntity.status(404).body("Disciplina não encontrada");
+		}
 		
 		try {
-			MapaCurricular item = mapaCurricularService.adicionarDisciplina(userEmail, disciplinaId, semestre);
+			MapaCurricular item = mapaCurricularService.adicionarDisciplina(usuario, disciplina.get(), semestre);
 			
 			return ResponseEntity.ok(MapaCurricularDTO.from(item));
 		} catch(IllegalArgumentException e) {
@@ -93,8 +124,16 @@ public class DashboardController {
 		if (userEmail == null) {
 			return ResponseEntity.status(401).body("Não autenticado");
 		}
-		
-		mapaCurricularService.removerDisciplina(userEmail, disciplinaId);
+		Usuario usuario = userService.getUser(userEmail);
+		if (usuario == null) {
+			return ResponseEntity.status(404).body("Usuário não encontrado");
+		}
+		Optional<Disciplina> disciplina = disciplinaService.buscarPorCodigo(disciplinaId);
+		if (disciplina.isEmpty()) {
+			return ResponseEntity.status(404).body("Disciplina não encontrada");
+		}
+
+		mapaCurricularService.removerDisciplina(usuario, disciplina.get());
 		return ResponseEntity.ok().build();
 	}
 
