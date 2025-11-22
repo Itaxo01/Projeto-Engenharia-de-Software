@@ -1262,6 +1262,73 @@
     opacity: 0.6;
 }
 
+/* ✅ Nested comments styling with progressive indentation */
+.child-comments-container {
+    margin-left: 16px;
+    border-left: 2px solid #ecf0f1;
+    padding-left: 16px;
+}
+
+/* Nested reply indicators */
+.reply-indicator {
+    display: inline-block;
+    background: #e8f4f8;
+    color: #2980b9;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+/* Styling for different nesting levels */
+.review-card.child-comment.nest-level-1 {
+    background: #fafbfc;
+    border-left: 3px solid #3498db;
+}
+
+.review-card.child-comment.nest-level-2 {
+    background: #f5f7fa;
+    border-left: 3px solid #9b59b6;
+}
+
+.review-card.child-comment.nest-level-3 {
+    background: #f0f3f7;
+    border-left: 3px solid #e67e22;
+}
+
+.review-card.child-comment.nest-level-4,
+.review-card.child-comment.nest-level-5,
+.review-card.child-comment.nest-level-6 {
+    background: #eceef1;
+    border-left: 3px solid #95a5a6;
+}
+
+/* Optional: fade out very deep nesting */
+.review-card.child-comment.nest-level-5,
+.review-card.child-comment.nest-level-6 {
+    opacity: 0.85;
+}
+
+/* Progressive left margin for deeper nesting */
+.child-comments-container.nest-level-1 {
+    margin-left: 20px;
+}
+
+.child-comments-container.nest-level-2 {
+    margin-left: 24px;
+}
+
+.child-comments-container.nest-level-3 {
+    margin-left: 28px;
+}
+
+.child-comments-container.nest-level-4,
+.child-comments-container.nest-level-5,
+.child-comments-container.nest-level-6 {
+    margin-left: 32px;
+}
+
 /* Mobile responsiveness for reply editor */
 @media (max-width: 600px) {
     .reply-editor-container {
@@ -1291,5 +1358,18 @@
     .reply-actions .btn-submit {
         width: 100%;
     }
+    
+    /* Reduce indentation on mobile */
+    .child-comments-container {
+        margin-left: 8px;
+        padding-left: 8px;
+    }
+    
+    .child-comments-container.nest-level-1 { margin-left: 10px; }
+    .child-comments-container.nest-level-2 { margin-left: 12px; }
+    .child-comments-container.nest-level-3 { margin-left: 14px; }
+    .child-comments-container.nest-level-4,
+    .child-comments-container.nest-level-5,
+    .child-comments-container.nest-level-6 { margin-left: 16px; }
 }
 

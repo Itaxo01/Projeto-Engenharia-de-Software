@@ -155,7 +155,7 @@ public class AvaliacaoService {
         private final String professorId; // Null = avaliação da disciplina
         private final Integer nota;
         private final Instant createdAt;
-		  private final Boolean isOwner; 
+        private final Boolean isOwner;
         
         public AvaliacaoDTO(Long id, Disciplina disciplina, Professor professor, Integer nota, Instant createdAt, Boolean isOwner) {
             this.id = id;
@@ -163,7 +163,7 @@ public class AvaliacaoService {
             this.professorId = professor != null ? professor.getProfessorId() : null;
             this.nota = nota;
             this.createdAt = createdAt;
-				this.isOwner = isOwner;
+            this.isOwner = isOwner;
         }
         
         // Getters
@@ -172,7 +172,7 @@ public class AvaliacaoService {
         public String getProfessorId() { return professorId; }
         public Integer getNota() { return nota; }
         public Instant getCreatedAt() { return createdAt; }
-		  public Boolean getIsOwner() { return isOwner; }
+        public Boolean getIsOwner() { return isOwner; }
         
         // Helper methods para o front-end
         public boolean isAvaliacaoDisciplina() { return professorId == null; }

@@ -10,6 +10,23 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 let isAdmin = false; // Flag de admin
 let editingCommentId = null; // Track if we're editing a comment
 let editingCommentData = null; // Store original comment data for editing
+let allComments = []
+
+function generateListAllComments(listaComentario, lista) {
+    listaComentario.forEach(comentario => {
+        buscaFilho(comentario, lista)
+    });
+}
+
+function buscaFilho (comentario, lista) {
+    if (comentario.filhos.length > 0) {
+        comentario.filhos.forEach(filho => {
+            buscaFilho(filho, lista);
+        });
+    }
+
+    lista.push(comentario);
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof AVALIACOES_DATA === 'undefined') return;
@@ -20,12 +37,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Obter email do usuário logado e status de admin
     isAdmin = typeof IS_ADMIN !== 'undefined' ? IS_ADMIN : false;
-    
+
+    generateListAllComments(COMENTARIOS_DATA, allComments)
+
     console.log('📊 Dados carregados:', {
         avaliacoes: AVALIACOES_DATA.length,
         comentarios: COMENTARIOS_DATA.length,
+        listaComentarios: allComments.length,
         professores: PROFESSORES_DATA?.length || 0,
         isAdmin: isAdmin
+
     });
 
 	 AVALIACOES_DATA.forEach(a => {
@@ -325,32 +346,20 @@ function mostrarComentarios(comentarios, professorNome) {
         return;
     }
     
-    // Filter only parent comments (those without a pai/parent)
-    const comentariosPais = comentarios.filter(c => !c.pai);
-    
-    lista.innerHTML = comentariosPais.map(comentario => {
-        // Render parent comment
-        let html = renderCommentCard(comentario, false);
-        
-        // Render child comments if they exist
-        if (comentario.filhos && comentario.filhos.length > 0) {
-            html += `<div class="child-comments-container">`;
-            comentario.filhos.forEach(filho => {
-                html += renderCommentCard(filho, true);
-            });
-            html += `</div>`;
-        }
-        
-        return html;
+    // Backend already returns only parent comments with children embedded in filhos array
+    // renderCommentCard handles recursive rendering of all nested levels
+    lista.innerHTML = comentarios.map(comentario => {
+        return renderCommentCard(comentario, false, 0);
     }).join('');
 }
 
 /**
- * Render a single comment card (parent or child)
+ * Render a single comment card (parent or child) with recursive support for nested replies
  * @param {Object} comentario - The comment object
  * @param {Boolean} isChild - Whether this is a child comment
+ * @param {Number} nestLevel - Depth level for nested styling
  */
-function renderCommentCard(comentario, isChild = false) {
+function renderCommentCard(comentario, isChild = false, nestLevel = 0) {
     const isOwner = comentario.isOwner || false;
     const hasVoted = comentario.hasVoted; // 1 (upvote), -1 (downvote), 0 (no vote)
     
@@ -372,10 +381,11 @@ function renderCommentCard(comentario, isChild = false) {
         ? `<span class="edited-indicator"> (Editado em ${formatarData(comentario.editedAt)})</span>`
         : '';
     
-    // Add child class for styling
-    const childClass = isChild ? 'child-comment' : 'parent-comment';
+    // Add child class for styling based on nesting level
+    const childClass = isChild ? `child-comment nest-level-${nestLevel}` : 'parent-comment';
     
-    return `
+    // Render this comment card
+    let html = `
     <div class="review-card ${childClass}" data-comment-id="${comentario.id}">
          <div class="review-header">
         <div class="reviewer-info">
@@ -418,6 +428,17 @@ function renderCommentCard(comentario, isChild = false) {
          </div>
     </div>
     `;
+    
+    // Recursively render nested replies (filhos can have filhos)
+    if (comentario.filhos && comentario.filhos.length > 0) {
+        html += `<div class="child-comments-container nest-level-${nestLevel + 1}">`;
+        comentario.filhos.forEach(filho => {
+            html += renderCommentCard(filho, true, nestLevel + 1);
+        });
+        html += `</div>`;
+    }
+    
+    return html;
 }
 
 // Formatar data
@@ -1467,7 +1488,7 @@ function replyToComment(comentarioId) {
  */
 function editComment(comentarioId) {
     // Find the comment data
-    const comentario = COMENTARIOS_DATA.find(c => c.id === comentarioId);
+    const comentario = allComments.find(c => c.id === comentarioId);
     
     if (!comentario) {
         alert('Comentário não encontrado.');

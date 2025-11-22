@@ -122,6 +122,11 @@ public class ComentarioService {
 					 arquivo.getTamanho()
 				))
 				.collect(Collectors.toList());
+
+		  List<ComentarioDTO> comentariosFilho = comentario
+		  											.getFilhos()
+													.stream()
+													.map(c -> converterParaDTO(c, sessionUsuarioEmail)).toList();
 		  
 		  return new ComentarioDTO(
 				comentario.getComentarioId(),
@@ -134,7 +139,8 @@ public class ComentarioService {
 				comentario.getIsEdited(),
 				comentario.getEditedAt(),
 				comentario.getProfessor() != null ? comentario.getProfessor().getProfessorId() : null,
-				arquivos
+				arquivos,
+				comentariosFilho
 		  );
 	 }
     
@@ -187,10 +193,11 @@ public class ComentarioService {
 		  private final Boolean edited;
 		  private final Instant editedAt;
 		  private final List<ArquivoDTO> arquivos;
+		  private final List<ComentarioDTO> filhos;
 		  
 		  public ComentarioDTO(Long id, String texto, 
 								Integer upVotes, Integer downVotes, Instant createdAt, 
-								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, String professorId, List<ArquivoDTO> arquivos) {
+								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, String professorId, List<ArquivoDTO> arquivos, List<ComentarioDTO> filhos) {
 				this.id = id;
 				this.texto = texto;
 				this.upVotes = upVotes != null ? upVotes : 0;
@@ -202,6 +209,8 @@ public class ComentarioService {
 				this.editedAt = editedAt;
 				this.professorId = professorId;
 				this.arquivos = arquivos != null ? arquivos : new ArrayList<>();
+				this.filhos = filhos;
+
 		  }
 		  
 		  // Getters
@@ -216,6 +225,7 @@ public class ComentarioService {
 		  public Instant getEditedAt() { return editedAt; }
 		  public String getProfessorId() { return professorId; }
 		  public List<ArquivoDTO> getArquivos() { return arquivos; }
+		  public List<ComentarioDTO> getFilhos() { return filhos; }
 		  
 		  public String getDataFormatada() {
 				return createdAt.atZone(ZoneId.systemDefault())
