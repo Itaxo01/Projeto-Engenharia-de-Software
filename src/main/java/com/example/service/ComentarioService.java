@@ -138,7 +138,9 @@ public class ComentarioService {
 				comentario.hasVoted(sessionUsuarioEmail),
 				comentario.getIsEdited(),
 				comentario.getEditedAt(),
+				comentario.getDeleted(),
 				comentario.getProfessor() != null ? comentario.getProfessor().getProfessorId() : null,
+				comentario.getPai() != null ? comentario.getPai().getComentarioId() : null,
 				arquivos,
 				comentariosFilho
 		  );
@@ -192,12 +194,14 @@ public class ComentarioService {
 		  private final Integer hasVoted; // -1 = downvote, 0 = no vote, 1 = upvote
 		  private final Boolean edited;
 		  private final Instant editedAt;
+		  private final Boolean deleted;
+		  private final Long comentarioPaiId;
 		  private final List<ArquivoDTO> arquivos;
 		  private final List<ComentarioDTO> filhos;
 		  
 		  public ComentarioDTO(Long id, String texto, 
 								Integer upVotes, Integer downVotes, Instant createdAt, 
-								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, String professorId, List<ArquivoDTO> arquivos, List<ComentarioDTO> filhos) {
+								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, Boolean deleted, String professorId, Long comentarioPaiId, List<ArquivoDTO> arquivos, List<ComentarioDTO> filhos) {
 				this.id = id;
 				this.texto = texto;
 				this.upVotes = upVotes != null ? upVotes : 0;
@@ -207,7 +211,9 @@ public class ComentarioService {
 				this.hasVoted = hasVoted;
 				this.edited = edited;
 				this.editedAt = editedAt;
+				this.deleted = deleted;
 				this.professorId = professorId;
+				this.comentarioPaiId = comentarioPaiId;
 				this.arquivos = arquivos != null ? arquivos : new ArrayList<>();
 				this.filhos = filhos;
 
@@ -223,7 +229,9 @@ public class ComentarioService {
 		  public Integer getHasVoted() { return hasVoted; }
 		  public Boolean getEdited() { return edited; }
 		  public Instant getEditedAt() { return editedAt; }
+		  public Boolean getDeleted() { return deleted; }
 		  public String getProfessorId() { return professorId; }
+		  public Long getComentarioPaiId() { return comentarioPaiId; }
 		  public List<ArquivoDTO> getArquivos() { return arquivos; }
 		  public List<ComentarioDTO> getFilhos() { return filhos; }
 		  

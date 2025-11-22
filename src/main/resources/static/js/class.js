@@ -10,6 +10,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 let isAdmin = false; // Flag de admin
 let editingCommentId = null; // Track if we're editing a comment
 let editingCommentData = null; // Store original comment data for editing
+let replyingToCommentId = null; // Track if we're replying to a comment
 let allComments = []
 
 function generateListAllComments(listaComentario, lista) {
@@ -49,13 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
-	 AVALIACOES_DATA.forEach(a => {
-		console.log('Avaliação:', a);
-	 });
+	//  AVALIACOES_DATA.forEach(a => {
+	// 	console.log('Avaliação:', a);
+	//  });
 
-	 COMENTARIOS_DATA.forEach(c => {
-		console.log('Comentário:', c);
-	 });
+	//  COMENTARIOS_DATA.forEach(c => {
+	// 	console.log('Comentário:', c);
+	//  });
     
     // Separar avaliações
     const avaliacoesDisciplina = AVALIACOES_DATA.filter(a => !a.professorId);
@@ -63,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualizar disciplina com comentários
     const statsDisciplina = calcularStats(avaliacoesDisciplina);
-    const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
+    const comentariosDisciplina = allComments.filter(c => !c.professorId);
     atualizarDisciplina(statsDisciplina, comentariosDisciplina);
     
     // Atualizar professores e adicionar event listeners
@@ -279,7 +280,7 @@ function selecionarProfessor(professorId, professorNome) {
     }
     
     // ✅ Mostrar comentários do professor usando COMENTARIOS_DATA
-    const comentariosProfessor = COMENTARIOS_DATA.filter(c => 
+    const comentariosProfessor = allComments.filter(c => 
         String(c.professorId) === String(professorId)
     );
     mostrarComentarios(comentariosProfessor, professorNome);
@@ -302,7 +303,7 @@ function deselecionarProfessor() {
     }
     
     // ✅ Mostrar comentários da disciplina novamente usando COMENTARIOS_DATA
-    const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
+    const comentariosDisciplina = allComments.filter(c => !c.professorId);
     mostrarComentarios(comentariosDisciplina, null);
 }
 
@@ -346,9 +347,7 @@ function mostrarComentarios(comentarios, professorNome) {
         return;
     }
     
-    // Backend already returns only parent comments with children embedded in filhos array
-    // renderCommentCard handles recursive rendering of all nested levels
-    lista.innerHTML = comentarios.map(comentario => {
+    lista.innerHTML = comentarios.filter(c => !c.comentarioPaiId && !c.deleted).map(comentario => {
         return renderCommentCard(comentario, false, 0);
     }).join('');
 }
@@ -432,7 +431,7 @@ function renderCommentCard(comentario, isChild = false, nestLevel = 0) {
     // Recursively render nested replies (filhos can have filhos)
     if (comentario.filhos && comentario.filhos.length > 0) {
         html += `<div class="child-comments-container nest-level-${nestLevel + 1}">`;
-        comentario.filhos.forEach(filho => {
+        comentario.filhos.filter(filho => !filho.deleted).forEach(filho => {
             html += renderCommentCard(filho, true, nestLevel + 1);
         });
         html += `</div>`;
@@ -557,6 +556,109 @@ function setupCommentEditor() {
         textarea.addEventListener('input', function() {
             updateSubmitButton();
         });
+        
+        // ✅ Add paste event listener for images and files
+        textarea.addEventListener('paste', handlePaste);
+    }
+    
+    // Also add paste listener to the entire comment form
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('paste', handlePaste);
+    }
+}
+
+/**
+ * Handle paste events to extract images from clipboard
+ */
+function handlePaste(event) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    
+    let hasFiles = false;
+    
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        // Check if item is a file
+        if (item.kind === 'file') {
+            const file = item.getAsFile();
+            
+            if (file) {
+                // Check if it's an allowed file type
+                const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
+                const allowedMimeTypes = [
+                    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'text/plain'
+                ];
+                
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                const isAllowedType = allowedMimeTypes.includes(file.type) || allowedExtensions.includes(fileExtension);
+                
+                if (isAllowedType) {
+                    // Check file size
+                    if (file.size > MAX_FILE_SIZE) {
+                        const fileList = document.getElementById('fileList');
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'file-error';
+                        errorDiv.textContent = `❌ ${file.name} é muito grande (máx: 5MB)`;
+                        fileList.appendChild(errorDiv);
+                        fileList.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            errorDiv.remove();
+                            if (fileList.children.length === 0) {
+                                fileList.style.display = 'none';
+                            }
+                        }, 3000);
+                        continue;
+                    }
+                    
+                    // Add to selected files
+                    selectedFiles.push(file);
+                    hasFiles = true;
+                    
+                    console.log('📎 File pasted:', file.name, file.type);
+                } else {
+                    const fileList = document.getElementById('fileList');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'file-error';
+                    errorDiv.textContent = `❌ ${file.name} não é um tipo de arquivo permitido`;
+                    fileList.appendChild(errorDiv);
+                    fileList.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        errorDiv.remove();
+                        if (fileList.children.length === 0) {
+                            fileList.style.display = 'none';
+                        }
+                    }, 3000);
+                }
+            }
+        }
+    }
+    
+    if (hasFiles) {
+        renderFileList();
+        
+        // Show a notification to the user
+        const fileList = document.getElementById('fileList');
+        const notification = document.createElement('div');
+        notification.className = 'file-success';
+        notification.style.color = '#27ae60';
+        notification.style.padding = '8px';
+        notification.style.marginBottom = '8px';
+        notification.textContent = `✓ ${selectedFiles.length === 1 ? 'Arquivo colado' : selectedFiles.length + ' arquivos colados'}`;
+        fileList.insertBefore(notification, fileList.firstChild);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 2000);
     }
 }
 
@@ -595,9 +697,15 @@ function toggleCommentEditor() {
 function updateEditorSubtitle() {
     const subtitle = document.getElementById('editorSubtitle');
     
+    // If replying, show reply message
+    if (replyingToCommentId !== null) {
+        subtitle.textContent = '💬 Respondendo ao comentário';
+        return;
+    }
+    
     // If editing, show edit message
     if (editingCommentId !== null) {
-        subtitle.textContent = 'Editando comentário';
+        subtitle.textContent = '✏️ Editando comentário';
         return;
     }
     
@@ -629,6 +737,32 @@ function resetCommentEditor() {
     // Clear edit mode
     editingCommentId = null;
     editingCommentData = null;
+    
+    // Clear reply mode
+    replyingToCommentId = null;
+    
+    // Reset editor positioning and move back to original location
+    const editor = document.getElementById('commentEditor');
+    if (editor) {
+        // Remove inline styles
+        editor.style.position = '';
+        editor.style.top = '';
+        editor.style.left = '';
+        editor.style.right = '';
+        editor.style.marginLeft = '';
+        editor.style.maxWidth = '';
+        
+        // Remove reply mode class
+        editor.classList.remove('reply-mode');
+        
+        // Move editor back to its original container (before the reviews list)
+        const originalContainer = document.querySelector('.reviews-section');
+        const reviewsList = document.querySelector('.reviews-list');
+        if (originalContainer && reviewsList) {
+            // Insert before reviews list
+            originalContainer.insertBefore(editor, reviewsList);
+        }
+    }
     
     // Disable submit button
     document.getElementById('submitBtn').disabled = true;
@@ -785,8 +919,59 @@ async function submitComment(event) {
     if (editingCommentId !== null) {
         // EDIT MODE
         await submitEditComment(editingCommentId, texto);
+    } else if (replyingToCommentId !== null) {
+        // REPLY MODE
+        console.log('Submitting reply to comment:', {
+            parentId: replyingToCommentId,
+            texto,
+            files: selectedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
+        });
+		  
+        // Prepare FormData for reply
+        const formData = new FormData();
+        formData.append('texto', texto);
+        formData.append('comentarioPaiId', replyingToCommentId);
+        
+        selectedFiles.forEach((file, index) => {
+            formData.append(`files`, file);
+        });
+        
+		  console.log('FormData for reply:', formData);
+        try {
+            const response = await fetch('/api/comentario/responder', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                alert('Erro ao enviar resposta: ' + errorText);
+                return;
+            }
+            
+            const result = await response.json();
+            console.log('Resposta enviada com sucesso:', result);
+            
+            // Reload page to show new reply
+            window.location.reload();
+            
+        } catch (error) {
+            console.error('Erro ao enviar resposta:', error);
+            alert('Erro ao enviar resposta: ' + error.message);
+            
+            // Re-enable form on error
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('btn-loading');
+                submitButton.textContent = submitButton.dataset.originalText || 'Enviar';
+            }
+            if (commentForm) {
+                commentForm.classList.remove('form-disabled');
+            }
+            return;
+        }
     } else {
-        // CREATE MODE
+        // CREATE MODE (new comment)
         console.log('Submitting comment:', {
             texto,
             professorId: professorSelecionado,
@@ -1216,7 +1401,7 @@ function atualizarVisualizacao() {
         const stats = calcularStats(avaliacoesDisciplina);
         
         // Filtrar comentários da disciplina
-        const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
+        const comentariosDisciplina = allComments.filter(c => !c.professorId);
         
         atualizarDisciplina(stats, comentariosDisciplina);
     } else {
@@ -1228,7 +1413,7 @@ function atualizarVisualizacao() {
         const stats = calcularStats(avaliacoesProf);
         
         // Filtrar comentários do professor
-        const comentariosProfessor = COMENTARIOS_DATA.filter(c => 
+        const comentariosProfessor = allComments.filter(c => 
             String(c.professorId) === String(professorSelecionado)
         );
         
@@ -1339,7 +1524,7 @@ async function voteComment(comentarioId, isUpVote) {
     
     const upvoteBtn = commentCard.querySelector('.upvote-btn');
     const downvoteBtn = commentCard.querySelector('.downvote-btn');
-    const comentario = COMENTARIOS_DATA.find(c => c.id === comentarioId);
+    const comentario = allComments.find(c => c.id === comentarioId);
     
     if (!comentario) return;
     
@@ -1478,9 +1663,63 @@ async function voteComment(comentarioId, isUpVote) {
  * Responder a um comentário
  */
 function replyToComment(comentarioId) {
-    // TODO: Implementar sistema de respostas aninhadas
-    alert(`Funcionalidade de resposta será implementada em breve.\nComentário ID: ${comentarioId}`);
     console.log('Reply to comment:', comentarioId);
+    
+    // Store which comment we're replying to
+    replyingToCommentId = comentarioId;
+    
+    // Find the comment card
+    const commentCard = document.querySelector(`[data-comment-id="${comentarioId}"]`);
+    if (!commentCard) {
+        alert('Comentário não encontrado.');
+        return;
+    }
+    
+    // Get the comment editor
+    const editor = document.getElementById('commentEditor');
+    const button = document.querySelector('.btn-add-review');
+    
+    // Reset editor first (but keep replyingToCommentId)
+    const savedReplyId = replyingToCommentId;
+    resetCommentEditor();
+    replyingToCommentId = savedReplyId;
+    
+    // Update subtitle to show we're replying
+    const subtitle = document.getElementById('editorSubtitle');
+    if (subtitle) {
+        subtitle.textContent = '💬 Respondendo ao comentário';
+    }
+    
+    // Show the editor if hidden
+    if (!editor.classList.contains('show')) {
+        editor.classList.add('show');
+        if (button) button.classList.add('active');
+    }
+    
+    // Remove any previous inline positioning from absolute mode
+    editor.style.position = '';
+    editor.style.top = '';
+    editor.style.left = '';
+    editor.style.right = '';
+    editor.style.maxWidth = '';
+    
+    // Add reply mode class and indent styling
+    editor.classList.add('reply-mode');
+    editor.style.marginLeft = '10px'; // Small indent to the right
+    
+    // Insert the editor right after the comment card in the DOM
+    // This makes it part of the document flow
+    if (commentCard.nextSibling) {
+        commentCard.parentNode.insertBefore(editor, commentCard.nextSibling);
+    } else {
+        commentCard.parentNode.appendChild(editor);
+    }
+    
+    // Scroll to the editor smoothly
+    setTimeout(() => {
+        editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('commentText').focus();
+    }, 100);
 }
 
 /**
@@ -1563,6 +1802,14 @@ function editComment(comentarioId) {
     }, 500);
 }
 
+
+function markAsDeleted(comentario){
+	comentario.deleted = true;
+	if(comentario.filhos && comentario.filhos.length > 0){
+		comentario.filhos.forEach(filho => markAsDeleted(filho));
+	}
+}
+
 /**
  * Deletar um comentário
  */
@@ -1628,19 +1875,20 @@ async function deleteComment(comentarioId) {
         // Wait for animation before removing from DOM
         setTimeout(() => {
             // ✅ Remover comentário do array global
-            const indexGlobal = COMENTARIOS_DATA.findIndex(c => c.id === comentarioId);
+            const indexGlobal = allComments.findIndex(c => c.id === comentarioId);
+				
             if (indexGlobal !== -1) {
-                COMENTARIOS_DATA.splice(indexGlobal, 1);
+					markAsDeleted(allComments[indexGlobal]);
             }
             
             // ✅ Atualizar visualização baseado no contexto atual
             if (professorSelecionado === null) {
                 // Atualizar comentários da disciplina
-                const comentariosDisciplina = COMENTARIOS_DATA.filter(c => !c.professorId);
+                const comentariosDisciplina = allComments.filter(c => !c.professorId);
                 mostrarComentarios(comentariosDisciplina, null);
             } else {
                 // Atualizar comentários do professor
-                const comentariosProfessor = COMENTARIOS_DATA.filter(c => 
+                const comentariosProfessor = allComments.filter(c => 
                     String(c.professorId) === String(professorSelecionado)
                 );
                 
@@ -1682,255 +1930,3 @@ function escapeHtml(text) {
     };
     return text.replace(/[&<>"'`\\]/g, char => map[char]);
 }
-
-// ============================================
-// REPLY TO COMMENT FUNCTIONS
-// ============================================
-
-let selectedReplyFiles = [];
-let replyingToCommentId = null;
-
-/**
- * Open reply editor for a specific comment
- */
-function replyToComment(comentarioId) {
-    console.log('Opening reply editor for comment:', comentarioId);
-    
-    // Reset reply editor
-    resetReplyEditor();
-
-
-    // Store which comment we're replying to
-    replyingToCommentId = comentarioId;
-    
-    
-    console.log(replyingToCommentId)
-    // Show modal
-    const replyEditor = document.getElementById('replyEditor');
-    if (replyEditor) {
-        replyEditor.classList.add('show');
-        // Focus on textarea
-        setTimeout(() => {
-            document.getElementById('replyText').focus();
-        }, 100);
-    }
-    console.log("AAA" ,replyingToCommentId)
-}
-
-/**
- * Close reply editor
- */
-function closeReplyEditor() {
-    console.log('Closing reply editor');
-    const replyEditor = document.getElementById('replyEditor');
-    if (replyEditor) {
-        replyEditor.classList.remove('show');
-    }
-    resetReplyEditor();
-}
-
-/**
- * Reset reply editor state
- */
-function resetReplyEditor() {
-    document.getElementById('replyText').value = '';
-    selectedReplyFiles = [];
-    document.getElementById('replyFileInput').value = '';
-    renderReplyFileList();
-    document.getElementById('replySubmitBtn').disabled = true;
-    replyingToCommentId = null;
-}
-
-/**
- * Handle file selection for reply
- */
-function handleReplyFileSelect(event) {
-    const files = Array.from(event.target.files);
-    const fileList = document.getElementById('replyFileList');
-    
-    // Allowed file types for security
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
-    const allowedMimeTypes = [
-        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'text/plain'
-    ];
-    
-    // Clear error messages
-    fileList.querySelectorAll('.file-error').forEach(el => el.remove());
-    
-    files.forEach(file => {
-        // Check file size
-        if (file.size > MAX_FILE_SIZE) {
-            const error = document.createElement('div');
-            error.className = 'file-error';
-            error.textContent = `❌ Arquivo "${file.name}" excede o tamanho máximo de 5MB`;
-            fileList.appendChild(error);
-            return;
-        }
-        
-        // Check file extension
-        const extension = '.' + file.name.split('.').pop().toLowerCase();
-        if (!allowedExtensions.includes(extension)) {
-            const error = document.createElement('div');
-            error.className = 'file-error';
-            error.textContent = `❌ Tipo de arquivo não permitido: "${file.name}". Apenas imagens (JPG, PNG, GIF, WebP) e documentos (PDF, DOC, DOCX, XLS, XLSX, TXT) são permitidos.`;
-            fileList.appendChild(error);
-            return;
-        }
-        
-        // Check MIME type
-        if (!allowedMimeTypes.includes(file.type)) {
-            const error = document.createElement('div');
-            error.className = 'file-error';
-            error.textContent = `❌ Tipo de arquivo não permitido: "${file.name}". Apenas imagens e documentos seguros são permitidos.`;
-            fileList.appendChild(error);
-            return;
-        }
-        
-        // Check if file already exists
-        const exists = selectedReplyFiles.some(f => f.name === file.name && f.size === file.size);
-        if (!exists) {
-            selectedReplyFiles.push(file);
-        }
-    });
-    
-    // Clear input to allow selecting the same file again
-    event.target.value = '';
-    
-    renderReplyFileList();
-}
-
-/**
- * Remove file from reply
- */
-function removeReplyFile(index) {
-    selectedReplyFiles.splice(index, 1);
-    renderReplyFileList();
-}
-
-/**
- * Render list of files for reply
- */
-function renderReplyFileList() {
-    const fileList = document.getElementById('replyFileList');
-    const errors = fileList.querySelectorAll('.file-error');
-    
-    if (selectedReplyFiles.length === 0 && errors.length === 0) {
-        fileList.innerHTML = '';
-        return;
-    }
-    
-    const filesHTML = selectedReplyFiles.map((file, index) => `
-        <div class="file-item">
-            <div class="file-item-info">
-                <span class="file-item-icon">${getFileIcon(file.name)}</span>
-                <span class="file-item-name">${file.name}</span>
-                <span class="file-item-size">${formatFileSize(file.size)}</span>
-            </div>
-            <button type="button" class="file-item-remove" onclick="removeReplyFile(${index})" title="Remover arquivo">×</button>
-        </div>
-    `).join('');
-    
-    // Preserve error messages
-    const errorsHTML = Array.from(errors).map(el => el.outerHTML).join('');
-    
-    fileList.innerHTML = filesHTML + errorsHTML;
-}
-
-/**
- * Setup reply editor events
- */
-function setupReplyEditor() {
-    const textarea = document.getElementById('replyText');
-    const submitBtn = document.getElementById('replySubmitBtn');
-    const overlay = document.querySelector('.reply-editor-overlay');
-    
-    if (textarea && submitBtn) {
-        textarea.addEventListener('input', function() {
-            updateReplySubmitButton();
-        });
-    }
-    
-    // Close reply editor when clicking overlay
-    if (overlay) {
-        overlay.addEventListener('click', closeReplyEditor);
-    }
-}
-
-/**
- * Update reply submit button state
- */
-function updateReplySubmitButton() {
-    const textarea = document.getElementById('replyText');	
-    const submitBtn = document.getElementById('replySubmitBtn');
-    const hasText = textarea.value.trim().length > 0;
-    submitBtn.disabled = !hasText;
-}
-
-/**
- * Submit reply to comment
- */
-async function submitReply(event) {
-    event.preventDefault();
-    console.log(replyingToCommentId)
-    if (!replyingToCommentId) {
-        alert('Erro: Nenhum comentário selecionado para resposta.');
-        return;
-    }
-    
-    const texto = document.getElementById('replyText').value.trim();
-    
-    if (!texto) {
-        alert('Por favor, escreva uma resposta.');
-        return;
-    }
-    
-    console.log('Submitting reply:', {
-        texto,
-        comentarioPaiId: replyingToCommentId,
-        files: selectedReplyFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
-    });
-    
-    // Prepare FormData for file upload
-    const formData = new FormData();
-    formData.append('texto', texto);
-    formData.append('comentarioPaiId', replyingToCommentId);
-    selectedReplyFiles.forEach((file) => {
-        formData.append('files', file);
-    });
-    
-    try {
-        const response = await fetch('/api/comentario/addComentarioFilho', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            alert('Erro ao enviar resposta: ' + errorText);
-            return;
-        }
-        
-        const result = await response.json();
-        console.log('Resposta enviada com sucesso:', result);
-        
-        // Reload page to show new reply
-        window.location.reload();
-        
-    } catch (error) {
-        console.error('Erro ao enviar resposta:', error);
-        alert('Erro ao enviar resposta: ' + error.message);
-        return;
-    }
-}
-
-// Initialize reply editor on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setupReplyEditor();
-}, { once: false });
-

@@ -329,6 +329,14 @@
     display: block;
 }
 
+/* ✅ Reply mode - when editor is positioned below a comment */
+.comment-editor.reply-mode {
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border-left: 3px solid #3498db;
+    background: #f0f8ff;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;

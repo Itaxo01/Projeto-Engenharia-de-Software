@@ -59,9 +59,9 @@ public class ComentarioController {
 	@Autowired
 	private ComentarioService comentarioService;
 
-	@PostMapping("/addComentarioFilho")
+	@PostMapping("/responder")
 	@ResponseBody
-	public ResponseEntity<?> addComentarioFilho(@RequestParam("texto") String texto
+	public ResponseEntity<?> responder(@RequestParam("texto") String texto
 													,@RequestParam("comentarioPaiId") Long comentarioPaiId
 													,@RequestParam(value = "files", required=false) MultipartFile[] files
 													,HttpServletRequest request) {
