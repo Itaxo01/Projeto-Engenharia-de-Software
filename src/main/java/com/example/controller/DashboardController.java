@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.example.model.MapaCurricular;
 import com.example.service.MapaCurricularService;
+import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
 
 import org.springframework.ui.Model;
@@ -26,6 +27,9 @@ public class DashboardController {
 	
 	@Autowired
 	private MapaCurricularService mapaCurricularService;
+
+	@Autowired
+	private NotificacaoService notificacaoService;
 
 	@Autowired
 	private SessionService sessionService;
@@ -42,6 +46,7 @@ public class DashboardController {
 		List<MapaCurricularService.MapaCurricularDTO> mapa = mapaCurricularService.getMapaDoUsuario(userEmail);
 		model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		model.addAttribute("mapaCurricular", mapa);
+		model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
 		
 		return "dashboard";
 	}

@@ -39,9 +39,6 @@ public class AvaliacaoService {
     @Autowired
     private ProfessorService professorService;
 
-	 @Autowired
-	 private SessionService sessionService;
-
 	 private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AvaliacaoService.class);
     // Criar nova avaliação
     public Avaliacao salvar(Avaliacao avaliacao) {
@@ -59,7 +56,7 @@ public class AvaliacaoService {
             } catch (Exception e) {
                 // Log do erro, mas não falha a operação principal
 					 logger.error("Erro ao marcar disciplina como avaliada para usuário {}: {}", 
-						  avaliacao.getUsuario().getUser_email(), e.getMessage());
+						  avaliacao.getUsuario().getUserEmail(), e.getMessage());
                 System.err.println("Erro ao marcar disciplina como avaliada: " + e.getMessage());
             }
         }
@@ -104,7 +101,7 @@ public class AvaliacaoService {
 	 // Create na verdade cria ou edita avaliação (apenas nota)
     public Optional<Avaliacao> create(Professor professor, Disciplina disciplina, Usuario usuario, Integer nota){
         Optional<Avaliacao> avaliacaoExistente;
-		  logger.debug("Criando ou atualizando avaliação para usuário: " + usuario.getUser_email() +
+		  logger.debug("Criando ou atualizando avaliação para usuário: " + usuario.getUserEmail() +
 			  		   ", disciplina: " + disciplina.getCodigo() +
 			  		   (professor != null ? ", professor: " + professor.getProfessorId() : ", avaliação da disciplina"));
 
@@ -180,7 +177,7 @@ public class AvaliacaoService {
             avaliacao.getProfessor(),
             avaliacao.getNota() != null ? avaliacao.getNota() : 0,
             avaliacao.getCreatedAt(),
-				avaliacao.getUsuario().getUser_email().equals(sessionUsuarioEmail)
+				avaliacao.getUsuario().getUserEmail().equals(sessionUsuarioEmail)
         );
     }
 

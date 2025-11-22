@@ -128,7 +128,7 @@ public class ComentarioService {
 				comentario.getUpVotes(),
 				comentario.getDownVotes(),
 				comentario.getCreatedAt(),
-				comentario.getUsuario() != null && comentario.getUsuario().getUser_email().equals(sessionUsuarioEmail),
+				comentario.getUsuario() != null && comentario.getUsuario().getUserEmail().equals(sessionUsuarioEmail),
 				comentario.hasVoted(sessionUsuarioEmail),
 				comentario.getProfessor() != null ? comentario.getProfessor().getProfessorId() : null,
 				arquivos

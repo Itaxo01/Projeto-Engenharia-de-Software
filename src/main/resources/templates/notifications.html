@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações - Sistema Acadêmico</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .notifications-container { max-width: 900px; margin: 24px auto; padding: 16px; }
+        .notification-card { padding: 12px; border: 1px solid #ecf0f1; border-radius: 6px; margin-bottom: 12px; background: white; }
+        .notification-card.unread { font-weight: 700; background: #f7fbff; }
+        .notification-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
+        .notification-text { font-size: 14px; color: #2c3e50; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <!-- Navbar (copied from dashboard) -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/dashboard" style="text-decoration: none;"><h2>Sistema Acadêmico</h2></a>
+            </div>
+
+            <div class="nav-search">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar disciplina por código ou nome..." autocomplete="off">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/notifications" class="nav-link active" th:classappend="${unreadNotifications > 0} ? 'unread-notification-link' : ''">
+                    Notificações
+                    <span th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}" class="notification-badge">0</span>
+                </a>
+                <a href="/user" class="nav-link">Perfil</a>
+                <a th:if="${isAdmin}" href="/admin" class="nav-link">Administração</a>
+                <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <form id="logout-form" method="post" action="/logout" style="display: none;"></form>
+    <script>
+        function logout() { document.getElementById('logout-form').submit(); }
+    </script>
+
+    <div class="notifications-container">
+        <h1>Notificações</h1>
+        <div th:if="${notifications == null or #lists.isEmpty(notifications)}">
+            <p>Você não possui notificações.</p>
+        </div>
+
+        <div th:each="notification : ${notifications}">
+            <div th:classappend="${notification.isRead} ? '' : ' unread'" class="notification-card" th:attr="data-notification-id=${notification.id}">
+                <div class="notification-meta">
+                    <span th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">Data</span>
+                </div>
+                <div class="notification-text">
+                    <a th:href="@{'/class/' + ${notification.disciplinaCodigo} + '#comment-' + ${notification.comentarioId}}" th:text="'Texto: ' + ${notification.texto}">Comentário</a>
+                </div>
+
+                <div class="notification-actions" style="margin-top:8px;">
+                    <button type="button"
+                            class="mark-btn"
+                            th:attr="data-id=${notification.id},data-read=${notification.isRead}"
+                            th:text="${notification.isRead} ? 'Marcar como não lida' : 'Marcar como lida'">Marcar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+    <script>
+        // Attach click handlers to mark buttons and links
+        document.addEventListener('DOMContentLoaded', function() {
+            // Helper to update UI after marking
+            function updateUIAfterMark(card, markedRead) {
+                if (markedRead) card.classList.remove('unread');
+                else card.classList.add('unread');
+
+                // Update corresponding button if present
+                const btn = card.querySelector('.mark-btn');
+                if (btn) {
+                    btn.dataset.read = String(markedRead);
+                    btn.textContent = markedRead ? 'Marcar como não lida' : 'Marcar como lida';
+                }
+
+                // Update navbar badge
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    let count = parseInt(badge.textContent || '0', 10);
+                    if (markedRead) {
+                        count = Math.max(0, count - 1);
+                    } else {
+                        count = count + 1;
+                    }
+                    badge.textContent = count;
+
+                    const notifLink = document.querySelector('.nav-link[href="/notifications"]');
+                    if (notifLink) {
+                        if (count > 0) notifLink.classList.add('unread-notification-link');
+                        else notifLink.classList.remove('unread-notification-link');
+                    }
+                }
+            }
+
+            const buttons = document.querySelectorAll('.mark-btn');
+            buttons.forEach(btn => btn.addEventListener('click', async function(ev) {
+                const id = this.dataset.id;
+                const currentlyRead = this.dataset.read === 'true';
+                const marcacao = !currentlyRead;
+
+                try {
+                    const form = new URLSearchParams();
+                    form.append('marcacao', String(marcacao));
+                    form.append('notificacaoId', String(id));
+
+                    const res = await fetch('/notifications/read', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: form.toString()
+                    });
+
+                    if (!res.ok) {
+                        const txt = await res.text();
+                        alert('Erro ao marcar notificação: ' + txt);
+                        return;
+                    }
+
+                    const card = this.closest('.notification-card');
+                    updateUIAfterMark(card, marcacao);
+
+                } catch (err) {
+                    console.error('Erro ao marcar notificação', err);
+                    alert('Erro ao marcar notificação');
+                }
+            }));
+
+            // When user clicks the notification link, mark as read then navigate
+            const notifLinks = document.querySelectorAll('.notification-card .notification-text a');
+            notifLinks.forEach(a => a.addEventListener('click', async function(ev) {
+                const card = this.closest('.notification-card');
+                if (!card) return; // defensive
+                const id = card.dataset.notificationId;
+                // If card is unread (has class 'unread'), mark it as read before navigating
+                const isUnread = card.classList.contains('unread');
+                if (!id || !isUnread) {
+                    // either no id or already read -> allow default navigation
+                    return;
+                }
+
+                ev.preventDefault(); // prevent immediate navigation
+
+                try {
+                    const form = new URLSearchParams();
+                    form.append('marcacao', 'true');
+                    form.append('notificacaoId', String(id));
+
+                    const res = await fetch('/notifications/read', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: form.toString()
+                    });
+
+                    if (!res.ok) {
+                        const txt = await res.text();
+                        console.warn('Erro ao marcar notificação (navegação):', txt);
+                        // proceed with navigation even if marking failed
+                        window.location.href = this.href;
+                        return;
+                    }
+
+                    // Update UI and navigate
+                    updateUIAfterMark(card, true);
+                    window.location.href = this.href;
+
+                } catch (err) {
+                    console.error('Erro ao marcar notificação (navegação)', err);
+                    // proceed with navigation even if request failed
+                    window.location.href = this.href;
+                }
+            }));
+        });
+    </script>
+</html>

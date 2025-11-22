@@ -26,11 +26,20 @@ public class Notificacao {
 	@Column
 	private Boolean read;
 
+	public Notificacao(Long id, Usuario usuario, Comentario comentario, Boolean read) {
+		this.id = id;
+		this.usuario = usuario;
+		this.comentario = comentario;
+		this.read = read;
+	}
+
 	public Notificacao(Usuario usuario, Comentario comentario) {
 		this.usuario = usuario;
 		this.comentario = comentario;
 		this.read = false;
 	}
+
+	public Notificacao(){}
 
 	public Long getId() {
 		return id;

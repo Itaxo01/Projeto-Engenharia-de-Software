@@ -325,93 +325,65 @@ function mostrarComentarios(comentarios, professorNome) {
         return;
     }
     
-    // Filter only parent comments (those without a pai/parent)
-    const comentariosPais = comentarios.filter(c => !c.pai);
-    
-    lista.innerHTML = comentariosPais.map(comentario => {
-        // Render parent comment
-        let html = renderCommentCard(comentario, false);
+    lista.innerHTML = comentarios.map(comentario => {
+        const isOwner = comentario.isOwner || false;
+        const hasVoted = comentario.hasVoted; // 1 (upvote), -1 (downvote), 0 (no vote)
         
-        // Render child comments if they exist
-        if (comentario.filhos && comentario.filhos.length > 0) {
-            html += `<div class="child-comments-container">`;
-            comentario.filhos.forEach(filho => {
-                html += renderCommentCard(filho, true);
-            });
-            html += `</div>`;
-        }
+        // Classes para destacar botões de voto
+        const upvoteClass = hasVoted === 1 ? 'voted' : '';
+        const downvoteClass = hasVoted === -1 ? 'voted' : '';
         
-        return html;
+        // ✅ Show delete button if user is owner OR admin
+        const canDelete = isOwner || isAdmin;
+        
+        // ✅ Render attached files
+        const arquivosHTML = comentario.arquivos && comentario.arquivos.length > 0 
+            ? `<div class="comment-attachments">${renderArquivos(comentario.arquivos)}</div>`
+            : '';
+        
+		return `
+		<div class="review-card" data-comment-id="${comentario.id}">
+			 <div class="review-header">
+			<div class="reviewer-info">
+				 <div class="reviewer-avatar">${String.fromCharCode(65 + (comentario.id % 26))}</div>
+				 <span class="reviewer-date">${formatarData(comentario.createdAt)}</span>
+			</div>
+			 </div>
+			 <div class="review-content">${escapeHtml(comentario.texto)}</div>
+			 
+			 <!-- Arquivos Anexados -->
+			 ${arquivosHTML}
+			 
+			 <!-- Botões de Ação -->
+			 <div class="review-actions">
+			<button class="review-action-btn upvote-btn ${upvoteClass}" onclick="voteComment(${comentario.id}, true)">
+				 <span class="vote-icon">👍</span>
+				 <span class="vote-count">${comentario.upVotes || 0}</span>
+			</button>
+			<button class="review-action-btn downvote-btn ${downvoteClass}" onclick="voteComment(${comentario.id}, false)">
+				 <span class="vote-icon">👎</span>
+				 <span class="vote-count">${comentario.downVotes || 0}</span>
+			</button>
+			<button class="review-action-btn reply-btn" onclick="replyToComment(${comentario.id})">
+				 <span class="vote-icon">💬</span>
+				 <span>Responder</span>
+			</button>
+			${isOwner ? `
+			<button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
+				 <span class="vote-icon">✏️</span>
+				 <span>Editar</span>
+			</button>
+			` : ''}
+			${canDelete ? `
+			<button class="review-action-btn delete-btn" onclick="deleteComment(${comentario.id})">
+				 <span class="vote-icon">🗑️</span>
+				 <span>Deletar</span>
+			</button>
+			` : ''}
+			 </div>
+		</div>
+		`;
     }).join('');
-}
-
-/**
- * Render a single comment card (parent or child)
- * @param {Object} comentario - The comment object
- * @param {Boolean} isChild - Whether this is a child comment
- */
-function renderCommentCard(comentario, isChild = false) {
-    const isOwner = comentario.isOwner || false;
-    const hasVoted = comentario.hasVoted; // 1 (upvote), -1 (downvote), 0 (no vote)
-    
-    // Classes para destacar botões de voto
-    const upvoteClass = hasVoted === 1 ? 'voted' : '';
-    const downvoteClass = hasVoted === -1 ? 'voted' : '';
-    
-    // ✅ Show delete button if user is owner OR admin
-    const canDelete = isOwner || isAdmin;
-    
-    // ✅ Render attached files
-    const arquivosHTML = comentario.arquivos && comentario.arquivos.length > 0 
-        ? `<div class="comment-attachments">${renderArquivos(comentario.arquivos)}</div>`
-        : '';
-    
-    // Add child class for styling
-    const childClass = isChild ? 'child-comment' : 'parent-comment';
-    
-    return `
-    <div class="review-card ${childClass}" data-comment-id="${comentario.id}">
-         <div class="review-header">
-        <div class="reviewer-info">
-             ${isChild ? '<span class="reply-indicator">↳ Resposta</span>' : ''}
-             <div class="reviewer-avatar">${String.fromCharCode(65 + (comentario.id % 26))}</div>
-             <span class="reviewer-date">${formatarData(comentario.createdAt)}</span>
-        </div>
-         </div>
-         <div class="review-content">${escapeHtml(comentario.texto)}</div>
-         
-         <!-- Arquivos Anexados -->
-         ${arquivosHTML}
-         
-         <!-- Botões de Ação -->
-         <div class="review-actions">
-        <button class="review-action-btn upvote-btn ${upvoteClass}" onclick="voteComment(${comentario.id}, true)">
-             <span class="vote-icon">👍</span>
-             <span class="vote-count">${comentario.upVotes || 0}</span>
-        </button>
-        <button class="review-action-btn downvote-btn ${downvoteClass}" onclick="voteComment(${comentario.id}, false)">
-             <span class="vote-icon">👎</span>
-             <span class="vote-count">${comentario.downVotes || 0}</span>
-        </button>
-        <button class="review-action-btn reply-btn" onclick="replyToComment(${comentario.id})">
-             <span class="vote-icon">💬</span>
-             <span>Responder</span>
-        </button>
-        ${isOwner ? `
-        <button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
-             <span class="vote-icon">✏️</span>
-             <span>Editar</span>
-        </button>
-        ` : ''}
-        ${canDelete ? `
-        <button class="review-action-btn delete-btn" onclick="deleteComment(${comentario.id})">
-             <span class="vote-icon">🗑️</span>
-             <span>Deletar</span>
-        </button>
-        ` : ''}
-         </div>
-    </div>
-    `;
 }
 
 // Formatar data
@@ -1672,7 +1644,7 @@ function replyToComment(comentarioId) {
     // Reset reply editor
     resetReplyEditor();
 
-
+    
     // Store which comment we're replying to
     replyingToCommentId = comentarioId;
     

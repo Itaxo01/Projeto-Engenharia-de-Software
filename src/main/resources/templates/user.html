@@ -25,6 +25,10 @@
 
             <div class="nav-links">
                 <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/notifications" class="nav-link" th:classappend="${unreadNotifications > 0} ? 'unread-notification-link' : ''">
+                    Notificações
+                    <span th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}" class="notification-badge">0</span>
+                </a>
                 <a href="/user" class="nav-link active">Perfil</a>
                 <a th:if="${isAdmin}" href="/admin" class="nav-link">Administração</a>
                 <a href="#" class="nav-link" onclick="logout(); return false;">Sair</a>

@@ -190,7 +190,7 @@ public class ComentarioController {
 			return ResponseEntity.status(404).body("Comentário não encontrado.");
 		}
 
-		if(user.getAdmin() || comentario.getUsuario().getUser_email().equals(userEmail)) {
+		if(user.getAdmin() || comentario.getUsuario().getUserEmail().equals(userEmail)) {
 			try {
 				comentarioService.softDelete(comentarioId, userEmail);
 				return ResponseEntity.ok("Comentário deletado com sucesso.");
@@ -312,7 +312,7 @@ public class ComentarioController {
 		if (novoTexto.length() > 2000) {
 			return ResponseEntity.status(400).body("O texto do comentário excede o limite de 2000 caracteres.");
 		}
-		if(!comentario.getUsuario().getUser_email().equals(userEmail)) {
+		if(!comentario.getUsuario().getUserEmail().equals(userEmail)) {
 			return ResponseEntity.status(403).body("Permissão negada para editar este comentário.");
 		}
 

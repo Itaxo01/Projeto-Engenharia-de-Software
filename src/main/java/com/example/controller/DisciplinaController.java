@@ -17,6 +17,7 @@ import com.example.model.Professor;
 import com.example.service.AvaliacaoService;
 import com.example.service.ComentarioService;
 import com.example.service.DisciplinaService;
+import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,9 @@ public class DisciplinaController {
 	@Autowired
 	private ComentarioService comentarioService;
 
+	@Autowired
+	private NotificacaoService notificacaoService;
+
 	private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DisciplinaController.class);
 	
 	// Aqui o id utilizado é o mesmo que o codigo utilizado no banco de dados
@@ -49,6 +53,7 @@ public class DisciplinaController {
 		// Adicionar email do usuário logado
 		String userEmail = sessionService.getCurrentUser(request);
 		model.addAttribute("userEmail", userEmail);
+		model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
 		
 		Optional<Disciplina> optDisciplina = disciplinaService.buscarPorCodigo(classId);
 		if (optDisciplina.isPresent()) {

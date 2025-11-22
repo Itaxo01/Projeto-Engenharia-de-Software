@@ -58,6 +58,61 @@ body {
     color: #2980b9;
 }
 
+/* Unread notifications styling */
+.nav-link.unread-notification-link {
+    font-weight: 700 !important;
+    color: #e74c3c !important;
+}
+
+.nav-link.unread-notification-link:hover {
+    color: #c0392b !important;
+}
+
+.notification-badge {
+    display: inline-block;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+/* Notification card action button */
+.notification-card .mark-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.08s ease;
+    font-family: inherit;
+}
+
+/* Unread notifications: prominent green button to mark as read */
+.notification-card .mark-btn[data-read="false"] {
+    background: #2ecc71;
+    color: #ffffff;
+    border-color: #27ae60;
+}
+
+/* Read notifications: neutral outline button to mark as unread */
+.notification-card .mark-btn[data-read="true"] {
+    background: #ecf0f1;
+    color: #2c3e50;
+    border-color: #d0d7dc;
+}
+
+.notification-card .mark-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+
 .nav-logout-form {
     display: inline;
     margin: 0;

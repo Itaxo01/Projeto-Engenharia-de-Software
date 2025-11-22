@@ -8,6 +8,7 @@ import com.example.repository.DisciplinaRepository;
 import com.example.repository.MapaCurricularRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,10 @@ public class MapaCurricularService {
 
 	@Autowired
 	private DisciplinaService disciplinaService;
+
+	@Autowired
+	@Lazy
+	private AvaliacaoService avaliacaoService;
    
 	
 	@Transactional(readOnly = true)
@@ -74,8 +79,8 @@ public class MapaCurricularService {
 		// Criar novo
 		MapaCurricular novo = new MapaCurricular(usuario, disciplina, semestre);
 
-		// verifica se ha alguma avaliacao de usuario para disciplina
-		novo.setAvaliada(Boolean.TRUE);
+		// verifica se ha alguma avaliacao de usuario para disciplina		
+		novo.setAvaliada(avaliacaoService.possuiAvaliacaoPorUsuarioDisciplina(usuarioEmail, disciplinaCodigo));
 	
 		return mapaCurricularRepository.save(novo);
 	}
