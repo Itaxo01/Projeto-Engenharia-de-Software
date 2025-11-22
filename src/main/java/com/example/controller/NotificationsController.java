@@ -39,7 +39,7 @@ public class NotificationsController {
         List<NotificacaoDTO> notificacoes = notificacaoService.buscarNotificacoesPorEmail(userEmail);
 
 		for (NotificacaoDTO notificacao : notificacoes) {
-			System.out.println(notificacao.texto());
+			logger.debug("Notificação: " + notificacao.texto() + " | Lida: " + notificacao.isRead());
 		}
 
         model.addAttribute("notifications", notificacoes);

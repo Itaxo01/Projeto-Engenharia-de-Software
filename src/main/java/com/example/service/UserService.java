@@ -22,6 +22,8 @@ public class UserService {
 	 @Autowired
 	 private AvaliacaoService avaliacaoService;
 
+	 private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserService.class);
+
 	/** Resultado padrão de operações de escrita. */
 	public record QueryResult(boolean success, String message) {}
     
@@ -66,7 +68,7 @@ public class UserService {
 		email = normalizeEmail(email);
 		  
 		if (!userRepository.emailExists(email)) {
-				System.out.println("Email não encontrado: " + email);
+				logger.warn("Email não encontrado: " + email);
 				return false;
 		  }
         String storedHash = userRepository.getPassword(email);

@@ -53,7 +53,6 @@ public class UserAPIController {
 	@PostMapping("/changePassword")
 	public ResponseEntity<?> changePassword(HttpServletRequest request, @RequestBody Map<String,String> body) {
 		String email = sessionService.getCurrentUser(request);
-		// System.out.println(body.get("currentPassword") + " "+body.get("newPassword"));
 		if(email == null) {
 			return ResponseEntity.status(401).body("Usuário não autenticado");
 		}
@@ -85,12 +84,12 @@ public class UserAPIController {
 	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
 		String email = sessionService.getCurrentUser(request);
 		String currentPassword = body.get("currentPassword");
-		if(email != null) System.out.println("Deleção de conta para: " + email);
+		if(email != null) logger.info("Deleção de conta para: " + email);
 		else return ResponseEntity.status(401).build();
 		try {
 			if(!userService.validateUser(email, currentPassword)) return ResponseEntity.status(406).build();
 			
-			System.out.println("Deletando usuário: " + email);
+			logger.info("Deletando usuário: " + email);
 			UserService.QueryResult result = userService.deleteUser(email);
 			if(!result.success()) return ResponseEntity.status(400).body(result.message());
 		} catch(Exception e) {

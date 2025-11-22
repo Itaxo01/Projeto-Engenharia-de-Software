@@ -37,6 +37,8 @@ public class AdminAPIController {
 	@Autowired
 	private ScrapperStatusService scrapperStatusService;
 
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AdminAPIController.class);
+
 	@GetMapping("/users")
 	public ResponseEntity<ArrayList<UserDto>> getUsers(HttpServletRequest request) {
 		boolean auth = sessionService.verifySession(request);
@@ -59,7 +61,7 @@ public class AdminAPIController {
 			return ResponseEntity.status(403).build();
 		}
 		String email = body.get("email");
-		if(email != null) System.out.println("Toggle admin para: " + email);
+		if(email != null) logger.debug("Toggle admin para: " + email);
 		try {
 			boolean success = userService.toggleAdmin(email);
 			if(!success) {
@@ -78,7 +80,7 @@ public class AdminAPIController {
 			return ResponseEntity.status(403).build();
 		}
 		String email = body.get("email");
-		if(email != null) System.out.println("Deletar conta: " + email);
+		if(email != null) logger.debug("Deletar conta: " + email);
 		try {
 			userService.deleteUser(email);
 			return ResponseEntity.ok("Conta deletada com sucesso.");
@@ -97,7 +99,6 @@ public class AdminAPIController {
 			return ResponseEntity.status(403).build();
 		}
 		
-		// System.out.println(sessionService.getCurrentUser(request) + " solicitou status do scrapper");
 		try {
 			var status = scrapperStatusService.getUltimoStatus();
 			return ResponseEntity.ok(status);
@@ -115,7 +116,6 @@ public class AdminAPIController {
 		if (!auth || !sessionService.currentUserIsAdmin(request)) {
 			return ResponseEntity.status(403).build();
 		}
-		// System.out.println(sessionService.getCurrentUser(request) + " solicitou execução do scrapper");
 		
 		String cagrUsername = body.get("cagrUsername");
 		String cagrPassword = body.get("cagrPassword");

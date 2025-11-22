@@ -33,26 +33,26 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${admin.curso}")
     private String adminCurso;
 
+	 private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DataInitializer.class);
+
     @Override
     public void run(String... args) throws Exception {
         // Verifica se o usuário administrador específico já existe
         if (userService.getUser(adminEmail) == null) {
-            System.out.println("==============================================");
-            System.out.println("🔧 Criando usuário administrador...");
+            logger.info("Criando usuário administrador...");
             
             userService.createUser(adminEmail, adminPassword, adminNome, adminMatricula, adminCurso);
             
-            System.out.println("✅ Usuário administrador criado com sucesso!");
-            System.out.println("==============================================");
+            logger.info("Usuário administrador criado com sucesso!");
 
 			} else {
-				System.out.println("✅ Usuário administrador já existe: " + adminEmail);
+				logger.info("Usuário administrador já existe: " + adminEmail);
 			}
 			if(!userService.getAdmin(adminEmail)) {
-				System.out.println("🔧 Definindo usuário como administrador...");
+				logger.info(" Definindo usuário como administrador...");
 				userService.toggleAdmin(adminEmail);
 			} else {
-				System.out.println("✅ Usuário já possui privilégios de administrador: " + adminEmail);
+				logger.info(" Usuário já possui privilégios de administrador: " + adminEmail);
 			}
     }
 }

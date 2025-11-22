@@ -21,6 +21,8 @@ public class RegisterController {
 
 	@Autowired
     private UserService userService;
+
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RegisterController.class);
 	
 	/**
 	 * Recebe o formulário de registro, valida o PDF e cria o usuário no repositório.
@@ -34,19 +36,19 @@ public class RegisterController {
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String handleRegister(@RequestParam("email") String email, @RequestParam("password") String password, @RequestParam("pdf") MultipartFile pdf, Model model) {
 		email = UserService.normalizeEmail(email);
-		System.out.println("Tentativa de registro: " + email);
-		System.out.println("PDF recebido: " + (pdf != null ? pdf.getOriginalFilename() : "null"));
+		logger.debug("Tentativa de registro: " + email);
+		logger.debug("PDF recebido: " + (pdf != null ? pdf.getOriginalFilename() : "null"));
 		
 		PdfValidationService.ValidationResult valid = PdfValidationService.validate(pdf);
 		if (!valid.valid()) {
-			System.out.println(valid.message());
+			logger.debug(valid.message());
 			model.addAttribute("error", valid.message());
 			return "register";
 		}
 
 		QueryResult userCreation = userService.createUser(email, password, valid.nome(), valid.matricula(), valid.curso());
 		if(userCreation.success()) {
-			System.out.println("Usuário registrado com sucesso: " + email);
+			logger.debug("Usuário registrado com sucesso: " + email);
 			return "redirect:/login";
 		} else {
 			model.addAttribute("error", userCreation.message());

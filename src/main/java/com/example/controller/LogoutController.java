@@ -16,6 +16,8 @@ public class LogoutController {
 
 	@Autowired
 	private SessionService sessionService;
+
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(LogoutController.class);
 	
 	/**
 	 * Invalida a sessão atual (se existir) e redireciona para a tela de login.
@@ -29,7 +31,7 @@ public class LogoutController {
 		// pode gerar um erro no usuário não logado que tenta acessar a página, não sei ao certo o por que.
 		if(auth){
 			String account = sessionService.getCurrentUser(request);
-			System.out.println("Saindo da conta " + account);
+			logger.debug("Usuário " + account + " realizou logout.");
 			sessionService.deleteSession(request);
 		}
 		return "redirect:/login";

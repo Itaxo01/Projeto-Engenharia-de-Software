@@ -23,6 +23,8 @@ public class LoginController {
 	private UserService userService;
 	@Autowired
 	private SessionService sessionService;
+
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(LoginController.class);
 	
 	/**
 	 * Processa o formulário de login, valida as credenciais e cria a sessão.
@@ -36,11 +38,11 @@ public class LoginController {
 	@PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String handleLogin(HttpServletRequest request,  @RequestParam("email") String email, @RequestParam("password") String password, Model model) {
 		email = UserService.normalizeEmail(email);
-		System.out.println("Tentativa de login: " + email);
+		logger.info("Tentativa de login: " + email);
 
 		boolean authenticated = userService.validateUser(email, password);
 		
-		System.out.println("Autenticação " + (authenticated ? "sucedida" : "falhou") + " para " + email);
+		logger.info("Autenticação " + (authenticated ? "sucedida" : "falhou") + " para " + email);
 		if(authenticated) {
 			sessionService.createSession(request, email, userService.getAdmin(email));
 			return "redirect:/dashboard";

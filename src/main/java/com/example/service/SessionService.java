@@ -14,6 +14,7 @@ public class SessionService {
 	@Autowired
 	private UserService userService;
 
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SessionService.class);
 	/**
 	 * Cria (ou reutiliza) uma sessão e armazena o email do usuário.
 	 * @param request requisição HTTP
@@ -23,7 +24,7 @@ public class SessionService {
 		HttpSession session = request.getSession();
 		session.setAttribute("email", email);
 		session.setMaxInactiveInterval(30*60); // 30 minutos
-		System.out.println("Sessão criada para: " + email);
+		logger.info("Sessão criada para: " + email);
 	}
 	
 	/**
@@ -33,7 +34,7 @@ public class SessionService {
 		HttpSession session = request.getSession(false);
 		if (session != null) {
 			String email = (String) session.getAttribute("email");
-			System.out.println("Sessão destruída para: " + email);
+			logger.info("Sessão destruída para: " + email);
 			session.invalidate();
 		}
 	}

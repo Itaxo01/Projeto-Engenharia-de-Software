@@ -47,7 +47,8 @@ public class DisciplinaController {
 	// Aqui o id utilizado é o mesmo que o codigo utilizado no banco de dados
 	@GetMapping("/class/{id}")
 	public String classDetails(HttpServletRequest request, @PathVariable("id") String classId, Model model) {
-		System.out.println(classId);
+		logger.debug("Acessando detalhes da disciplina: " + classId);
+		
 		model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		
 		// Adicionar email do usuário logado
