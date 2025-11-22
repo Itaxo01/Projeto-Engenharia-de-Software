@@ -158,33 +158,75 @@ async function changePassword() {
     modalContent.appendChild(overlay);
     
 	 console.log("Changing password...");
-    const code = await httpPost("/api/changePassword", JSON.stringify({"currentPassword": currentPassword, "newPassword": newPassword}));
     
-    // Remove loading overlay
-    if (overlay) overlay.remove();
-    
-    if (code == 400){
+    try {
+        const response = await fetch('/api/changePassword', {
+            method: "POST",
+            body: JSON.stringify({"currentPassword": currentPassword, "newPassword": newPassword}),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            },
+            credentials: 'same-origin'
+        });
+        
+        // Remove loading overlay
+        if (overlay) overlay.remove();
+        
+        let responseData;
+        const contentType = response.headers.get("content-type");
+        
+        // Check if response is JSON
+        if (contentType && contentType.includes("application/json")) {
+            responseData = await response.json();
+        } else {
+            // If not JSON, get as text
+            const textResponse = await response.text();
+            responseData = { message: textResponse };
+        }
+        
+        console.log("Response:", response.status, responseData);
+        
+        if (response.ok) {
+            // Success
+            alert("Senha alterada com sucesso.");
+            resetPasswordForm();
+            closePasswordModal();
+            
+            // Restore UI state after closing
+            submitButton.disabled = false;
+            submitButton.classList.remove('btn-loading');
+            submitButton.textContent = originalButtonText;
+            inputs.forEach(input => input.disabled = false);
+        } else {
+            // Error - restore UI and show backend message
+            submitButton.disabled = false;
+            submitButton.classList.remove('btn-loading');
+            submitButton.textContent = originalButtonText;
+            inputs.forEach(input => input.disabled = false);
+            
+            // Handle session expiration
+            if (response.status === 401) {
+                alert("Sessão expirada. Por favor refaça login.");
+                document.location.href = "/";
+                return;
+            }
+            
+            // Show error message from backend
+            errorMessage.textContent = responseData.message || 'Erro ao alterar senha. Tente novamente.';
+        }
+    } catch (error) {
+        console.error("Error changing password:", error);
+        
+        // Remove loading overlay
+        if (overlay) overlay.remove();
+        
         // Restore UI on error
         submitButton.disabled = false;
         submitButton.classList.remove('btn-loading');
         submitButton.textContent = originalButtonText;
         inputs.forEach(input => input.disabled = false);
         
-		errorMessage.textContent = 'Senha atual incorreta.';
-	} else if (code == 401) {
-        alert("Sessão expirada. Por favor refaça login.");
-        document.location.href = "/";
-    } else {
-        // Success - keep loading state while page/modal closes
-        alert("Senha alterada com sucesso.")
-        resetPasswordForm();
-        closePasswordModal();
-        
-        // Restore UI state after closing
-        submitButton.disabled = false;
-        submitButton.classList.remove('btn-loading');
-        submitButton.textContent = originalButtonText;
-        inputs.forEach(input => input.disabled = false);
+        errorMessage.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
     }
 }
 

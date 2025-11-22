@@ -42,35 +42,15 @@ public class Notificacao {
 
 	public Notificacao(){}
 
-	public Long getId() {
-		return id;
-	}
+	public Long getId() { return id;}
+	public void setId(Long id) { this.id = id; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+	public Usuario getUsuario() { return usuario; }
+	public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-	public Usuario getUsuario() {
-		return usuario;
-	}
+	public Comentario getComentario() { return comentario; }
+	public void setComentario(Comentario comentario) { this.comentario = comentario; }
 
-	public void setUsuario(Usuario usuario) {
-		this.usuario = usuario;
-	}
-
-	public Comentario getComentario() {
-		return comentario;
-	}
-
-	public void setComentario(Comentario comentario) {
-		this.comentario = comentario;
-	}
-
-	public Boolean getRead() {
-		return read;
-	}
-
-	public void setRead(Boolean read) {
-		this.read = read;
-	}
+	public Boolean getRead() { return read; }
+	public void setRead(Boolean read) { this.read = read; }
 }

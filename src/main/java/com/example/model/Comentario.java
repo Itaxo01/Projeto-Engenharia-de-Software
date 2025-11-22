@@ -118,6 +118,7 @@ public class Comentario {
 	private Professor professor;
 
 	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArquivoComentario> arquivos = new ArrayList<>();
 
 	// Relacionamento autoreferencial - comentário pai

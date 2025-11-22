@@ -26,6 +26,8 @@ public class UserAPIController {
 	private UserService userService;
 	@Autowired
 	private SessionService sessionService;
+
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserAPIController.class);
 	/**
 	 * Recurso que retorna dados do usuário logado. Respostas possíveis:
 	 * - 200 com JSON (email, nome, matricula, curso) se autenticado
@@ -49,20 +51,33 @@ public class UserAPIController {
 	/** Troca a senha do usuário logado.
 	 */
 	@PostMapping("/changePassword")
-	public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody Map<String,String> body) {
+	public ResponseEntity<?> changePassword(HttpServletRequest request, @RequestBody Map<String,String> body) {
 		String email = sessionService.getCurrentUser(request);
 		// System.out.println(body.get("currentPassword") + " "+body.get("newPassword"));
-		if(email != null) System.out.println("Troca de senha para: " + email);
-		try {
-			userService.changePassword(email, body.get("currentPassword"), body.get("newPassword"));
-		} catch(Exception e) {
-			if (e.getMessage() == "400") 
-				return ResponseEntity.status(400).build();
-			else if (e.getMessage() == "401")
-				return ResponseEntity.status(401).build();
-			return ResponseEntity.status(500).build();
+		if(email == null) {
+			return ResponseEntity.status(401).body("Usuário não autenticado");
 		}
-		return ResponseEntity.ok("Sucesso");
+
+		Usuario user = userService.getUser(email);
+		if(user == null) {
+			return ResponseEntity.status(404).body("Usuario não encontrado");
+		}
+		String currentPassword = body.get("currentPassword");
+		String newPassword = body.get("newPassword");
+
+		if(!userService.validateUser(email, currentPassword)) {
+			return ResponseEntity.status(406).body("Senha atual incorreta");
+		}
+		try { 
+			user = userService.changePassword(email, currentPassword, newPassword);
+			if(user == null) {
+				return ResponseEntity.status(500).body("Erro ao alterar senha");
+			}
+			logger.debug("Senha alterada para o usuário: " + email);
+			return ResponseEntity.ok("Sucesso");
+		} catch(Exception e) {
+			return ResponseEntity.status(500).body("Erro ao alterar senha");
+		}
 	}
 	/** Deleta a conta do usuário logado.
 	*/

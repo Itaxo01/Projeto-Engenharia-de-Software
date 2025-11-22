@@ -39,7 +39,7 @@ public class ArquivoComentario {
     private java.time.Instant createdAt = java.time.Instant.now();
     
     // Relacionamento com comentário
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "comentario_id", nullable = false)
     private Comentario comentario;
     

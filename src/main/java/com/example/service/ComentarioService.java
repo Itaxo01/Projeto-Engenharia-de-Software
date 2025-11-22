@@ -212,6 +212,7 @@ public class ComentarioService {
 		  public Boolean getIsOwner() { return isOwner; }
 		  public Integer getHasVoted() { return hasVoted; }
 		  public Boolean getEdited() { return edited; }
+		  public Instant getEditedAt() { return editedAt; }
 		  public String getProfessorId() { return professorId; }
 		  public List<ArquivoDTO> getArquivos() { return arquivos; }
 		  

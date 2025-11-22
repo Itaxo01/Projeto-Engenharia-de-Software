@@ -121,13 +121,15 @@ public class UserService {
 	/**
 	 * Altera senha de usuário
 	 */
-	public boolean changePassword (String email, String password, String newPassword) throws Exception {
+	public Usuario changePassword (String email, String password, String newPassword) throws Exception {
 		email = normalizeEmail(email);
 
 		if (!userRepository.emailExists(email)) throw new Exception("401");
-		String userPassword = userRepository.getPassword(email);
-		if (!HashingService.verifyPassword(password, userPassword)) throw new Exception("400");;
-		userRepository.changePassword(email, HashingService.hashPassword(newPassword));
-		return true;
+
+		Usuario user = userRepository.getUser(email);
+
+		if (!HashingService.verifyPassword(password, user.getPassword())) throw new Exception("400");
+
+		return userRepository.changePassword(user, HashingService.hashPassword(newPassword));
 	}
 }

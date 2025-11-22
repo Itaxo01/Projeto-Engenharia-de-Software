@@ -65,10 +65,8 @@ public interface UserRepository extends JpaRepository<Usuario, String> {
         deleteById(email);
     }
 
-    default void changePassword(String email, String passwordHash) {
-        findById(email).ifPresent(user -> {
-            user.setPassword(passwordHash);
-            save(user);
-        });
+    default Usuario changePassword(Usuario user, String passwordHash) {
+		  user.setPassword(passwordHash);
+		  return save(user);
     }
 }
