@@ -149,9 +149,6 @@ public class Comentario {
 		// Herdar disciplina e professor do pai
 		this.disciplina = pai.getDisciplina();
 		this.professor = pai.getProfessor();
-		// Gera o notificação para resposta para o dono do comentário
-		Notificacao notificacao = this.pai.usuario.generateAlert(this);
-		addNotificacao(notificacao);
 	}
 
 

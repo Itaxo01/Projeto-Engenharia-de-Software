@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.factory.ComentarioFactory;
 import com.example.model.Comentario;
 import com.example.model.Disciplina;
 import com.example.model.Professor;
@@ -69,8 +70,8 @@ public class ComentarioService {
 
     // ✅ Criar comentário principal (com disciplina e professor)
     public Comentario criarComentario(Usuario usuario, String texto, Disciplina disciplina, Professor professor) {
-        Comentario comentario = new Comentario(usuario, texto, disciplina, professor);
-		  return comentarioRepository.save(comentario);
+        Comentario comentario = ComentarioFactory.createComentario(usuario, texto, disciplina, professor);
+		return comentarioRepository.save(comentario);
     }
 
 
@@ -88,9 +89,9 @@ public class ComentarioService {
     public Comentario responderComentario(Usuario usuario, String texto, Long parentId) {
         Comentario parent = comentarioRepository.findById(parentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comentário pai não encontrado"));
-        
-        Comentario resposta = new Comentario(usuario, texto, parent);
-        return comentarioRepository.save(resposta);
+		Comentario resposta = ComentarioFactory.createReply(usuario, texto, parent);
+		comentarioRepository.save(resposta); 
+		return resposta;
     }
 	 
 	 // ✅ Buscar comentários de uma disciplina (sem professor)
