@@ -29,10 +29,6 @@ public class MapaCurricularService {
 	private DisciplinaService disciplinaService;
 
 	@Autowired
-	@Lazy
-	private AvaliacaoService avaliacaoService;
-   
-	@Autowired
 	private AvaliacaoService avaliacaoService;
 	
 	@Transactional(readOnly = true)
@@ -75,7 +71,7 @@ public class MapaCurricularService {
 		MapaCurricular novo = new MapaCurricular(usuario, disciplina, semestre);
 
 		// verifica se ha alguma avaliacao de usuario para disciplina		
-		novo.setAvaliada(avaliacaoService.possuiAvaliacaoPorUsuarioDisciplina(usuarioEmail, disciplinaCodigo));
+		novo.setAvaliada(avaliacaoService.possuiAvaliacaoPorUsuarioDisciplina(usuario, disciplina));
 	
 		return mapaCurricularRepository.save(novo);
 	}

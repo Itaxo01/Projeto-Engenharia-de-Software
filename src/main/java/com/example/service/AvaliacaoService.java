@@ -38,22 +38,8 @@ public class AvaliacaoService {
     public Avaliacao salvar(Avaliacao avaliacao) {
 		  logger.debug("A");
         Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
-		  logger.debug("Avaliação salva com ID: " + avaliacaoSalva.getId());
 
         // Marcar disciplina como avaliada no mapa curricular
-        if (avaliacao.getDisciplina() != null && avaliacao.getUsuario() != null) {
-            try {
-                mapaCurricularService.marcarComoAvaliada(
-                    avaliacao.getUsuario(), 
-                    avaliacao.getDisciplina()
-                );
-            } catch (Exception e) {
-                // Log do erro, mas não falha a operação principal
-					 logger.error("Erro ao marcar disciplina como avaliada para usuário {}: {}", 
-						  avaliacao.getUsuario().getUserEmail(), e.getMessage());
-                System.err.println("Erro ao marcar disciplina como avaliada: " + e.getMessage());
-            }
-        }
 		  logger.debug("Avaliação salva com ID: " + avaliacaoSalva.getId());
         
         return avaliacaoSalva;
