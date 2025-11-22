@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Where;
 
 import java.util.List;
@@ -58,8 +60,8 @@ public class Comentario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long comentarioId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_email")
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "user_email", nullable = false)
 	private Usuario usuario;
 
 	@Column(name = "up_votes")
@@ -68,7 +70,8 @@ public class Comentario {
 	@Column(name = "down_votes")
 	private Integer downVotes = 0;
 
-	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<Notificacao> notificacoes = new HashSet<>();
 
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -79,6 +82,7 @@ public class Comentario {
 	)
 	@MapKeyColumn(name = "user_email")
 	@Column(name = "is_upvote")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Map<String, Boolean> votes = new HashMap<>();
 
 	@Column(nullable = false, length = 2000)
@@ -113,7 +117,7 @@ public class Comentario {
 	@JoinColumn(name = "professor_id", nullable = true)
 	private Professor professor;
 
-	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private List<ArquivoComentario> arquivos = new ArrayList<>();
 
 	// Relacionamento autoreferencial - comentário pai
@@ -122,7 +126,7 @@ public class Comentario {
 	private Comentario pai;
 
 	// Relacionamento autoreferencial - comentários filhos
-	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@Where(clause = "deleted = false")
 	private List<Comentario> filhos = new ArrayList<>();
 

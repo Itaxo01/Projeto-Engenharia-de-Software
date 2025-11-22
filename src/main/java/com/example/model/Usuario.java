@@ -3,6 +3,9 @@ package com.example.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.*;
 
 /**
@@ -34,8 +37,21 @@ public class Usuario implements ComentarioObserver{
 	@Column(nullable = false)
 	private String curso;
 
-	@OneToMany(mappedBy = "usuario")
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<Notificacao> notificacoes = new HashSet<>();;
+
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<Avaliacao> avaliacoes = new HashSet<>();
+
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<MapaCurricular> mapaCurricular = new HashSet<>();
+
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<Comentario> comentarios = new HashSet<>();
 
 	@Column(name = "is_admin")
 	private boolean isAdmin = false;
@@ -84,6 +100,16 @@ public class Usuario implements ComentarioObserver{
 	public void setNotificacoes(Set<Notificacao> notificacoes) {
 		this.notificacoes = notificacoes;
 	}
+
+	public Set<Avaliacao> getAvaliacoes() { return avaliacoes; }
+	public void setAvaliacoes(Set<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
+
+	public Set<MapaCurricular> getMapaCurricular() { return mapaCurricular; }
+	public void setMapaCurricular(Set<MapaCurricular> mapaCurricular) { this.mapaCurricular = mapaCurricular; }
+
+	public Set<Comentario> getComentarios() { return comentarios; }
+	public void setComentarios(Set<Comentario> comentarios) { this.comentarios = comentarios; }
+
 
 	@Override
 	public Notificacao generateAlert(Comentario comentario) {

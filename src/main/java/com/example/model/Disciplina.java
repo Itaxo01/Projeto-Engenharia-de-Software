@@ -3,6 +3,10 @@ package com.example.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 /**
@@ -33,7 +38,10 @@ public class Disciplina {
     
     @Column(nullable = false, length = 300)
     private String nome;
-
+	 
+	 @OneToMany(mappedBy = "disciplina", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<MapaCurricular> mapaCurricular = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -45,17 +53,6 @@ public class Disciplina {
     )
     private Set<Professor> professores = new HashSet<>();
 
-	//  @ElementCollection(fetch = FetchType.EAGER)
-	//  @CollectionTable(
-	// 	  name = "professor_disciplina",
-	// 	  joinColumns = @JoinColumn(name = "disciplina_id")
-	//  )
-	//  @Column(name = "professor_id")
-    
-   //  // Relacionamento One-to-Many com Avaliacao
-    // @OneToMany(mappedBy = "disciplina_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    // private ArrayList<Avaliacao> avaliacoes = new ArrayList<>();
-    
     /**
      * Construtor completo utilizado pelo serviço/repositório.
      */
@@ -79,6 +76,9 @@ public class Disciplina {
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     
+	 public Set<MapaCurricular> getMapaCurricular() { return mapaCurricular; }
+	 public void setMapaCurricular(Set<MapaCurricular> mapaCurriculars) { this.mapaCurricular = mapaCurriculars; }
+
     /** Lista de professores que lecionam esta disciplina. */
     public Set<Professor> getProfessores() { 
 		if(professores == null) {
@@ -89,17 +89,6 @@ public class Disciplina {
     public void setProfessores(Set<Professor> professores) { 
 		this.professores = professores != null ? professores : new HashSet<>();
 	 }
-
-   //  /** Lista de avaliações desta disciplina. */
-    // public ArrayList<Avaliacao> getAvaliacoes() { 
-	// 	if(avaliacoes == null) {
-	// 		avaliacoes = new ArrayList<>();
-	// 	}
-	// 	return avaliacoes;
-	// }
-    // public void setAvaliacoes(ArrayList<Avaliacao> avaliacoes) { 
-	// 	this.avaliacoes = avaliacoes != null ? avaliacoes : new ArrayList<>();
-	// }
 
     // Métodos auxiliares para gerenciamento de relacionamentos
     // public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getProfessorId());}
@@ -118,6 +107,8 @@ public class Disciplina {
 		}
 		return professores.contains(professor);
 	}
+
+
     
 	 @Override
     public boolean equals(Object o) {

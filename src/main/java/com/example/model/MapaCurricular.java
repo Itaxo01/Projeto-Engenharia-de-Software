@@ -18,12 +18,12 @@ public class MapaCurricular {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_email", nullable = false, unique = true)
     private Usuario usuario;
     
-    @ManyToOne
-    @JoinColumn(name = "disciplina_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "disciplina_id", nullable = false)
     private Disciplina disciplina;
     
     @Column(nullable = false)

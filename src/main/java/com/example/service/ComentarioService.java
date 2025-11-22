@@ -130,6 +130,8 @@ public class ComentarioService {
 				comentario.getCreatedAt(),
 				comentario.getUsuario() != null && comentario.getUsuario().getUserEmail().equals(sessionUsuarioEmail),
 				comentario.hasVoted(sessionUsuarioEmail),
+				comentario.getIsEdited(),
+				comentario.getEditedAt(),
 				comentario.getProfessor() != null ? comentario.getProfessor().getProfessorId() : null,
 				arquivos
 		  );
@@ -181,12 +183,13 @@ public class ComentarioService {
 		  private final Instant createdAt;
 		  private final Boolean isOwner;
 		  private final Integer hasVoted; // -1 = downvote, 0 = no vote, 1 = upvote
+		  private final Boolean edited;
+		  private final Instant editedAt;
 		  private final List<ArquivoDTO> arquivos;
 		  
 		  public ComentarioDTO(Long id, String texto, 
 								Integer upVotes, Integer downVotes, Instant createdAt, 
-								Boolean isOwner, Integer hasVoted, String professorId,
-								List<ArquivoDTO> arquivos) {
+								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, String professorId, List<ArquivoDTO> arquivos) {
 				this.id = id;
 				this.texto = texto;
 				this.upVotes = upVotes != null ? upVotes : 0;
@@ -194,6 +197,8 @@ public class ComentarioService {
 				this.createdAt = createdAt;
 				this.isOwner = isOwner;
 				this.hasVoted = hasVoted;
+				this.edited = edited;
+				this.editedAt = editedAt;
 				this.professorId = professorId;
 				this.arquivos = arquivos != null ? arquivos : new ArrayList<>();
 		  }
@@ -206,6 +211,7 @@ public class ComentarioService {
 		  public Instant getCreatedAt() { return createdAt; }
 		  public Boolean getIsOwner() { return isOwner; }
 		  public Integer getHasVoted() { return hasVoted; }
+		  public Boolean getEdited() { return edited; }
 		  public String getProfessorId() { return professorId; }
 		  public List<ArquivoDTO> getArquivos() { return arquivos; }
 		  
