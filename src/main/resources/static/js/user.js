@@ -42,41 +42,108 @@ async function confirmDelete() {
 	const confirmation = document.getElementById('deleteConfirmation').value;
 	const errorMessage = document.getElementById('delete-error-message');
 	const currentPassword = document.getElementById('confirmDeletePassword').value;
-	if (confirmation === 'EXCLUIR') {
-		console.log("Confirmando exclusão...");
-			const code = await httpPost("/api/deleteUser", JSON.stringify({"currentPassword": currentPassword}));
-		if (code == 401) {
-			alert("Sessão expirada. Por favor refaça login.");
+	
+	// Validate confirmation text
+	if (confirmation !== 'EXCLUIR') {
+		errorMessage.textContent = 'Digite "EXCLUIR" para confirmar a exclusão da conta';
+		setTimeout(() => {
+			errorMessage.textContent = '';
+		}, 3000);
+		return;
+	}
+	
+	console.log("Confirmando exclusão...");
+	
+	// Get modal elements for loading state
+	const deleteButton = document.querySelector('#deleteModal .btn-danger');
+	const modalContent = document.querySelector('#deleteModal .modal-content');
+	const inputs = document.querySelectorAll('#deleteModal input');
+	
+	// Disable inputs and button
+	inputs.forEach(input => input.disabled = true);
+	deleteButton.disabled = true;
+	const originalButtonText = deleteButton.textContent;
+	deleteButton.classList.add('btn-loading');
+	deleteButton.innerHTML = '<div class="spinner spinner-small"></div><span>Excluindo conta...</span>';
+	
+	// Add loading overlay to modal
+	let overlay = document.createElement('div');
+	overlay.className = 'loading-overlay';
+	overlay.innerHTML = `
+		<div class="spinner"></div>
+		<div class="loading-overlay-text">Excluindo conta...</div>
+	`;
+	modalContent.style.position = 'relative';
+	modalContent.appendChild(overlay);
+	
+	try {
+		const response = await fetch('/api/deleteUser', {
+			method: "POST",
+			body: JSON.stringify({"currentPassword": currentPassword}),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8"
+			},
+			credentials: 'same-origin'
+		});
+		
+		// Remove loading overlay
+		if (overlay) overlay.remove();
+		
+		let responseData;
+		const contentType = response.headers.get("content-type");
+		
+		// Check if response is JSON
+		if (contentType && contentType.includes("application/json")) {
+			responseData = await response.json();
+		} else {
+			// If not JSON, get as text
+			const textResponse = await response.text();
+			responseData = { message: textResponse };
+		}
+		
+		console.log("Delete response:", response.status, responseData);
+		
+		if (response.ok) {
+			// Success - keep loading state while redirecting
+			alert('Conta excluída com sucesso.');
 			document.location.href = "/";
-			return;
-		} else if (code == 400) {
-			errorMessage.textContent = 'Erro ao excluir a conta. Tente novamente.';
+		} else {
+			// Error - restore UI and show message
+			deleteButton.disabled = false;
+			deleteButton.classList.remove('btn-loading');
+			deleteButton.textContent = originalButtonText;
+			inputs.forEach(input => input.disabled = false);
+			
+			// Handle session expiration
+			if (response.status === 401) {
+				alert("Sessão expirada. Por favor refaça login.");
+				document.location.href = "/";
+				return;
+			}
+			
+			// Show error message from backend
+			errorMessage.textContent = responseData.message || 'Erro ao excluir a conta. Tente novamente.';
 			setTimeout(() => {
 				errorMessage.textContent = '';
 			}, 3000);
-			return;
-		} else if(code == 406){
-			errorMessage.textContent = 'Senha incorreta. Tente novamente.';
-			setTimeout(() => {
-				errorMessage.textContent = '';
-			}, 3000);
-			return;
-		} else if (code == 500) {
-			errorMessage.textContent = 'Erro no servidor. Tente novamente mais tarde.';
-			setTimeout(() => {
-				errorMessage.textContent = '';
-			}, 3000);
-			return;
-		}  
-		alert('Conta excluída com sucesso.');
-		document.location.href = "/";
-		closeDeleteModal();
-    } else {
-        errorMessage.textContent = 'Digite "EXCLUIR" para confirmar a exclusão da conta';
-        setTimeout(() => {
-            errorMessage.textContent = '';
-        }, 3000);
-    }
+		}
+	} catch (error) {
+		console.error("Error deleting account:", error);
+		
+		// Remove loading overlay
+		if (overlay) overlay.remove();
+		
+		// Restore UI on error
+		deleteButton.disabled = false;
+		deleteButton.classList.remove('btn-loading');
+		deleteButton.textContent = originalButtonText;
+		inputs.forEach(input => input.disabled = false);
+		
+		errorMessage.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
+		setTimeout(() => {
+			errorMessage.textContent = '';
+		}, 3000);
+	}
 }
 
 // Close modals when clicking outside
