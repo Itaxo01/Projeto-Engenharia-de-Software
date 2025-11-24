@@ -51,7 +51,7 @@ public class NotificacaoService {
 
 		Notificacao notificacao = notificacaoOpt.get();
 
-		if (notificacao.getUsuario().getUserEmail() != userEmail) {
+		if (!notificacao.getUsuario().getUserEmail().equals(userEmail)) {
 			throw new IllegalArgumentException("Usuário não é dono da notificação.");
 		}
 

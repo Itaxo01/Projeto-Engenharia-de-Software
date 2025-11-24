@@ -115,6 +115,8 @@ public class Usuario implements ComentarioObserver{
 	public Notificacao generateAlert(Comentario comentario) {
 		Notificacao notificacao = new Notificacao(this, comentario);
 		notificacoes.add(notificacao);
+		comentario.addNotificacao(notificacao);
+		
 		return notificacao;
 	}
 }

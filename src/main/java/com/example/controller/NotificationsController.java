@@ -63,9 +63,9 @@ public class NotificationsController {
 			}
 
 			notificacaoService.marcarNotificacao(marcacao, usuarioEmail, notificacaoId);
-
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return ResponseEntity.badRequest().build();
 		}
 

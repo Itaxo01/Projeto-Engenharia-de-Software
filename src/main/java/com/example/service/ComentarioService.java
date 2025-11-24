@@ -11,13 +11,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.event.ComentarioRepliedEvent;
 import com.example.factory.ComentarioFactory;
 import com.example.model.Comentario;
 import com.example.model.Disciplina;
+import com.example.model.Notificacao;
 import com.example.model.Professor;
 import com.example.model.Usuario;
 import com.example.repository.ComentarioRepository;
@@ -27,6 +30,9 @@ public class ComentarioService {
     
     @Autowired
     private ComentarioRepository comentarioRepository;
+
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
 
 	 @Transactional // Admin use
 	 public void softDelete(Long id, String deletedBy) {
@@ -70,7 +76,7 @@ public class ComentarioService {
 
     // ✅ Criar comentário principal (com disciplina e professor)
     public Comentario criarComentario(Usuario usuario, String texto, Disciplina disciplina, Professor professor) {
-        Comentario comentario = ComentarioFactory.createComentario(usuario, texto, disciplina, professor);
+        Comentario comentario = ComentarioFactory.criarComentario(usuario, texto, disciplina, professor, null);
 		return comentarioRepository.save(comentario);
     }
 
@@ -89,9 +95,14 @@ public class ComentarioService {
     public Comentario responderComentario(Usuario usuario, String texto, Long parentId) {
         Comentario parent = comentarioRepository.findById(parentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comentário pai não encontrado"));
-		Comentario resposta = ComentarioFactory.createReply(usuario, texto, parent);
-		comentarioRepository.save(resposta); 
-		return resposta;
+
+		Comentario resposta = ComentarioFactory.criarComentario(usuario, texto, null, null, parent);
+		Comentario saved = comentarioRepository.save(resposta); 
+		
+		// Cria notificacao
+		eventPublisher.publishEvent(new ComentarioRepliedEvent(this, saved, parent));
+		
+		return saved;
     }
 	 
 	 // ✅ Buscar comentários de uma disciplina (sem professor)
