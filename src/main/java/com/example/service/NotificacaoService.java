@@ -54,5 +54,6 @@ public class NotificacaoService {
 		}
 
 		notificacao.setRead(marcacao);
+		notificacaoRepository.save(notificacao);
 	}
 }
