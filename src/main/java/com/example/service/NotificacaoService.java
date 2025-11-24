@@ -17,41 +17,39 @@ import jakarta.transaction.Transactional;
 public class NotificacaoService {
 	
 	@Autowired
-    private NotificacaoRepository notificacaoRepository;
-
-	@Autowired UserService userService;
+	private NotificacaoRepository notificacaoRepository;
 
 
 	@Transactional
-	public List<NotificacaoDTO> buscarNotificacoesPorEmail(String userEmail) {
-		List<Notificacao> notificacaos = notificacaoRepository.findByUsuarioUserEmailOrderByIdDesc(userEmail);
+	public List<NotificacaoDTO> buscarNotificacoesPorEmail(Usuario usuario) {
+		List<Notificacao> notificacaos = notificacaoRepository.findByUsuarioOrderByIdDesc(usuario);
 
 		return notificacaos.stream().map(n -> NotificacaoDTO.from(n)).toList();
 	}
 
 	@Transactional
-	public long countUnreadNotifications(String userEmail) {
-		List<Notificacao> notificacoes = notificacaoRepository.findByUsuarioUserEmailOrderByIdDesc(userEmail);
+	public long countUnreadNotifications(Usuario usuario) {
+		List<Notificacao> notificacoes = notificacaoRepository.findByUsuarioOrderByIdDesc(usuario);
 		return notificacoes.stream().filter(n -> !n.getRead()).count();
 	}
 
 	@Transactional
-	public void marcarNotificacao(Boolean marcacao, String userEmail, Long notificacaoId) {
-		Usuario usuario = userService.getUser(userEmail);
+	public Notificacao buscarPorId(Long notificacaoId) {
+		return notificacaoRepository.findById(notificacaoId).orElse(null);
+	}
+
+	@Transactional
+	public void marcarNotificacao(Boolean marcacao, Usuario usuario, Notificacao notificacao) {
 		
 		if (usuario == null) {
 			throw new IllegalArgumentException("Usuário não existe.");
 		}
 
-		Optional<Notificacao> notificacaoOpt = notificacaoRepository.findById(notificacaoId); 
-	
-		if (notificacaoOpt.isEmpty()) {
+		if (notificacao == null) {
 			throw new IllegalArgumentException("Notificação não existe.");
 		}
 
-		Notificacao notificacao = notificacaoOpt.get();
-
-		if (!notificacao.getUsuario().getUserEmail().equals(userEmail)) {
+		if (!notificacao.getUsuario().getUserEmail().equals(usuario.getUserEmail())) {
 			throw new IllegalArgumentException("Usuário não é dono da notificação.");
 		}
 

@@ -34,45 +34,9 @@ public class ComentarioService {
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
 
-	 @Transactional // Admin use
-	 public void softDelete(Long id, String deletedBy) {
-			Comentario c = comentarioRepository.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Comentário não encontrado"));
-			
-			softRecursiveDelete(c, deletedBy);
-			comentarioRepository.save(c);
+	 public void delete(Comentario comentario) {
+		  comentarioRepository.delete(comentario);
 	 }
-
-	 // recursiva por conta do save, salvar o pai é suficiente para persistir a deleção do ramo
-	 public void softRecursiveDelete(Comentario c, String deletedBy) {
-			c.setDeleted(true);
-			c.setDeletedAt(Instant.now());
-			c.setDeletedBy(deletedBy);
-
-			for( Comentario filho : c.getFilhos()) {
-				if (!filho.getDeleted()) {
-					softRecursiveDelete(filho, deletedBy);
-				}
-			}
-	 }
-
-	 /**
-     * Scheduled job: Archive old soft-deleted records
-     * Runs daily at 3 AM
-     */
-    @Scheduled(cron = "0 0 3 * * ?")
-    @Transactional
-    public void archiveOldDeletions() {
-        Instant cutoff = Instant.now().minus(30, ChronoUnit.DAYS);
-        
-        List<Comentario> oldDeleted = comentarioRepository
-            .findByDeletedTrueAndDeletedAtBefore(cutoff);
-        
-        for (Comentario c : oldDeleted) {
-            comentarioRepository.delete(c);
-        }
-    }
-
 
     // ✅ Criar comentário principal (com disciplina e professor)
     public Comentario criarComentario(Usuario usuario, String texto, Disciplina disciplina, Professor professor) {
@@ -149,7 +113,6 @@ public class ComentarioService {
 				comentario.hasVoted(sessionUsuarioEmail),
 				comentario.getIsEdited(),
 				comentario.getEditedAt(),
-				comentario.getDeleted(),
 				comentario.getProfessor() != null ? comentario.getProfessor().getProfessorId() : null,
 				comentario.getPai() != null ? comentario.getPai().getComentarioId() : null,
 				arquivos,
@@ -167,14 +130,6 @@ public class ComentarioService {
         return comentarioRepository.findAll();
     }
 
-	 public List<Comentario> buscarNaoDeletados() {
-		  return comentarioRepository.findByDeletedFalse();
-	 }
-
-	 /* 
-	  * Hard delete
-	  * Consider soft delete first
-	  */
     public void deletar(Long id) {
         comentarioRepository.deleteById(id);
     }
@@ -212,7 +167,7 @@ public class ComentarioService {
 		  
 		  public ComentarioDTO(Long id, String texto, 
 								Integer upVotes, Integer downVotes, Instant createdAt, 
-								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, Boolean deleted, String professorId, Long comentarioPaiId, List<ArquivoDTO> arquivos, List<ComentarioDTO> filhos) {
+								Boolean isOwner, Integer hasVoted, Boolean edited, Instant editedAt, String professorId, Long comentarioPaiId, List<ArquivoDTO> arquivos, List<ComentarioDTO> filhos) {
 				this.id = id;
 				this.texto = texto;
 				this.upVotes = upVotes != null ? upVotes : 0;
@@ -222,7 +177,7 @@ public class ComentarioService {
 				this.hasVoted = hasVoted;
 				this.edited = edited;
 				this.editedAt = editedAt;
-				this.deleted = deleted;
+				this.deleted = false;
 				this.professorId = professorId;
 				this.comentarioPaiId = comentarioPaiId;
 				this.arquivos = arquivos != null ? arquivos : new ArrayList<>();

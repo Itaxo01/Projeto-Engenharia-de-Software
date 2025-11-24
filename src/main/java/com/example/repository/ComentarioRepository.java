@@ -18,15 +18,11 @@ import com.example.model.Professor;
 @Repository
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 
-	List<Comentario> findByDeletedFalse();
-		
-	List<Comentario> findByDeletedTrueAndDeletedAtBefore(Instant dateTime);
-	
 	// ✅ Buscar comentários principais (sem pai) de uma disciplina (sem professor)
-	@Query("SELECT c FROM Comentario c WHERE c.disciplina = :disciplina AND c.professor IS NULL AND c.pai IS NULL AND c.deleted = false")
+	@Query("SELECT c FROM Comentario c WHERE c.disciplina = :disciplina AND c.professor IS NULL AND c.pai IS NULL")
 	List<Comentario> findByDisciplinaAndProfessorIsNullAndPaiIsNull(@Param("disciplina") Disciplina disciplina);
 	
 	// ✅ Buscar comentários principais (sem pai) de um professor específico
-	@Query("SELECT c FROM Comentario c WHERE c.disciplina = :disciplina AND c.professor = :professor AND c.pai IS NULL AND c.deleted = false")
+	@Query("SELECT c FROM Comentario c WHERE c.disciplina = :disciplina AND c.professor = :professor AND c.pai IS NULL")
 	List<Comentario> findByDisciplinaAndProfessorAndPaiIsNull(@Param("disciplina") Disciplina disciplina, @Param("professor") Professor professor);
 }

@@ -54,7 +54,6 @@ import jakarta.persistence.UniqueConstraint;
 	@Index(name = "idx_created", columnList = "created_at")
 })
 
-@Where(clause = "deleted = false")
 public class Comentario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,16 +90,6 @@ public class Comentario {
 	@Column(name = "created_at")
 	private Instant createdAt = Instant.now();
 
-	// Campos para soft delete
-	@Column(name = "deleted", nullable = false)
-	private Boolean deleted = false;
-
-	@Column(name = "deleted_at")
-	private Instant deletedAt;
-
-	@Column(name = "deleted_by")
-	private String deletedBy;
-
 	@Column(name = "is_edited", nullable = false)
 	private Boolean isEdited = false;
 
@@ -128,7 +117,6 @@ public class Comentario {
 
 	// Relacionamento autoreferencial - comentários filhos
 	@OneToMany(mappedBy = "pai", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	@Where(clause = "deleted = false")
 	private List<Comentario> filhos = new ArrayList<>();
 
 	public Comentario(){}
@@ -184,16 +172,6 @@ public class Comentario {
 
 	public Integer getDownVotes() { return downVotes; }
 	public void setDownVotes(Integer downVotes) { this.downVotes = downVotes; }
-
-	public Boolean getDeleted() { return deleted; }
-	public void setDeleted(Boolean deleted) { this.deleted = deleted; }
-
-	public Instant getDeletedAt() { return deletedAt; }
-	public void setDeletedAt(Instant deletedAt) { this.deletedAt = deletedAt; }
-
-	public String getDeletedBy() { return deletedBy; }
-	public void setDeletedBy(String deletedBy) { this.deletedBy = deletedBy; }
-
 
 	public Boolean getIsEdited() { return isEdited; }
 	public void setIsEdited(Boolean isEdited) { this.isEdited = isEdited; }

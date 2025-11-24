@@ -273,7 +273,7 @@ public class ComentarioController {
 
 		if(user.getAdmin() || comentario.getUsuario().getUserEmail().equals(userEmail)) {
 			try {
-				comentarioService.softDelete(comentarioId, userEmail);
+				comentarioService.delete(comentario);
 				return ResponseEntity.ok("Comentário deletado com sucesso.");
 			} catch(Exception e) {
 				return ResponseEntity.status(500).body("Erro ao deletar comentário: " + e.getMessage());

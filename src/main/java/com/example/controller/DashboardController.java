@@ -19,7 +19,6 @@ import com.example.model.MapaCurricular;
 import com.example.model.Usuario;
 import com.example.model.Disciplina;
 import com.example.service.MapaCurricularService;
-import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
 import com.example.service.UserService;
 import com.example.service.DisciplinaService;
@@ -32,9 +31,6 @@ public class DashboardController {
 	
 	@Autowired
 	private MapaCurricularService mapaCurricularService;
-
-	@Autowired
-	private NotificacaoService notificacaoService;
 
 	@Autowired
 	private SessionService sessionService;
@@ -61,10 +57,7 @@ public class DashboardController {
 		}
 		
 		List<MapaCurricularService.MapaCurricularDTO> mapa = mapaCurricularService.getMapaDoUsuario(usuario);
-		model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
 		model.addAttribute("mapaCurricular", mapa);
-		model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
-		
 		return "dashboard";
 	}
 

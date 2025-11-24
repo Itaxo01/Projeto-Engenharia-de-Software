@@ -8,12 +8,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.DTO.NotificacaoDTO;
 import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
+import com.example.service.UserService;
+
+import com.example.model.Notificacao;
+import com.example.model.Usuario;
 
 import jakarta.servlet.http.HttpServletRequest;
 import okhttp3.Response;
@@ -24,32 +29,42 @@ public class NotificationsController {
 	@Autowired
 	private NotificacaoService notificacaoService;
 
-    @Autowired
-    private SessionService sessionService;
+	@Autowired
+	private SessionService sessionService;
 
-	private org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ComentarioController.class);
+	@Autowired
+	private UserService userService;
+
+	private org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(NotificationsController.class);
 
     @GetMapping("/notifications")
     public String notifications(Model model, HttpServletRequest request) {
-        String userEmail = sessionService.getCurrentUser(request);
-        if (userEmail == null) {
-            return "redirect:/login";
-        }
+		String userEmail = sessionService.getCurrentUser(request);
+		logger.debug("Buscando usuário atual para listar notificações: " + userEmail);
 
-        List<NotificacaoDTO> notificacoes = notificacaoService.buscarNotificacoesPorEmail(userEmail);
+		if (userEmail == null) {
+			return "redirect:/login";
+		}
+		Usuario usuario = userService.getUser(userEmail);
+		if (usuario == null) {
+			return "redirect:/error";
+		}
+		logger.debug("Usuário encontrado: " + usuario.getUserEmail());
 
+		List<NotificacaoDTO> notificacoes = notificacaoService.buscarNotificacoesPorEmail(usuario);
+
+		logger.debug("Notificações encontradas: " + notificacoes.size());
+		
 		for (NotificacaoDTO notificacao : notificacoes) {
 			logger.debug("Notificação: " + notificacao.texto() + " | Lida: " + notificacao.isRead());
 		}
 
-        model.addAttribute("notifications", notificacoes);
-        model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-        model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
+		model.addAttribute("notifications", notificacoes);
 
-        return "notifications";
+		return "notifications";
 	}
 
-	@PostMapping("/notifications/read")
+	@PostMapping("/api/notifications/read")
 	@ResponseBody
 	public ResponseEntity<?> marcarNotificacao(@RequestParam("marcacao") Boolean marcacao,
 												@RequestParam("notificacaoId") Long notificacaoId,
@@ -62,7 +77,15 @@ public class NotificationsController {
 				return ResponseEntity.status(401).body("Usuário não autenticado.");
 			}
 
-			notificacaoService.marcarNotificacao(marcacao, usuarioEmail, notificacaoId);
+			Usuario usuario = userService.getUser(usuarioEmail);
+			Notificacao notificacao = notificacaoService.buscarPorId(notificacaoId);
+
+			if(usuario == null || notificacao == null) {
+				return ResponseEntity.badRequest().body("Usuário ou notificação inválidos.");
+			}
+
+			notificacaoService.marcarNotificacao(marcacao, usuario, notificacao);
+
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +20,6 @@ public class MainController {
 	@Autowired
 	private SessionService sessionService;
 
-	@Autowired
-	private NotificacaoService notificacaoService;
 
     /**
      * Redireciona a raiz para a tela de login. A verificação do login será feita lá. 
@@ -56,16 +53,12 @@ public class MainController {
     @GetMapping("/user")
     public String userProfile(HttpServletRequest request, Model model) {
       String userEmail = sessionService.getCurrentUser(request);
-      model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-      model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
-	  return "user";
+	  	return "user";
 	  }
 
     @GetMapping("/admin")
     public String adminPanel(HttpServletRequest request, Model model) {
       String userEmail = sessionService.getCurrentUser(request);
-      model.addAttribute("isAdmin", sessionService.currentUserIsAdmin(request));
-      model.addAttribute("unreadNotifications", notificacaoService.countUnreadNotifications(userEmail));
       return "admin";
     }
 }
