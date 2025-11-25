@@ -30,6 +30,8 @@ public class MapaCurricularService {
 
 	@Autowired
 	private AvaliacaoService avaliacaoService;
+
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MapaCurricularService.class);
 	
 	@Transactional(readOnly = true)
 	public List<MapaCurricularDTO> getMapaDoUsuario(Usuario usuario) {
@@ -60,6 +62,7 @@ public class MapaCurricularService {
 		}
 
 		var existente = mapaCurricularRepository.findByUsuarioAndDisciplina(usuario, disciplina);
+		logger.debug("MapaCurricular existente: {}", existente.isPresent() ? "ENCONTRADO" : "NÃO ENCONTRADO");
 		if (existente.isPresent()) {
 			// Atualizar semestre se já existe
 			MapaCurricular item = existente.get();

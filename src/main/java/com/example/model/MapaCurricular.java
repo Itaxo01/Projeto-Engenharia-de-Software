@@ -19,7 +19,7 @@ public class MapaCurricular {
     private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_email", nullable = false, unique = true)
+    @JoinColumn(name = "user_email", nullable = false)
     private Usuario usuario;
     
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
