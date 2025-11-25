@@ -55,7 +55,7 @@ public class ComentarioService {
 	 }
     
     // Responder comentário (herda disciplina/professor do pai)
-	@Transactional(readOnly = true)
+	@Transactional
     public Comentario responderComentario(Usuario usuario, String texto, Long parentId) {
         Comentario parent = comentarioRepository.findById(parentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comentário pai não encontrado"));
