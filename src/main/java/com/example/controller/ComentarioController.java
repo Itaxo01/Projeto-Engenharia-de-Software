@@ -216,12 +216,6 @@ public class ComentarioController {
 		if (userEmail == null) {
 			return ResponseEntity.status(401).body("Usuário não autenticado.");
 		}
-
-		
-		logger.debug("isUpVote recebido: " + isUpVote);
-		if (isUpVote == null) {
-			return ResponseEntity.status(400).body("isUpVote não recebido.");
-		}
 		
 		logger.debug("Registrando voto para comentário ID " + comentarioId + " por usuário " + userEmail + " como " + (isUpVote ? "upvote" : "downvote"));
 		try {
