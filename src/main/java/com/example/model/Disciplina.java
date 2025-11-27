@@ -43,15 +43,8 @@ public class Disciplina {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<MapaCurricular> mapaCurricular = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-        name="professor_disciplina",
-        joinColumns=
-            @JoinColumn(name="disciplina_id", referencedColumnName="disciplinaId"),
-        inverseJoinColumns=
-            @JoinColumn(name="professor_id", referencedColumnName="professor_id")
-    )
-    private Set<Professor> professores = new HashSet<>();
+    @OneToMany(mappedBy = "disciplina", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProfessorDisciplina> professorDisciplinas = new HashSet<>();
 
     /**
      * Construtor completo utilizado pelo serviço/repositório.
@@ -79,35 +72,47 @@ public class Disciplina {
 	 public Set<MapaCurricular> getMapaCurricular() { return mapaCurricular; }
 	 public void setMapaCurricular(Set<MapaCurricular> mapaCurriculars) { this.mapaCurricular = mapaCurriculars; }
 
-    /** Lista de professores que lecionam esta disciplina. */
-    public Set<Professor> getProfessores() { 
-		if(professores == null) {
-			professores = new HashSet<>();
-		}
-		return professores; 
+    /** Lista de relacionamentos professor-disciplina. */
+    public Set<ProfessorDisciplina> getProfessorDisciplinas() { 
+		return professorDisciplinas; 
 	}
-    public void setProfessores(Set<Professor> professores) { 
-		this.professores = professores != null ? professores : new HashSet<>();
+    public void setProfessorDisciplinas(Set<ProfessorDisciplina> professorDisciplinas) { 
+		this.professorDisciplinas = professorDisciplinas != null ? professorDisciplinas : new HashSet<>();
 	 }
 
-    // Métodos auxiliares para gerenciamento de relacionamentos
-    // public void adicionarProfessor(Professor professor) {adicionarProfessor(professor.getProfessorId());}
-    public void adicionarProfessor(Professor professor) {
-      if(professores == null) {
-	 	  professores = new HashSet<>();
-		}
-
-		professores.add(professor);
+    
+    public void adicionarProfessor(Professor professor, String ultimoSemestre) {
+		ProfessorDisciplina pd = new ProfessorDisciplina(professor, this, ultimoSemestre);
+		professorDisciplinas.add(pd);
+    }
+    
+    public void atualizarSemestreProfessor(Professor professor, String ultimoSemestre) {
+		professorDisciplinas.stream()
+			.filter(pd -> pd.getProfessor().equals(professor))
+			.findFirst()
+			.ifPresent(pd -> pd.setUltimoSemestre(ultimoSemestre));
     }
 
-	//  public boolean temProfessor(Professor professor) { return temProfessor(professor.getProfessorId()); }
 	 public boolean temProfessor(Professor professor) {
-		if(professores == null) {
-	 	  professores = new HashSet<>();
+		if(professorDisciplinas == null) {
+	 	  professorDisciplinas = new HashSet<>();
 		}
-		return professores.contains(professor);
+		return professorDisciplinas.stream()
+			.anyMatch(pd -> pd.getProfessor().equals(professor));
 	}
 
+	 /**
+	  * Método auxiliar para obter a lista de professores desta disciplina.
+	  * Converte o Set de ProfessorDisciplina para Set de Professor.
+	  */
+	 public Set<Professor> getProfessores() {
+		if(professorDisciplinas == null) {
+			return new HashSet<>();
+		}
+		return professorDisciplinas.stream()
+			.map(ProfessorDisciplina::getProfessor)
+			.collect(java.util.stream.Collectors.toSet());
+	 }
 
     
 	 @Override

@@ -471,7 +471,8 @@ public class DisciplinaScrapper {
 									}
 								}
 								try{
-									Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores);
+									Disciplina disciplina = disciplinaService.criarOuAtualizar(info.getCodigo(), info.getNome(), professores, semestre);
+									logger.debug("Disciplina processada: {} - {}", disciplina.getCodigo(), disciplina.getNome());
 									result.addDisciplina(disciplina);
                                     // logger.debug("Disciplina criada/atualizada com sucesso: {}", disciplina.toString());
 								} catch(Exception e){

@@ -14,9 +14,9 @@ import com.example.model.Usuario;
 import com.example.scrapper.DisciplinaScrapper;
 import com.example.service.ScrapperStatusService;
 import com.example.service.SessionService;
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
 
-import com.example.DTO.UserDto;
+import com.example.DTO.UserDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -31,7 +31,7 @@ import java.util.List;
 public class AdminAPIController {
 	
 	@Autowired
-	private UserService userService;
+	private UsuarioService userService;
 	@Autowired
 	private SessionService sessionService;
 	@Autowired
@@ -42,16 +42,16 @@ public class AdminAPIController {
 	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AdminAPIController.class);
 
 	@GetMapping("/users")
-	public ResponseEntity<ArrayList<UserDto>> getUsers(HttpServletRequest request) {
+	public ResponseEntity<ArrayList<UserDTO>> getUsers(HttpServletRequest request) {
 		boolean auth = sessionService.verifySession(request);
 		if (!auth || !sessionService.currentUserIsAdmin(request)) {
 			return ResponseEntity.status(403).build();
 		}
 
 		List<Usuario> users = userService.getUsers();
-		ArrayList<UserDto> usersRet = new ArrayList<UserDto>();
+		ArrayList<UserDTO> usersRet = new ArrayList<UserDTO>();
 		users.forEach(user -> {
-			usersRet.add(UserDto.from(user));
+			usersRet.add(UserDTO.from(user));
 		});
 		return ResponseEntity.ok(usersRet);
 
@@ -84,7 +84,13 @@ public class AdminAPIController {
 		String email = body.get("email");
 		if(email != null) logger.debug("Deletar conta: " + email);
 		try {
-			userService.deleteUser(email);
+			Usuario user = userService.getUsuario(email);
+			if(user == null) {
+				return ResponseEntity.status(404).body("Usuário não encontrado.");
+			}
+
+			userService.delete(user);
+			
 			return ResponseEntity.ok("Conta deletada com sucesso.");
 		} catch (Exception e) {
 			return ResponseEntity.status(500).body("Erro ao deletar conta.");

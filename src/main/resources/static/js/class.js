@@ -389,7 +389,7 @@ function renderCommentCard(comentario, isChild = false, nestLevel = 0) {
          <div class="review-header">
         <div class="reviewer-info">
              ${isChild ? '<span class="reply-indicator">↳ Resposta</span>' : ''}
-             <div class="reviewer-avatar">${String.fromCharCode(65 + (comentario.id % 26))}</div>
+             <div class="reviewer-avatar">${comentario.userInitials || '?'}</div>
              <span class="reviewer-date">${formatarData(comentario.createdAt)}${editedText}</span>
         </div>
          </div>

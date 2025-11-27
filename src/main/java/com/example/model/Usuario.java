@@ -21,9 +21,13 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "usuarios")
-public class Usuario implements ComentarioObserver{
+public class Usuario{
 	@Id
-	private String userEmail;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(nullable = false, unique = true)
+	private String email;
 	
 	@Column(nullable = false)
 	private String password;
@@ -37,9 +41,6 @@ public class Usuario implements ComentarioObserver{
 	@Column(nullable = false)
 	private String curso;
 
-	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Set<Notificacao> notificacoes = new HashSet<>();;
 
 	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
@@ -60,7 +61,7 @@ public class Usuario implements ComentarioObserver{
 	 * Construtor completo utilizado pelo serviço/repositório.
 	 */
 	public Usuario(String email, String password, String nome, String matricula, String curso) {
-		this.userEmail = email;
+		this.email = email;
 		this.password = password;
 		this.nome = nome;
 		this.matricula = matricula;
@@ -70,9 +71,12 @@ public class Usuario implements ComentarioObserver{
 	/** Construtor padrão necessário para (de)serialização JSON. */
 	public Usuario(){}
 
+	public Long getId() { return id; }
+	public void setId(Long id) { this.id = id; }
+
 	/** Email (chave de login). */
-	public String getUserEmail() { return userEmail;}
-	public void setUserEmail(String email) { this.userEmail = email; }
+	public String getEmail() { return email;}
+	public void setEmail(String email) { this.email = email; }
 
 	/** Hash da senha armazenado. */
 	// the password here is already hashed
@@ -91,15 +95,11 @@ public class Usuario implements ComentarioObserver{
 	public String getCurso() { return curso;}
 	public void setCurso(String curso) { this.curso = curso;}
 
-	public boolean getAdmin() { return isAdmin; }
-	public void setAdmin(boolean admin) { isAdmin = admin; }
+	public boolean getIsAdmin() { return isAdmin; }
+	public void setIsAdmin(boolean isAdmin) { isAdmin = isAdmin; }
 
-	public Set<Notificacao> getNotificacoes() {
-		return notificacoes;
-	}
-	public void setNotificacoes(Set<Notificacao> notificacoes) {
-		this.notificacoes = notificacoes;
-	}
+	public void toggleIsAdmin() { this.isAdmin = !this.isAdmin; }
+
 
 	public Set<Avaliacao> getAvaliacoes() { return avaliacoes; }
 	public void setAvaliacoes(Set<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
@@ -110,13 +110,4 @@ public class Usuario implements ComentarioObserver{
 	public Set<Comentario> getComentarios() { return comentarios; }
 	public void setComentarios(Set<Comentario> comentarios) { this.comentarios = comentarios; }
 
-
-	@Override
-	public Notificacao generateAlert(Comentario comentario) {
-		Notificacao notificacao = new Notificacao(this, comentario);
-		notificacoes.add(notificacao);
-		comentario.addNotificacao(notificacao);
-		
-		return notificacao;
-	}
 }

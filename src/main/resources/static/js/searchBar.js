@@ -239,7 +239,7 @@ class DisciplinasCache {
 // Global cache instance
 const disciplinasCache = new DisciplinasCache();
 
-// Expor funções para reutilização em outros módulos (dashboard.js)
+// Expor funções para reutilização em outros módulos (index.js)
 window.getDisciplinasData = function() {
     return disciplinas_fetch;
 };
@@ -279,6 +279,7 @@ searchInput.addEventListener('input', function() {
     if (query.length < 2) {
         searchResults.innerHTML = '';
         searchResults.style.display = 'none';
+        searchResults.classList.remove('show');
 		  selectedIndex = -1;
         return;
     }
@@ -411,6 +412,7 @@ function displayResults(results) {
     if (!results || results.length === 0) {
         searchResults.innerHTML = '<div class="search-item no-results">Nenhuma disciplina encontrada</div>';
         searchResults.style.display = 'block';
+        searchResults.classList.add('show');
         return;
     }
     
@@ -426,22 +428,26 @@ function displayResults(results) {
     
     searchResults.innerHTML = html;
     searchResults.style.display = 'block';
+    searchResults.classList.add('show');
 }
 
 function showLoading() {
     searchResults.innerHTML = '<div class="search-item loading">🔄 Carregando disciplinas...</div>';
     searchResults.style.display = 'block';
+    searchResults.classList.add('show');
 }
 
 function hideLoading() {
     if (searchResults.innerHTML.includes('Carregando')) {
         searchResults.style.display = 'none';
+        searchResults.classList.remove('show');
     }
 }
 
 function showError(message) {
     searchResults.innerHTML = `<div class="search-item error">❌ ${message}</div>`;
     searchResults.style.display = 'block';
+    searchResults.classList.add('show');
 }
 
 function goToDisciplina(codigo) {
@@ -452,6 +458,7 @@ function goToDisciplina(codigo) {
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.search-container')) {
         searchResults.style.display = 'none';
+        searchResults.classList.remove('show');
     }
 });
 

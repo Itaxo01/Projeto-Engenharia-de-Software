@@ -6,7 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
 import com.example.service.SessionService;
 
 import org.springframework.http.MediaType;
@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class LoginController {
 
 	@Autowired
-	private UserService userService;
+	private UsuarioService userService;
 	@Autowired
 	private SessionService sessionService;
 
@@ -33,19 +33,18 @@ public class LoginController {
 	 * @param email    email do usuário
 	 * @param password senha em texto claro enviada pelo formulário
 	 * @param model    modelo para exibir mensagens de erro em caso de falha
-	 * @return redirect para "/dashboard" se sucesso ou view "login" em caso de erro
+	 * @return redirect para "/index" se sucesso ou view "login" em caso de erro
 	 */
 	@PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String handleLogin(HttpServletRequest request,  @RequestParam("email") String email, @RequestParam("password") String password, Model model) {
-		email = UserService.normalizeEmail(email);
 		logger.info("Tentativa de login: " + email);
 
 		boolean authenticated = userService.validateUser(email, password);
 		
 		logger.info("Autenticação " + (authenticated ? "sucedida" : "falhou") + " para " + email);
 		if(authenticated) {
-			sessionService.createSession(request, email, userService.getAdmin(email));
-			return "redirect:/dashboard";
+			sessionService.createSession(request, email, userService.getIsAdmin(email));
+			return "redirect:/index";
 		} else {
 			model.addAttribute("error", "Email ou senha inválidos.");
 			return "login";

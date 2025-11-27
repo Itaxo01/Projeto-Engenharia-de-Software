@@ -19,6 +19,7 @@ import com.example.model.Comentario;
 import com.example.model.Disciplina;
 import com.example.model.Professor;
 import com.example.model.Usuario;
+import com.example.DTO.AvaliacaoDTO;
 import com.example.repository.AvaliacaoRepository;
 
 @Service
@@ -79,7 +80,7 @@ public class AvaliacaoService {
 	 // Create na verdade cria ou edita avaliação (apenas nota)
     public Optional<Avaliacao> create(Professor professor, Disciplina disciplina, Usuario usuario, Integer nota){
         Optional<Avaliacao> avaliacaoExistente;
-		  logger.debug("Criando ou atualizando avaliação para usuário: " + usuario.getUserEmail() +
+		  logger.debug("Criando ou atualizando avaliação para usuário: " + usuario.getEmail() +
 			  		   ", disciplina: " + disciplina.getCodigo() +
 			  		   (professor != null ? ", professor: " + professor.getProfessorId() : ", avaliação da disciplina"));
 
@@ -133,54 +134,7 @@ public class AvaliacaoService {
 		List<Avaliacao> avaliacoes = avaliacaoRepository.findAllAvaliacoesByDisciplina(disciplinaOpt.get());
 		  
 		return avaliacoes.stream()
-			.map(a -> converterParaDTO(a, sessionUsuarioEmail))
+			.map(a -> AvaliacaoDTO.from(a, sessionUsuarioEmail))
 			.collect(Collectors.toList());
 	}
-
-	private AvaliacaoDTO converterParaDTO(Avaliacao avaliacao, String sessionUsuarioEmail) {
-        return new AvaliacaoDTO(
-            avaliacao.getId(),
-            avaliacao.getDisciplina(),
-            avaliacao.getProfessor(),
-            avaliacao.getNota() != null ? avaliacao.getNota() : 0,
-            avaliacao.getCreatedAt(),
-				avaliacao.getUsuario().getUserEmail().equals(sessionUsuarioEmail)
-        );
-    }
-
-	// DTO para Avaliação (apenas ratings, sem comentários)
-	public static class AvaliacaoDTO {
-        private final Long id;
-        private final String disciplinaId;
-        private final String professorId; // Null = avaliação da disciplina
-        private final Integer nota;
-        private final Instant createdAt;
-        private final Boolean isOwner;
-        
-        public AvaliacaoDTO(Long id, Disciplina disciplina, Professor professor, Integer nota, Instant createdAt, Boolean isOwner) {
-            this.id = id;
-            this.disciplinaId = disciplina.getCodigo();
-            this.professorId = professor != null ? professor.getProfessorId() : null;
-            this.nota = nota;
-            this.createdAt = createdAt;
-            this.isOwner = isOwner;
-        }
-        
-        // Getters
-        public Long getId() { return id; }
-        public String getDisciplinaId() { return disciplinaId; }
-        public String getProfessorId() { return professorId; }
-        public Integer getNota() { return nota; }
-        public Instant getCreatedAt() { return createdAt; }
-        public Boolean getIsOwner() { return isOwner; }
-        
-        // Helper methods para o front-end
-        public boolean isAvaliacaoDisciplina() { return professorId == null; }
-        public boolean isAvaliacaoProfessor() { return professorId != null; }
-        
-        public String getDataFormatada() {
-            return createdAt.atZone(ZoneId.systemDefault())
-                           .format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("pt-BR")));
-        }
-    }
 }

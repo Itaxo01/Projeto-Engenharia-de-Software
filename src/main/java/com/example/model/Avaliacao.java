@@ -93,7 +93,7 @@ public class Avaliacao {
 				", nota=" + nota +
 				", professorId='" + (professor != null ? professor.getProfessorId() : "null") + '\'' +
 				", disciplinaId='" + disciplina.getDisciplinaId() + '\'' +
-				", userEmail='" + usuario.getUserEmail() + '\'' +
+				", userEmail='" + usuario.getEmail() + '\'' +
 				", createdAt=" + createdAt +
 				'}';
 	}

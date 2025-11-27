@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.example.model.Usuario;
-import com.example.service.NotificacaoService;
 import com.example.service.SessionService;
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -23,10 +22,8 @@ public class GlobalModelAttributes {
     private SessionService sessionService;
 
     @Autowired
-    private UserService userService;
+    private UsuarioService userService;
 
-    @Autowired
-    private NotificacaoService notificacaoService;
 
     /**
      * Adiciona informações do usuário logado em todas as páginas
@@ -36,16 +33,22 @@ public class GlobalModelAttributes {
         String userEmail = sessionService.getCurrentUser(request);
         
         if (userEmail != null) {
-            Usuario usuario = userService.getUser(userEmail);
+            Usuario usuario = userService.getUsuario(userEmail);
             
             if (usuario != null) {
                 // Adicionar informações do usuário
                 model.addAttribute("userEmail", userEmail);
-                model.addAttribute("isAdmin", usuario.getAdmin());
-                model.addAttribute("unreadNotifications", 
-                    notificacaoService.countUnreadNotifications(usuario));
+                model.addAttribute("isAdmin", usuario.getIsAdmin());
                 model.addAttribute("userName", usuario.getNome());
                 model.addAttribute("userCurso", usuario.getCurso());
+                
+                // Adicionar inicial do usuário para o avatar
+                String nome = usuario.getNome();
+                if (nome != null && !nome.isEmpty()) {
+                    model.addAttribute("userInitial", nome.substring(0, 1).toUpperCase());
+                } else {
+                    model.addAttribute("userInitial", "U");
+                }
             }
         }
     }

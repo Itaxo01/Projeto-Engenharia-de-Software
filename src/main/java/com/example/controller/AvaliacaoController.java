@@ -33,7 +33,7 @@ import com.example.service.SessionService;
 import com.example.service.DisciplinaService;
 import com.example.service.ProfessorService;
 import com.example.service.ArquivoComentarioService;
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -47,7 +47,7 @@ public class AvaliacaoController {
 	private SessionService sessionService;
 
 	@Autowired
-	private UserService userService;
+	private UsuarioService userService;
 
 	@Autowired
 	private ComentarioService comentarioService;
@@ -96,7 +96,7 @@ public class AvaliacaoController {
 				return ResponseEntity.status(400).body("Nota deve estar entre 1 e 5.");
 			}
 			
-			Usuario usuario = userService.getUser(usuarioEmail);
+			Usuario usuario = userService.getUsuario(usuarioEmail);
 			if (usuario == null) {
 				return ResponseEntity.status(404).body("Usuário não encontrado.");
 			}
@@ -178,7 +178,7 @@ public class AvaliacaoController {
 			logger.info("Removendo rating: disciplina={}, professor={}, usuario={}", 
 						  disciplinaId, professorId, usuarioEmail);
 			
-			Usuario usuario = userService.getUser(usuarioEmail);
+			Usuario usuario = userService.getUsuario(usuarioEmail);
 			if (usuario == null) {
 				return ResponseEntity.status(404).body("Usuário não encontrado.");
 			}

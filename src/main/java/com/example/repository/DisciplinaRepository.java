@@ -18,7 +18,7 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
 
     ArrayList<Disciplina> findByNome(String nome);
 
-    @Query("SELECT d FROM Disciplina d WHERE :professorId MEMBER OF d.professores")
+    @Query("SELECT d FROM Disciplina d JOIN d.professorDisciplinas pd WHERE pd.professor.professorId = :professorId")
     ArrayList<Disciplina> findByProfessor(@Param("professorId") String professorId);
 
     void deleteByCodigo(String codigo);

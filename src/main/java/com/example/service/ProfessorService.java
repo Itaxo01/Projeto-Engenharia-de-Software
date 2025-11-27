@@ -59,9 +59,7 @@ public class ProfessorService {
             }
             
             // Criar novo professor
-            Professor novoProfessor = new Professor();
-            novoProfessor.setProfessorId(lattesId);
-            novoProfessor.setNome(nome);
+            Professor novoProfessor = new Professor(nome, lattesId);
             
             logger.debug("*** CRIANDO NOVO PROFESSOR: {} ({}) ***", nome, lattesId);
             Professor criado = professorRepository.save(novoProfessor);

@@ -10,7 +10,7 @@ import com.example.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Controlador das rotas de navegação principais (login, registro, dashboard, perfil e detalhes de turma).
+ * Controlador das rotas de navegação principais (login, registro, index, perfil e detalhes de turma).
  * Basicamente tudo que não possui um controller dedicado.
  * O Interceptor já verifica a autenticação para essas rotas.
  */
@@ -30,21 +30,21 @@ public class MainController {
     }
 
     /**
-     * Exibe a página de login ou redireciona para o dashboard caso já autenticado.
+     * Exibe a página de login ou redireciona para o index caso já autenticado.
      */
     @GetMapping("/login")
     public String login(HttpServletRequest request, Model model) {
 		if (!sessionService.verifySession(request)) return "login";
-		return "redirect:/dashboard";
+		return "redirect:/index";
     }
 
     /**
-     * Exibe a página de registro ou redireciona para o dashboard caso já autenticado.
+     * Exibe a página de registro ou redireciona para o index caso já autenticado.
      */
     @GetMapping("/register")
     public String register(HttpServletRequest request, Model model) {
 		if (!sessionService.verifySession(request)) return "register";
-		return "redirect:/dashboard";
+		return "redirect:/index";
     }
 
     /**

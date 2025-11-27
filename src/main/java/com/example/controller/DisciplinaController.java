@@ -19,6 +19,10 @@ import com.example.service.ComentarioService;
 import com.example.service.DisciplinaService;
 import com.example.service.SessionService;
 
+import com.example.DTO.ComentarioDTO;
+import com.example.DTO.AvaliacaoDTO;
+import com.example.DTO.ProfessorDTO;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -55,30 +59,30 @@ public class DisciplinaController {
 
 			logger.debug("Disciplina encontrada no /class/{id}");
 
-			List<Professor.ProfessorResumo> professors = new ArrayList<>(
+			List<ProfessorDTO> professors = new ArrayList<>(
 				disciplina.getProfessores().stream()
-					.map(Professor.ProfessorResumo::from)
+					.map(ProfessorDTO::from)
 					.toList()
 			);
 
 			logger.debug("Lista de professores carregada no /class/{id}");
 
 			// ✅ Carregar avaliações (apenas ratings)
-			List<AvaliacaoService.AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId, sessionService.getCurrentUser(request));
+			List<AvaliacaoDTO> avaliacoes = avaliacaoService.buscarTodasAvaliacoesDisciplina(classId, sessionService.getCurrentUser(request));
 
 			logger.debug("Lista de avaliações (ratings) carregada no /class/{id}");
 
 			// ✅ Carregar comentários da disciplina (sem professor)
-			List<ComentarioService.ComentarioDTO> comentariosDisciplina = 
+			List<ComentarioDTO> comentariosDisciplina = 
 				comentarioService.buscarComentariosDisciplina(disciplina, userEmail);
 
 			// ✅ Carregar comentários de cada professor
-			List<ComentarioService.ComentarioDTO> comentariosProfessores = disciplina.getProfessores().stream()
+			List<ComentarioDTO> comentariosProfessores = disciplina.getProfessores().stream()
 				.flatMap(prof -> comentarioService.buscarComentariosProfessor(disciplina, prof, userEmail).stream())
 				.collect(Collectors.toList());
 
 			// ✅ Combinar todos os comentários
-			List<ComentarioService.ComentarioDTO> todosComentarios = Stream.concat(
+			List<ComentarioDTO> todosComentarios = Stream.concat(
 				comentariosDisciplina.stream(),
 				comentariosProfessores.stream()
 			).collect(Collectors.toList());

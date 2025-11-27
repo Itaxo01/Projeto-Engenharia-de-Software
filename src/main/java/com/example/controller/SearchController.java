@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+import com.example.DTO.DisciplinaSearchDTO;
+
 /* Só vai fazer uma coisa, retornar as disciplinas ao front-end ao selecionar a barra de pesquisa */
 @RestController
 @RequestMapping("/api/search")
@@ -39,10 +41,4 @@ public class SearchController {
         
         return ResponseEntity.ok(count);
     }
-	
-	private record DisciplinaSearchDTO (String codigo, String nome) {
-		public static DisciplinaSearchDTO from(Disciplina u) {
-			return new DisciplinaSearchDTO(u.getCodigo(), u.getNome());
-		}
-	}
 }

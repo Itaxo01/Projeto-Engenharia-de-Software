@@ -28,7 +28,7 @@ import com.example.service.ComentarioService;
 import com.example.service.DisciplinaService;
 import com.example.service.ProfessorService;
 import com.example.service.ArquivoComentarioService;
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
 import com.example.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +43,7 @@ public class ComentarioController {
 	private SessionService sessionService;
 
 	@Autowired 
-	private UserService userService;
+	private UsuarioService userService;
 
 	@Autowired
 	private DisciplinaService disciplinaService;
@@ -76,7 +76,7 @@ public class ComentarioController {
 				return ResponseEntity.status(401).body("Usuário não autenticado.");
 			}
 			
-			Usuario usuario = userService.getUser(usuarioEmail);
+			Usuario usuario = userService.getUsuario(usuarioEmail);
 			if (usuario == null) {
 				return ResponseEntity.status(404).body("Usuário não encontrado.");
 			}
@@ -142,7 +142,7 @@ public class ComentarioController {
 				return ResponseEntity.status(401).body("Usuário não autenticado.");
 			}
 			
-			Usuario usuario = userService.getUser(usuarioEmail);
+			Usuario usuario = userService.getUsuario(usuarioEmail);
 			if (usuario == null) {
 				return ResponseEntity.status(404).body("Usuário não encontrado.");
 			}
@@ -254,26 +254,28 @@ public class ComentarioController {
 		if (userEmail == null) {
 			return ResponseEntity.status(401).body("Usuário não autenticado.");
 		}
+		logger.debug("Email do usuário para deleção: " + userEmail);
 
-		Usuario user = userService.getUser(userEmail);
+		Usuario user = userService.getUsuario(userEmail);
 		if (user == null) {
 			return ResponseEntity.status(401).body("Usuário não encontrado.");
 		}
+		logger.debug("Usuário encontrado");
 		
 		Comentario comentario = comentarioService.buscarPorId(comentarioId).orElse(null);
 		if (comentario == null) {
 			return ResponseEntity.status(404).body("Comentário não encontrado.");
 		}
+		logger.debug("Comentário encontrado: " + comentarioId);
 
-		if(user.getAdmin() || comentario.getUsuario().getUserEmail().equals(userEmail)) {
+		if(user.getIsAdmin() || comentario.getUsuario().getEmail().equals(userEmail)) {
 			try {
 				comentarioService.delete(comentario);
 				return ResponseEntity.ok("Comentário deletado com sucesso.");
 			} catch(Exception e) {
 				return ResponseEntity.status(500).body("Erro ao deletar comentário: " + e.getMessage());
 			}
-		} 
-		else {
+		} else {
 				return ResponseEntity.status(403).body("Permissão negada para deletar este comentário.");
 		}
 	}
@@ -290,7 +292,7 @@ public class ComentarioController {
 			return ResponseEntity.status(401).body("Usuário não autenticado.");
 		}
 
-		Usuario user = userService.getUser(userEmail);
+		Usuario user = userService.getUsuario(userEmail);
 		if (user == null) {
 			return ResponseEntity.status(404).body("Usuário não encontrado.");
 		}
@@ -306,7 +308,7 @@ public class ComentarioController {
 		if (novoTexto.length() > 2000) {
 			return ResponseEntity.status(400).body("O texto do comentário excede o limite de 2000 caracteres.");
 		}
-		if(!comentario.getUsuario().getUserEmail().equals(userEmail)) {
+		if(!comentario.getUsuario().getEmail().equals(userEmail)) {
 			return ResponseEntity.status(403).body("Permissão negada para editar este comentário.");
 		}
 

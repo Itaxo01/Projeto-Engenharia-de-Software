@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.model.Usuario;
 import com.example.service.SessionService;
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
+
+import com.example.DTO.UserDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -23,7 +25,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api")
 public class UserAPIController {
 	@Autowired
-	private UserService userService;
+	private UsuarioService userService;
 	@Autowired
 	private SessionService sessionService;
 
@@ -35,17 +37,17 @@ public class UserAPIController {
 	 * - 404 se o usuário não for encontrado no repositório
 	 */
 	@GetMapping("/me")
-	public ResponseEntity<UserDto> me(HttpServletRequest request) {
+	public ResponseEntity<UserDTO> me(HttpServletRequest request) {
 		String email = sessionService.getCurrentUser(request);
 		if(email == null){
 			return ResponseEntity.status(401).build();
 		}
-		Usuario user = userService.getUser(email);
+		Usuario user = userService.getUsuario(email);
 		if(user == null){
 			return ResponseEntity.status(404).build();
 		}
 		
-		return ResponseEntity.ok(UserDto.from(user));
+		return ResponseEntity.ok(UserDTO.from(user));
 	}
 
 	/** Troca a senha do usuário logado.
@@ -57,7 +59,7 @@ public class UserAPIController {
 			return ResponseEntity.status(401).body("Usuário não autenticado");
 		}
 
-		Usuario user = userService.getUser(email);
+		Usuario user = userService.getUsuario(email);
 		if(user == null) {
 			return ResponseEntity.status(404).body("Usuario não encontrado");
 		}
@@ -81,29 +83,31 @@ public class UserAPIController {
 	/** Deleta a conta do usuário logado.
 	*/
 	@PostMapping("/deleteUser")
-	public ResponseEntity<String> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
+	public ResponseEntity<?> deleteUser(HttpServletRequest request, @RequestBody Map<String,String> body) {
 		String email = sessionService.getCurrentUser(request);
 		String currentPassword = body.get("currentPassword");
+
 		if(email != null) logger.info("Deleção de conta para: " + email);
 		else return ResponseEntity.status(401).build();
+		
 		try {
 			if(!userService.validateUser(email, currentPassword)) return ResponseEntity.status(406).build();
 			
 			logger.info("Deletando usuário: " + email);
-			UserService.QueryResult result = userService.deleteUser(email);
-			if(!result.success()) return ResponseEntity.status(400).body(result.message());
+			try{
+				Usuario user = userService.getUsuario(email);
+				if(user == null) return ResponseEntity.status(404).build();
+				
+				userService.delete(user);
+				sessionService.deleteSession(request);
+
+				return ResponseEntity.ok("Sucesso");
+			
+			} catch (Exception e) {
+				return ResponseEntity.status(500).body("Erro ao deletar usuário");
+			}
 		} catch(Exception e) {
 			return ResponseEntity.status(500).build();
-		}
-		sessionService.deleteSession(request);
-		return ResponseEntity.ok("Sucesso");
-	}
-
-	/** DTO exposto pelo endpoint /api/me. */
-	public record UserDto(String email, String nome, String matricula, String curso){
-		/** Constrói o DTO a partir da entidade {@link com.example.model.Usuario}. */
-		public static UserDto from(Usuario u){
-			return new UserDto(u.getUserEmail(), u.getNome(), u.getMatricula(), u.getCurso());
 		}
 	}
 }

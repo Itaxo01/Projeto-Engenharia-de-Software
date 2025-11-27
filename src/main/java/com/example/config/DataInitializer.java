@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import com.example.service.UserService;
+import com.example.service.UsuarioService;
 import com.example.service.HashingService;
 
 /**
@@ -16,7 +16,7 @@ import com.example.service.HashingService;
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
-    private UserService userService;
+    private UsuarioService userService;
 
     @Value("${admin.email}")
     private String adminEmail;
@@ -38,17 +38,17 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Verifica se o usuário administrador específico já existe
-        if (userService.getUser(adminEmail) == null) {
+        if (userService.getUsuario(adminEmail) == null) {
             logger.info("Criando usuário administrador...");
             
-            userService.createUser(adminEmail, adminPassword, adminNome, adminMatricula, adminCurso);
+            userService.create(adminEmail, adminPassword, adminNome, adminMatricula, adminCurso);
             
             logger.info("Usuário administrador criado com sucesso!");
 
 			} else {
 				logger.info("Usuário administrador já existe: " + adminEmail);
 			}
-			if(!userService.getAdmin(adminEmail)) {
+			if(!userService.getIsAdmin(adminEmail)) {
 				logger.info(" Definindo usuário como administrador...");
 				userService.toggleAdmin(adminEmail);
 			} else {
