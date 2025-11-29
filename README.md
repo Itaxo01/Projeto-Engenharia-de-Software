@@ -1,127 +1,299 @@
-## Setup
+# 🎓 AvaliaUFSC
 
+> Sistema de avaliação de professores e disciplinas desenvolvido para estudantes da Universidade Federal de Santa Catarina (UFSC)
 
-### Prerequisites
+![Java](https://img.shields.io/badge/Java-21-orange?style=flat-square&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?style=flat-square&logo=springboot)
+![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3.x-005F0F?style=flat-square&logo=thymeleaf)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+
+---
+
+## 📸 Screenshots
+
+<details>
+<summary>🔐 Tela de Login</summary>
+
+<!-- ![Login](docs/screenshots/login.png) -->
+*Screenshot da tela de login*
+
+</details>
+
+<details>
+<summary>🔍 Busca de Disciplinas</summary>
+
+<!-- ![Search](docs/screenshots/search.gif) -->
+*GIF demonstrando a busca fuzzy com suporte a nome de professor*
+
+</details>
+
+<details>
+<summary>⭐ Avaliação de Professor</summary>
+
+<!-- ![Rating](docs/screenshots/rating.gif) -->
+*GIF do sistema de avaliação com estrelas interativas*
+
+</details>
+
+<details>
+<summary>💬 Sistema de Comentários</summary>
+
+<!-- ![Comments](docs/screenshots/comments.gif) -->
+*GIF mostrando comentários com respostas aninhadas e votação*
+
+</details>
+
+---
+
+## ✨ Funcionalidades
+
+### 🔐 Sistema de Autenticação
+- Login e registro com validação de **vínculo institucional via PDF**
+- Perfis de usuário com avatar baseado em iniciais
+- Controle de acesso por roles (**usuário/admin**)
+- Proteção de rotas com Spring Security
+
+### ⭐ Avaliação de Professores e Disciplinas
+- Sistema de **rating com estrelas interativas** (1-5)
+- Média de avaliações calculada em tempo real
+- Avaliações separadas por professor e disciplina
+- Histórico de avaliações do usuário
+
+### 💬 Sistema de Comentários
+- Comentários com suporte a **respostas aninhadas** (threads)
+- **Upload de arquivos e imagens** em comentários
+- Sistema de **upvote/downvote** estilo Reddit
+- **Edição inline** de comentários próprios
+- Soft delete com exclusão periódica automática
+
+### 🔍 Busca Inteligente
+- **Fuzzy search** com Fuse.js para tolerância a erros de digitação
+- Busca por **nome de professor** como tags da disciplina
+- **Cache local** (LocalStorage) com duração de 6 meses
+- Navegação completa por **teclado** (↑↓ Enter Esc)
+- Indicador visual quando match é por professor
+
+### 🕷️ Web Scraping Automatizado
+- Scraper do sistema **CAGR/UFSC** para disciplinas e professores
+- Atualização automática do **semestre de atuação** dos professores
+- Sincronização periódica de dados acadêmicos
+
+### 📚 Mapa Curricular
+- Organização de disciplinas por semestre
+- Marcação de disciplinas cursadas e avaliadas
+- Visualização do progresso acadêmico
+
+---
+
+## 🛠️ Stack Tecnológica
+
+### Backend
+| Tecnologia | Uso |
+|------------|-----|
+| **Java 21** | Linguagem principal |
+| **Spring Boot 3** | Framework web |
+| **Spring Security** | Autenticação e autorização |
+| **Spring Data JPA** | Persistência de dados |
+| **Hibernate** | ORM e mapeamento objeto-relacional |
+| **H2 / PostgreSQL** | Banco de dados (dev/prod) |
+| **Jsoup** | Web scraping do CAGR |
+| **Docker** | Containerização do banco |
+
+### Frontend
+| Tecnologia | Uso |
+|------------|-----|
+| **Thymeleaf** | Template engine server-side |
+| **JavaScript (ES6+)** | Interatividade e dinamismo |
+| **Fuse.js** | Busca fuzzy client-side |
+| **CSS3 Puro** | Estilos customizados (sem frameworks) |
+| **LocalStorage** | Cache de dados no navegador |
+
+### Padrões e Arquitetura
+- **MVC** (Model-View-Controller)
+- **DTO Pattern** (Data Transfer Objects)
+- **Repository Pattern** (Acesso a dados)
+- **Service Layer** (Lógica de negócio)
+- **Modularização JS** (Code splitting)
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── main/
+│   ├── java/com/example/
+│   │   ├── controller/        # Controllers REST e MVC
+│   │   │   ├── AuthController.java
+│   │   │   ├── ClassController.java
+│   │   │   ├── ComentarioController.java
+│   │   │   └── SearchController.java
+│   │   ├── service/           # Lógica de negócio
+│   │   │   ├── UsuarioService.java
+│   │   │   ├── ComentarioService.java
+│   │   │   └── AvaliacaoService.java
+│   │   ├── repository/        # Interfaces JPA
+│   │   ├── model/             # Entidades JPA
+│   │   │   ├── Usuario.java
+│   │   │   ├── Professor.java
+│   │   │   ├── Disciplina.java
+│   │   │   ├── Comentario.java
+│   │   │   └── Avaliacao.java
+│   │   ├── DTO/               # Data Transfer Objects
+│   │   ├── config/            # Configurações Spring
+│   │   └── scrapper/          # Web scraping CAGR
+│   └── resources/
+│       ├── static/
+│       │   ├── css/           # Estilos (main.css, class.css, etc)
+│       │   └── js/            # Scripts modulares
+│       │       ├── classRender.js      # Renderização da página
+│       │       ├── commentRender.js    # Renderização de comentários
+│       │       ├── commentHandler.js   # CRUD de comentários
+│       │       ├── avaliationHandler.js # Sistema de rating
+│       │       └── searchBar.js        # Busca fuzzy
+│       └── templates/         # Thymeleaf templates
+│           ├── index.html
+│           ├── class.html
+│           └── fragments/
+└── test/                      # Testes unitários e integração
+```
+
+---
+
+## 📊 Diagrama de Entidades
+
+```
+┌──────────────┐         ┌───────────────────────┐         ┌──────────────┐
+│   Usuario    │         │ ProfessorDisciplina   │         │   Professor  │
+├──────────────┤    ┌───>│   (Entidade Pivot)    │<───┐    ├──────────────┤
+│ id           │    │    ├───────────────────────┤    │    │ id           │
+│ email        │    │    │ professor_id (FK)     │────┘    │ nome         │
+│ nome         │    │    │ disciplina_id (FK)    │────┐    │ siape        │
+│ matricula    │    │    │ semestre              │    │    └──────────────┘
+│ curso        │    │    └───────────────────────┘    │           │
+│ role         │    │                                 │           │
+└──────────────┘    │    ┌───────────────────────┐    │           │
+       │            │    │     Disciplina        │<───┘           │
+       │            │    ├───────────────────────┤                │
+       │            │    │ codigo (PK)           │                │
+       │            │    │ nome                  │                │
+       │            │    │ cargaHoraria          │                │
+       │            │    └───────────────────────┘                │
+       │                          │                               │
+       │                          │                               │
+       ▼                          ▼                               │
+┌──────────────┐         ┌───────────────────────┐                │
+│  Avaliacao   │         │     Comentario        │<───────────────┘
+├──────────────┤         ├───────────────────────┤
+│ id           │         │ id                    │
+│ nota (1-5)   │         │ conteudo              │
+│ usuario_id   │         │ usuario_id (FK)       │
+│ professor_id │         │ professor_id (FK)     │
+│ disciplina_id│         │ disciplina_id (FK)    │
+└──────────────┘         │ parent_id (FK)        │◄── Self-reference
+                         │ upvotes / downvotes   │    (respostas)
+                         │ deleted (soft delete) │
+                         └───────────────────────┘
+                                   │
+                                   ▼
+                         ┌───────────────────────┐
+                         │       Arquivo         │
+                         ├───────────────────────┤
+                         │ id                    │
+                         │ nome                  │
+                         │ tipo                  │
+                         │ dados (BLOB)          │
+                         │ comentario_id (FK)    │
+                         └───────────────────────┘
+```
+
+---
+
+## 🚀 Como Executar
+
+### Pré-requisitos
 - Java 21
 - Maven 3.9+
-- Docker (If running on production mode)
+- Docker (apenas para modo produção)
 
-### Environment Variables
+### Modo Desenvolvimento (H2 Database)
 
-Create a `.env` file on root with default the values for the project
 ```bash
-# Admin User Configuration (Required)
-ADMIN_EMAIL=defaultadmin@admin.com
-ADMIN_PASSWORD=admin123
-ADMIN_NOME=admin
+# Clone o repositório
+git clone https://github.com/Itaxo01/Projeto-Engenharia-de-Software.git
+
+# Entre no diretório
+cd Projeto-Engenharia-de-Software
+
+# Execute a aplicação
+mvn spring-boot:run
+
+# Acesse em http://localhost:8080
+```
+
+### Modo Produção (PostgreSQL)
+
+1. **Configure as variáveis de ambiente** criando um arquivo `.env`:
+
+```bash
+# Admin User Configuration
+ADMIN_EMAIL=admin@ufsc.br
+ADMIN_PASSWORD=sua_senha_segura
+ADMIN_NOME=Administrador
 ADMIN_MATRICULA=000000
-ADMIN_CURSO=admin
+ADMIN_CURSO=Administração
 
 # Database Configuration
 DATABASE_URL=jdbc:postgresql://localhost:5432/academic_system
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=postgres
 ```
-**Note:** Load the variables before running with:
+
+2. **Inicie o PostgreSQL com Docker**:
+
 ```bash
+# Carregue as variáveis
 source .env
-```
 
-## Development Mode (H2 database)
-Just run the application with
-```bash
-mvn spring-boot:run
-```
-The H2 database is set by default and should not require further configuration
-
-## Production Mode (PostgreSQL)
-### 1. Start PostgreSQL with Docker
-
-```bash
-# Start PostgreSQL container
+# Inicie o container
 sudo docker compose up -d postgres
 
-# Verify it's running
+# Verifique se está rodando
 sudo docker ps
 ```
 
-### 2. Run the application in production profile
+3. **Execute a aplicação**:
 
 ```bash
-# Load environment variables
-source .env
-
-# Run with production profile
 SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run
 ```
-#### Useful info for the postgres terminal 
-
-```bash
-# Connect to database via terminal
-sudo docker exec -it academic-system-db psql -U postgres -d academic_system
-
-# Common psql commands:
-# \dt                    - List all tables
-# \d table_name         - Describe table structure
-# SELECT * FROM usuarios; - Query
-# \q                    - Exit
-
-
-# stops the PostgreSQL
-sudo docker compose down
-```
-
-
-## Then open http://localhost:8080/
-
-## or
-### Check https://96acb17de87a.ngrok-free.app/ for the already hosted project 
-#### (Link may have changed or be offline).
 
 ---
-## Recent changes
 
-Fiz as mudanças necessárias para migrar para o postgreSQL. O método para rodar está no run.
+## 🔒 Nota sobre Acesso
+
+> ⚠️ **Este sistema é de uso exclusivo de estudantes da UFSC** e requer validação de vínculo institucional (upload de atestado de matrícula em PDF) para registro.
+>
+> O código-fonte está disponível publicamente para fins **educacionais** e de **portfólio**, demonstrando conhecimentos em desenvolvimento fullstack com Java/Spring Boot.
 
 ---
-## TO DO (Iteração 2)
-- [X] Implementar as páginas das disciplinas (localhost:8080/class/{CODE})
 
+## 👥 Autores
 
-- [X] Fetch das disciplinas e professores da UFSC
+| Nome | GitHub |
+|------|--------|
+| Kauan Fank | [@kauanfank](https://github.com/kauanfank) |
+| Luam | - |
 
-- [X] Barra de pesquisa de disciplinas
+---
 
-- [X] Mapa curricular
-	- O usuário guardará uma lista das matérias divididas por semestre. Cada matéria será uma tupla(String código, Boolean cursada, Boolean avaliada), e será usada para compor o mapa curricular.
-	- Inicialmente o usuário irá inserir as matérias de cada semestre, posteriormente pode haver algum sistema que capture as matérias padrões do curso, porém ainda permite a adição de matérias.
+## 📝 Licença
 
+Este projeto está sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## TO DO (Iteração 3)
+---
 
-- [X] O comentário precisa ter uma relação de muitos pra muitos com usuários para lidar com o upvote e downvote (O mesmo usuário não pode ter votos repetidos). Implementar os upvotes e downvotes do comentário
-
-- [X] Implementar Arquivos do comentário (Incluso visualização dos mesmos no frontend). Limitado os tipos de arquivos aceitos para assegurar uma segurança ao usuário.
-
-- [X] Implementar edição do comentário (Com arquivos)
-
-- [X] Implementar deleção do comentário (Feito com soft delete e deleção periódica)
-
-- [X] Implementar rating dos professores/disciplina
-
-- [ ] Implementar resposta de comentário
-
-
-- [ ] (Optional) Melhorar a resposta das ações de comentário e rating no frontend (Atualmente se recarrega a página para assegurar as mudanças)
-
-- [ ] (Optional) Modificar a relação Disciplina Professor para uma entidade intermediária isolada. Com isso, implementar no scrapper o getter do semestre da relação, no frontend mostrar apenas os DisciplinaProfessor cuja distância de semestres em relação ao atual for menor igual a, por exemplo, cinco semestres.
-
-- [ ] (Optional )Fetch dos cursos da UFSC (Necessário para montar o grafo das dependências entre disciplinas)
-	- Tentar usar isso aqui: https://cagr.sistemas.ufsc.br/relatorios/curriculoCurso?curso=603, separar o id do curso, nome e criar o grafo que relaciona as disciplinas.
-
-
-## TO DO DIAGRAMAS
-- 2 Diagramas de sequência baseados em história de usuário
-	- Fazer sobre:
-		 Admin exclui comentário (HU 4) - Luam
-		 interação com comentário (Upvote, DownVote, comentar) - Kauan
+<p align="center">
+  Desenvolvido como projeto da disciplina de <strong>Engenharia de Software</strong> - UFSC 2025
+</p>
