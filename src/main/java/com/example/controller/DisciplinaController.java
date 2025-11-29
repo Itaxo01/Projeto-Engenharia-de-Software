@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.model.Disciplina;
 import com.example.model.Professor;
+import com.example.model.ProfessorDisciplina;
 import com.example.service.AvaliacaoService;
 import com.example.service.ComentarioService;
 import com.example.service.DisciplinaService;
@@ -59,9 +59,10 @@ public class DisciplinaController {
 
 			logger.debug("Disciplina encontrada no /class/{id}");
 
+			// ✅ Construir lista de professores a partir de ProfessorDisciplina para incluir ultimoSemestre
 			List<ProfessorDTO> professors = new ArrayList<>(
-				disciplina.getProfessores().stream()
-					.map(ProfessorDTO::from)
+				disciplina.getProfessorDisciplinas().stream()
+					.map(pd -> ProfessorDTO.from(pd.getProfessor(), pd.getUltimoSemestre()))
 					.toList()
 			);
 
@@ -72,28 +73,22 @@ public class DisciplinaController {
 
 			logger.debug("Lista de avaliações (ratings) carregada no /class/{id}");
 
-			// ✅ Carregar comentários da disciplina (sem professor)
-			List<ComentarioDTO> comentariosDisciplina = 
-				comentarioService.buscarComentariosDisciplina(disciplina, userEmail);
-
-			// ✅ Carregar comentários de cada professor
-			List<ComentarioDTO> comentariosProfessores = disciplina.getProfessores().stream()
+			// ✅ Carregar apenas comentários de professores (comentários de disciplina não existem mais)
+			List<ComentarioDTO> todosComentarios = disciplina.getProfessores().stream()
 				.flatMap(prof -> comentarioService.buscarComentariosProfessor(disciplina, prof, userEmail).stream())
 				.collect(Collectors.toList());
 
-			// ✅ Combinar todos os comentários
-			List<ComentarioDTO> todosComentarios = Stream.concat(
-				comentariosDisciplina.stream(),
-				comentariosProfessores.stream()
-			).collect(Collectors.toList());
-
 			logger.debug("Lista de comentários carregada no /class/{id}: {} total", todosComentarios.size());
+
+			// ✅ Flag para indicar se há professores na disciplina
+			boolean hasProfessors = !professors.isEmpty();
 
 			model.addAttribute("disciplina", disciplina);
 			model.addAttribute("professors", professors);
 			model.addAttribute("classId", classId);
 			model.addAttribute("avaliacoes", avaliacoes);
 			model.addAttribute("comentarios", todosComentarios);
+			model.addAttribute("hasProfessors", hasProfessors);
 			return "class";
 		} else {
 			return "error";

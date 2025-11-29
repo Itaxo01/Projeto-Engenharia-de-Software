@@ -13,7 +13,7 @@ public record AvaliacaoDTO(Long id, String disciplinaId, String professorId, Int
 		return new AvaliacaoDTO(
 					avaliacao.getId(),
 					avaliacao.getDisciplina().getCodigo(),
-					avaliacao.getProfessor().getProfessorId(),
+					avaliacao.getProfessor() != null ? avaliacao.getProfessor().getProfessorId() : null,
 					avaliacao.getNota(),
 					avaliacao.getCreatedAt(),
 					isOwner

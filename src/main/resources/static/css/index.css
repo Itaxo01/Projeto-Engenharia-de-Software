@@ -160,6 +160,10 @@
     color: #ffffff !important;
 }
 
+.index-search .search-results .search-item.selected .search-item-professor-match {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
 .index-search .search-results .search-item-code {
     font-weight: 600;
     color: var(--primary);
@@ -172,6 +176,16 @@
     color: var(--text-secondary);
     font-size: 14px;
     flex: 1;
+    text-align: left;
+}
+
+.index-search .search-results .search-item-professor-match {
+    width: 100%;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: -8px;
+    margin-left: 102px;
+    font-style: italic;
     text-align: left;
 }
 

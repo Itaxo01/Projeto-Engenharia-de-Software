@@ -4,6 +4,9 @@ import com.example.model.Disciplina;
 import com.example.model.ScrapperStatus;
 import com.example.service.DisciplinaService;
 import com.example.service.ScrapperStatusService;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,7 @@ public class SearchController {
     @Autowired
     private ScrapperStatusService scrapperStatusService;
     
+	 @Transactional
     @GetMapping("/disciplinas")
     public ResponseEntity<List<DisciplinaSearchDTO>> searchDisciplinas() {
         List<Disciplina> resultados = disciplinaService.buscarTodas();

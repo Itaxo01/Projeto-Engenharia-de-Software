@@ -91,7 +91,10 @@
                         <div th:each="professor : ${professors}" class="professor-item">
                             <div class="professor-info">
                                 <div class="professor-avatar" th:text="${#strings.substring(professor.nome, 0, 1)}">J</div>
-                                <div class="professor-name" th:text="${professor.nome}">Desconhecido</div>
+                                <div class="professor-details">
+                                    <div class="professor-name" th:text="${professor.nome}">Desconhecido</div>
+                                    <div class="professor-semester" th:if="${professor.semestre != null}" th:text="${professor.semestre}"></div>
+                                </div>
                             </div>
                             <div class="professor-rating">
                                 <div class="rating-stars">
@@ -107,8 +110,7 @@
                         </div>
                     </div>
 						<div style="margin-top: 1rem; padding: 0.75rem; background-color: #f8f9fa; border-left: 3px solid #dee2e6; border-radius: 4px; text-align: center;">
-							<p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #6c757d;">Clique em algum professor para ver os comentários específicos</p>
-							<p style="margin: 0; font-size: 0.875rem; color: #6c757d;">Clique novamente para retornar aos comentários da disciplina</p>
+							<p style="margin: 0; font-size: 0.875rem; color: #6c757d;">Selecione um professor para ver e adicionar comentários</p>
 						</div>
                 </div>
             </div>
@@ -227,8 +229,13 @@
         const CLASS_ID = /*[[${classId}]]*/ '';
         const USER_EMAIL = /*[[${userEmail}]]*/ '';
         const IS_ADMIN = /*[[${isAdmin}]]*/ false;
+        const HAS_PROFESSORS = /*[[${hasProfessors}]]*/ false;
     </script>
-    <script src="/js/class.js"></script>
+    <!-- Modular JS files for class page -->
+    <script src="/js/classRender.js"></script>
+    <script src="/js/commentRender.js"></script>
+    <script src="/js/commentHandler.js"></script>
+    <script src="/js/avaliationHandler.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.basic.min.js"></script>
     <script src="/js/searchBar.js?v=1.0.4"></script>
 </body>

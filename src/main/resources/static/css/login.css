@@ -7,11 +7,12 @@
     justify-content: center;
     background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
     padding: 20px;
+    padding-bottom: 13vh; /* Desloca visualmente para cima */
 }
 
 .login-card {
     background: var(--bg-white);
-    padding: 40px;
+    padding: 48px 40px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     width: 100%;

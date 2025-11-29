@@ -4,12 +4,187 @@
 
 console.log('✅ class.js carregado');
 
+// ============================================
+// TOAST NOTIFICATION SYSTEM
+// ============================================
+
+/**
+ * Show a toast notification
+ * @param {string} message - The message to display
+ * @param {string} type - 'success', 'error', 'warning', 'info'
+ * @param {number} duration - Duration in ms (default 4000)
+ */
+function showToast(message, type = 'info', duration = 4000) {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        `;
+        document.body.appendChild(container);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Icon based on type
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+    
+    // Colors based on type
+    const colors = {
+        success: { bg: '#d4edda', border: '#28a745', text: '#155724', icon: '#28a745' },
+        error: { bg: '#f8d7da', border: '#dc3545', text: '#721c24', icon: '#dc3545' },
+        warning: { bg: '#fff3cd', border: '#ffc107', text: '#856404', icon: '#856404' },
+        info: { bg: '#d1ecf1', border: '#17a2b8', text: '#0c5460', icon: '#17a2b8' }
+    };
+    
+    const color = colors[type] || colors.info;
+    
+    toast.style.cssText = `
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        background: ${color.bg};
+        border: 1px solid ${color.border};
+        border-left: 4px solid ${color.border};
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideInRight 0.3s ease-out;
+        color: ${color.text};
+        font-size: 14px;
+        line-height: 1.5;
+    `;
+    
+    toast.innerHTML = `
+        <span style="font-size: 18px; font-weight: bold; color: ${color.icon}; flex-shrink: 0;">${icons[type]}</span>
+        <span style="flex: 1; word-break: break-word;">${escapeHtmlForToast(message)}</span>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: ${color.text};
+            opacity: 0.7;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        ">&times;</button>
+    `;
+    
+    // Add CSS animation if not exists
+    if (!document.getElementById('toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    container.appendChild(toast);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+        toast.style.animation = 'slideOutRight 0.3s ease-out forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+/**
+ * Parse and extract clean error message from potentially HTML response
+ * @param {string} text - The error text (may be HTML or plain text)
+ * @returns {string} - Clean error message
+ */
+function parseErrorMessage(text) {
+    if (!text) return 'Erro desconhecido';
+    
+    // If it looks like HTML (contains tags)
+    if (text.includes('<html') || text.includes('<body') || text.includes('<!DOCTYPE')) {
+        // Try to extract meaningful error from common patterns
+        
+        // Try to find error in <h1> or <title>
+        const h1Match = text.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+        if (h1Match) return h1Match[1].trim();
+        
+        const titleMatch = text.match(/<title[^>]*>([^<]+)<\/title>/i);
+        if (titleMatch) return titleMatch[1].trim();
+        
+        // Try to find "message" in JSON-like content
+        const messageMatch = text.match(/"message"\s*:\s*"([^"]+)"/);
+        if (messageMatch) return messageMatch[1];
+        
+        // Try to find common Spring Boot error patterns
+        const errorMatch = text.match(/There was an unexpected error[^<]*/i);
+        if (errorMatch) return 'Ocorreu um erro interno no servidor';
+        
+        // Generic fallback for HTML
+        return 'Ocorreu um erro no servidor. Tente novamente.';
+    }
+    
+    // If it's JSON, try to parse it
+    try {
+        const json = JSON.parse(text);
+        return json.message || json.error || text;
+    } catch {
+        // Not JSON, return as is (but truncate if too long)
+        if (text.length > 200) {
+            return text.substring(0, 200) + '...';
+        }
+        return text;
+    }
+}
+
+/**
+ * Escape HTML for display in toast (prevent XSS)
+ */
+function escapeHtmlForToast(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 let professorSelecionado = null;
 let selectedFiles = [];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 let isAdmin = false; // Flag de admin
-let editingCommentId = null; // Track if we're editing a comment
-let editingCommentData = null; // Store original comment data for editing
+let editingCommentId = null; // Track if we're editing a comment (inline)
+let inlineEditFiles = []; // Files for inline editing (new files to upload)
+let inlineEditExistingFiles = []; // Existing files to keep during edit
 let replyingToCommentId = null; // Track if we're replying to a comment
 let allComments = []
 
@@ -38,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Obter email do usuário logado e status de admin
     isAdmin = typeof IS_ADMIN !== 'undefined' ? IS_ADMIN : false;
+    const hasProfessors = typeof HAS_PROFESSORS !== 'undefined' ? HAS_PROFESSORS : false;
 
     generateListAllComments(COMENTARIOS_DATA, allComments)
 
@@ -46,7 +222,8 @@ document.addEventListener('DOMContentLoaded', function() {
         comentarios: COMENTARIOS_DATA.length,
         listaComentarios: allComments.length,
         professores: PROFESSORES_DATA?.length || 0,
-        isAdmin: isAdmin
+        isAdmin: isAdmin,
+        hasProfessors: hasProfessors
 
     });
 
@@ -62,13 +239,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const avaliacoesDisciplina = AVALIACOES_DATA.filter(a => !a.professorId);
     const avaliacoesProfessores = AVALIACOES_DATA.filter(a => a.professorId);
     
-    // Atualizar disciplina com comentários
+    // Atualizar disciplina com estatísticas (sem comentários - agora só para professores)
     const statsDisciplina = calcularStats(avaliacoesDisciplina);
-    const comentariosDisciplina = allComments.filter(c => !c.professorId);
-    atualizarDisciplina(statsDisciplina, comentariosDisciplina);
+    atualizarDisciplina(statsDisciplina, []);
     
     // Atualizar professores e adicionar event listeners
-    if (typeof PROFESSORES_DATA !== 'undefined') {
+    if (typeof PROFESSORES_DATA !== 'undefined' && hasProfessors) {
         console.log('👨‍🏫 Professores:', PROFESSORES_DATA);
         
         PROFESSORES_DATA.forEach((prof, index) => {
@@ -88,27 +264,62 @@ document.addEventListener('DOMContentLoaded', function() {
             const professorItem = document.querySelectorAll('.professor-item')[index];
             if (professorItem) {
                 professorItem.addEventListener('click', () => {
-                    // Toggle: se já está selecionado, desseleciona (comparar como string)
-                    if (String(professorSelecionado) === String(profId)) {
-                        console.log('Desselecionando professor:', profId);
-                        deselecionarProfessor();
-                    } else {
+                    // ✅ Não permitir desselecionar - apenas trocar de professor
+                    if (String(professorSelecionado) !== String(profId)) {
                         console.log('Alternando para professor:', profId, profNome);
-                        // ✅ FIX: Recalcular avaliações do professor dinamicamente
                         selecionarProfessor(profId, profNome);
                     }
                 });
             }
         });
+        
+        // ✅ Selecionar primeiro professor automaticamente se nenhum estiver salvo
+        let professorRestaurado = false;
+        
+        // Tentar restaurar professor selecionado do localStorage
+        if (typeof CLASS_ID !== 'undefined') {
+            const savedProfessor = localStorage.getItem(`selectedProfessor_${CLASS_ID}`);
+            if (savedProfessor) {
+                try {
+                    const { id, nome } = JSON.parse(savedProfessor);
+                    // Verificar se o professor ainda existe na lista
+                    const profExists = PROFESSORES_DATA?.some(p => {
+                        const profId = p.id || p.professorId || p.ID;
+                        return String(profId) === String(id);
+                    });
+                    if (profExists) {
+                        console.log('🔄 Restaurando professor salvo:', id, nome);
+                        selecionarProfessor(id, nome);
+                        professorRestaurado = true;
+                    } else {
+                        // Professor não existe mais, limpar localStorage
+                        localStorage.removeItem(`selectedProfessor_${CLASS_ID}`);
+                    }
+                } catch (e) {
+                    console.error('Erro ao restaurar professor:', e);
+                    localStorage.removeItem(`selectedProfessor_${CLASS_ID}`);
+                }
+            }
+        }
+        
+        // Se não restaurou nenhum professor, selecionar o primeiro
+        if (!professorRestaurado && PROFESSORES_DATA.length > 0) {
+            const firstProf = PROFESSORES_DATA[0];
+            const firstProfId = firstProf.id || firstProf.professorId || firstProf.ID || 0;
+            const firstProfNome = firstProf.nome || firstProf.name || 'Professor';
+            console.log('📌 Selecionando primeiro professor:', firstProfId, firstProfNome);
+            selecionarProfessor(firstProfId, firstProfNome);
+        }
+    } else {
+        // ✅ Disciplina sem professores - exibir mensagem e desabilitar comentários
+        console.log('⚠️ Disciplina sem professores cadastrados');
+        mostrarInterfaceSemProfessores();
     }
     
-    // Event listener no header da disciplina para voltar às avaliações da disciplina
+    // Event listener no header da disciplina - não faz mais nada (não dá para desselecionar)
     const disciplineHeader = document.querySelector('.discipline-header');
     if (disciplineHeader) {
-        disciplineHeader.style.cursor = 'pointer';
-        disciplineHeader.addEventListener('click', () => {
-            deselecionarProfessor();
-        });
+        disciplineHeader.style.cursor = 'default';
     }
     
     // Setup comment editor
@@ -246,6 +457,11 @@ function selecionarProfessor(professorId, professorNome) {
     // Atualizar professor selecionado
     professorSelecionado = professorId;
     
+    // Salvar no localStorage para persistir entre recarregamentos
+    if (typeof CLASS_ID !== 'undefined') {
+        localStorage.setItem(`selectedProfessor_${CLASS_ID}`, JSON.stringify({ id: professorId, nome: professorNome }));
+    }
+    
     // ✅ FIX: Recalcular avaliações do professor dinamicamente do array global
     const avaliacoesProfessores = AVALIACOES_DATA.filter(a => a.professorId);
     const avaliacoes = avaliacoesProfessores.filter(a => 
@@ -273,10 +489,9 @@ function selecionarProfessor(professorId, professorNome) {
         }
     });
     
-    // Atualizar título da seção de avaliações
     const sectionTitle = document.querySelector('.section-header h2');
     if (sectionTitle) {
-        sectionTitle.textContent = `Avaliações - ${professorNome}`;
+        sectionTitle.textContent = `Comentários para ${professorNome}`;
     }
     
     // ✅ Mostrar comentários do professor usando COMENTARIOS_DATA
@@ -286,25 +501,38 @@ function selecionarProfessor(professorId, professorNome) {
     mostrarComentarios(comentariosProfessor, professorNome);
 }
 
-// Desselecionar professor
-function deselecionarProfessor() {
-    console.log('Desselecionando professor');
-    professorSelecionado = null;
-    
-    // Remover todas as seleções
-    document.querySelectorAll('.professor-item').forEach(item => {
-        item.classList.remove('selected');
-    });
-    
-    // Restaurar título original
+// ✅ Mostrar interface quando não há professores cadastrados
+function mostrarInterfaceSemProfessores() {
+    // Atualizar título da seção de comentários
     const sectionTitle = document.querySelector('.section-header h2');
     if (sectionTitle) {
-        sectionTitle.textContent = 'Avaliações';
+        sectionTitle.textContent = 'Comentários';
     }
     
-    // ✅ Mostrar comentários da disciplina novamente usando COMENTARIOS_DATA
-    const comentariosDisciplina = allComments.filter(c => !c.professorId);
-    mostrarComentarios(comentariosDisciplina, null);
+    // Esconder botão de adicionar comentário
+    const addReviewBtn = document.querySelector('.btn-add-review');
+    if (addReviewBtn) {
+        addReviewBtn.style.display = 'none';
+    }
+    
+    // Esconder editor de comentário
+    const commentEditor = document.getElementById('commentEditor');
+    if (commentEditor) {
+        commentEditor.style.display = 'none';
+    }
+    
+    // Mostrar mensagem na lista de comentários
+    const commentsList = document.getElementById('commentsList');
+    if (commentsList) {
+        commentsList.innerHTML = `
+            <div class="no-comments-message" style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+                <div style="font-size: 48px; margin-bottom: 16px;">📚</div>
+                <h3 style="margin-bottom: 8px; color: var(--text-primary);">Disciplina sem professores cadastrados</h3>
+                <p>Esta disciplina ainda não possui professores vinculados.</p>
+                <p>Comentários só podem ser feitos para professores específicos.</p>
+            </div>
+        `;
+    }
 }
 
 // Atualizar professor específico
@@ -398,32 +626,46 @@ function renderCommentCard(comentario, isChild = false, nestLevel = 0) {
          <!-- Arquivos Anexados -->
          ${arquivosHTML}
          
-         <!-- Botões de Ação -->
+         <!-- Botões de Ação - Reddit Style -->
          <div class="review-actions">
-        <button class="review-action-btn upvote-btn ${upvoteClass}" onclick="voteComment(${comentario.id}, true)">
-             <span class="vote-icon">👍</span>
-             <span class="vote-count">${comentario.upVotes || 0}</span>
-        </button>
-        <button class="review-action-btn downvote-btn ${downvoteClass}" onclick="voteComment(${comentario.id}, false)">
-             <span class="vote-icon">👎</span>
-             <span class="vote-count">${comentario.downVotes || 0}</span>
-        </button>
-        <button class="review-action-btn reply-btn" onclick="replyToComment(${comentario.id})">
-             <span class="vote-icon">💬</span>
-             <span>Responder</span>
-        </button>
-        ${isOwner ? `
-        <button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
-             <span class="vote-icon">✏️</span>
-             <span>Editar</span>
-        </button>
-        ` : ''}
-        ${canDelete ? `
-        <button class="review-action-btn delete-btn" onclick="deleteComment(${comentario.id})">
-             <span class="vote-icon">🗑️</span>
-             <span>Deletar</span>
-        </button>
-        ` : ''}
+            <div class="vote-container">
+                <button class="vote-btn upvote-btn ${upvoteClass}" onclick="voteComment(${comentario.id}, true)" title="Upvote">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                </button>
+                <span class="vote-score" data-comment-id="${comentario.id}">${(comentario.upVotes || 0) - (comentario.downVotes || 0)}</span>
+                <button class="vote-btn downvote-btn ${downvoteClass}" onclick="voteComment(${comentario.id}, false)" title="Downvote">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12l7 7 7-7"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="action-separator"></div>
+            <button class="review-action-btn reply-btn" onclick="replyToComment(${comentario.id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>responder</span>
+            </button>
+            ${isOwner ? `
+            <button class="review-action-btn edit-btn" onclick="editComment(${comentario.id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <span>editar</span>
+            </button>
+            ` : ''}
+            ${canDelete ? `
+            <button class="review-action-btn delete-btn" onclick="deleteComment(${comentario.id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>deletar</span>
+            </button>
+            ` : ''}
          </div>
     </div>
     `;
@@ -673,22 +915,42 @@ function updateSubmitButton() {
 function toggleCommentEditor() {
     const editor = document.getElementById('commentEditor');
     const button = document.querySelector('.btn-add-review');
+    const sectionCard = document.querySelector('.right-column .section-card');
     
-    if (editor.classList.contains('show')) {
-        // Close editor
+    // Check if editor is currently in reply mode (positioned inline elsewhere)
+    const isInlineMode = replyingToCommentId !== null;
+    // Also check if editor is not in its original container
+    const isOutOfPlace = editor.parentNode !== sectionCard;
+    
+    // Cancel any inline edit in progress
+    cancelInlineEdit();
+    
+    if (editor.classList.contains('show') && !isInlineMode && !isOutOfPlace) {
+        // Close editor only if in original position and not in reply mode
         editor.classList.remove('show');
         button.classList.remove('active');
         resetCommentEditor();
     } else {
-        // Open editor
+        // If in inline mode or out of place, reset and move back to top first
+        if (isInlineMode || isOutOfPlace) {
+            // First hide, reset, then show again
+            editor.classList.remove('show');
+            resetCommentEditor();
+        }
+        
+        // Open editor at original position (top)
         editor.classList.add('show');
         button.classList.add('active');
         
-        // Update subtitle based on current context (or edit mode)
+        // Update subtitle based on current context
         updateEditorSubtitle();
         
-        // Focus on textarea
+        // Check if there's already text and enable submit button accordingly
+        updateSubmitButton();
+        
+        // Scroll to editor at top and focus
         setTimeout(() => {
+            editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             document.getElementById('commentText').focus();
         }, 100);
     }
@@ -700,12 +962,6 @@ function updateEditorSubtitle() {
     // If replying, show reply message
     if (replyingToCommentId !== null) {
         subtitle.textContent = '💬 Respondendo ao comentário';
-        return;
-    }
-    
-    // If editing, show edit message
-    if (editingCommentId !== null) {
-        subtitle.textContent = '✏️ Editando comentário';
         return;
     }
     
@@ -734,10 +990,6 @@ function resetCommentEditor() {
     document.getElementById('fileInput').value = '';
     renderFileList();
     
-    // Clear edit mode
-    editingCommentId = null;
-    editingCommentData = null;
-    
     // Clear reply mode
     replyingToCommentId = null;
     
@@ -755,12 +1007,12 @@ function resetCommentEditor() {
         // Remove reply mode class
         editor.classList.remove('reply-mode');
         
-        // Move editor back to its original container (before the reviews list)
-        const originalContainer = document.querySelector('.reviews-section');
+        // Move editor back to its original container (inside .section-card, before .reviews-list)
+        const sectionCard = document.querySelector('.right-column .section-card');
         const reviewsList = document.querySelector('.reviews-list');
-        if (originalContainer && reviewsList) {
-            // Insert before reviews list
-            originalContainer.insertBefore(editor, reviewsList);
+        if (sectionCard && reviewsList && editor.parentNode !== sectionCard) {
+            // Insert before reviews list (original position)
+            sectionCard.insertBefore(editor, reviewsList);
         }
     }
     
@@ -898,7 +1150,7 @@ async function submitComment(event) {
     const commentForm = document.getElementById('commentForm');
     
     if (!texto) {
-        alert('Por favor, escreva um comentário.');
+        showToast('Por favor, escreva um comentário.', 'warning');
         return;
     }
     
@@ -908,18 +1160,15 @@ async function submitComment(event) {
         submitButton.classList.add('btn-loading');
         const originalText = submitButton.textContent;
         submitButton.dataset.originalText = originalText;
-        submitButton.textContent = editingCommentId !== null ? 'Salvando...' : 'Enviando...';
+        submitButton.textContent = 'Enviando...';
     }
     
     if (commentForm) {
         commentForm.classList.add('form-disabled');
     }
     
-    // Check if we're editing or creating
-    if (editingCommentId !== null) {
-        // EDIT MODE
-        await submitEditComment(editingCommentId, texto);
-    } else if (replyingToCommentId !== null) {
+    // Check if we're replying or creating a new comment
+    if (replyingToCommentId !== null) {
         // REPLY MODE
         console.log('Submitting reply to comment:', {
             parentId: replyingToCommentId,
@@ -945,7 +1194,7 @@ async function submitComment(event) {
             
             if (!response.ok) {
                 const errorText = await response.text();
-                alert('Erro ao enviar resposta: ' + errorText);
+                showToast(parseErrorMessage(errorText) || 'Erro ao enviar resposta', 'error');
                 return;
             }
             
@@ -957,7 +1206,7 @@ async function submitComment(event) {
             
         } catch (error) {
             console.error('Erro ao enviar resposta:', error);
-            alert('Erro ao enviar resposta: ' + error.message);
+            showToast(parseErrorMessage(error.message) || 'Erro ao enviar resposta', 'error');
             
             // Re-enable form on error
             if (submitButton) {
@@ -999,7 +1248,7 @@ async function submitComment(event) {
             });
             if (!response.ok) {
                 const errorText = await response.text();
-                alert('Erro ao enviar comentário: ' + errorText);
+                showToast(parseErrorMessage(errorText) || 'Erro ao enviar comentário', 'error');
                 return;
             }
             const result = await response.json();
@@ -1010,7 +1259,7 @@ async function submitComment(event) {
             
         } catch (error) {
             console.error('Erro ao enviar comentário:', error);
-            alert('Erro ao enviar comentário: ' + error.message);
+            showToast(parseErrorMessage(error.message) || 'Erro ao enviar comentário', 'error');
             
             // Re-enable form on error
             if (submitButton) {
@@ -1023,49 +1272,6 @@ async function submitComment(event) {
             }
             return;
         }
-    }
-}
-
-/**
- * Submit edited comment
- */
-async function submitEditComment(comentarioId, novoTexto) {
-    console.log('Editing comment:', {
-        comentarioId,
-        novoTexto,
-        files: selectedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
-    });
-    
-    // Prepare FormData
-    const formData = new FormData();
-    formData.append('novoTexto', novoTexto);
-    
-    // Add files (could be old files or new files)
-    selectedFiles.forEach((file) => {
-        formData.append('files', file);
-    });
-    
-    try {
-        const response = await fetch(`/api/comentario/editar/${comentarioId}`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            alert('Erro ao editar comentário: ' + errorText);
-            return;
-        }
-        
-        const result = await response.json();
-        console.log('Comentário editado com sucesso:', result);
-        
-        // Reload page to show edited comment
-        window.location.reload();
-        
-    } catch (error) {
-        console.error('Erro ao editar comentário:', error);
-        alert('Erro ao editar comentário: ' + error.message);
     }
 }
 
@@ -1144,17 +1350,10 @@ async function removeRating(event, professorId = null) {
         clickedSpan.innerHTML = '<span class="loading-inline" style="display: inline-flex; align-items: center; gap: 4px;"><div class="spinner spinner-small"></div><span>Removendo...</span></span>';
     }
     
-    // Add loading overlay to rating section
-    let overlay = null;
+    // Add subtle visual feedback to rating section (no overlay)
     if (ratingSection) {
-        overlay = document.createElement('div');
-        overlay.className = 'loading-overlay';
-        overlay.innerHTML = `
-            <div class="spinner"></div>
-            <div class="loading-overlay-text">Removendo avaliação...</div>
-        `;
-        ratingSection.style.position = 'relative';
-        ratingSection.appendChild(overlay);
+        ratingSection.style.opacity = '0.7';
+        ratingSection.style.transition = 'opacity 0.2s';
     }
     
     try {
@@ -1178,9 +1377,11 @@ async function removeRating(event, professorId = null) {
                 removeLink.style.opacity = '';
                 clickedSpan.innerHTML = clickedSpan.dataset.originalHtml;
             }
-            if (overlay) overlay.remove();
+            if (ratingSection) {
+                ratingSection.style.opacity = '';
+            }
             
-            alert('Erro ao remover avaliação: ' + errorText);
+            showToast(parseErrorMessage(errorText) || 'Erro ao remover avaliação', 'error');
             return;
         }
         
@@ -1199,9 +1400,11 @@ async function removeRating(event, professorId = null) {
             removeLink.style.opacity = '';
             clickedSpan.innerHTML = clickedSpan.dataset.originalHtml;
         }
-        if (overlay) overlay.remove();
+        if (ratingSection) {
+            ratingSection.style.opacity = '';
+        }
         
-        alert('Erro ao remover avaliação: ' + error.message);
+        showToast(parseErrorMessage(error.message) || 'Erro ao remover avaliação', 'error');
     }
 }
 
@@ -1360,7 +1563,7 @@ async function submitModalRating() {
     const professorId = modal.dataset.professorId;
     
     if (!rating || rating < 1 || rating > 5) {
-        alert('Por favor, selecione uma avaliação.');
+        showToast('Por favor, selecione uma avaliação.', 'warning');
         return;
     }
     
@@ -1394,18 +1597,8 @@ async function submitModalRating() {
  * Atualizar visualização após mudanças
  */
 function atualizarVisualizacao() {
-    if (professorSelecionado === null) {
-        // Atualizar visualização da disciplina
-        const avaliacoesDisciplina = AVALIACOES_DATA.filter(a => !a.professorId);
-        avaliacoesDisciplinaGlobal = avaliacoesDisciplina;
-        const stats = calcularStats(avaliacoesDisciplina);
-        
-        // Filtrar comentários da disciplina
-        const comentariosDisciplina = allComments.filter(c => !c.professorId);
-        
-        atualizarDisciplina(stats, comentariosDisciplina);
-    } else {
-        // Atualizar visualização do professor
+    // Atualizar visualização do professor selecionado (comentários agora são apenas para professores)
+    if (professorSelecionado !== null) {
         const avaliacoesProfessores = AVALIACOES_DATA.filter(a => a.professorId);
         const avaliacoesProf = avaliacoesProfessores.filter(a => 
             String(a.professorId) === String(professorSelecionado)
@@ -1443,7 +1636,7 @@ function atualizarVisualizacao() {
 async function submitRating(rating, professorId = null) {
     
     if (rating < 1 || rating > 5) {
-        alert('Nota inválida.');
+        showToast('Nota inválida.', 'warning');
         return;
     }
     
@@ -1484,7 +1677,7 @@ async function submitRating(rating, professorId = null) {
                 submitButton.textContent = 'Confirmar';
             }
             
-            alert('Erro ao enviar avaliação: ' + errorText);
+            showToast(parseErrorMessage(errorText) || 'Erro ao enviar avaliação', 'error');
             return;
         }
         
@@ -1509,7 +1702,7 @@ async function submitRating(rating, professorId = null) {
             submitButton.textContent = 'Confirmar';
         }
         
-        alert('Erro ao enviar avaliação: ' + error.message);
+        showToast(parseErrorMessage(error.message) || 'Erro ao enviar avaliação', 'error');
         return null;
     }
 }
@@ -1577,9 +1770,15 @@ async function voteComment(comentarioId, isUpVote) {
         }
     }
     
-    // Update vote counts in UI
-    upvoteBtn.querySelector('.vote-count').textContent = comentario.upVotes || 0;
-    downvoteBtn.querySelector('.vote-count').textContent = comentario.downVotes || 0;
+    // Update vote score in UI (Reddit style: upvotes - downvotes)
+    const voteScore = commentCard.querySelector('.vote-score');
+    if (voteScore) {
+        const score = (comentario.upVotes || 0) - (comentario.downVotes || 0);
+        voteScore.textContent = score;
+        voteScore.classList.remove('positive', 'negative');
+        if (score > 0) voteScore.classList.add('positive');
+        else if (score < 0) voteScore.classList.add('negative');
+    }
     
     // Add pending state
     commentCard.classList.add('optimistic-pending');
@@ -1603,8 +1802,16 @@ async function voteComment(comentarioId, isUpVote) {
             comentario.upVotes = originalUpVotes;
             comentario.downVotes = originalDownVotes;
             comentario.hasVoted = originalHasVoted;
-            upvoteBtn.querySelector('.vote-count').textContent = originalUpVotes;
-            downvoteBtn.querySelector('.vote-count').textContent = originalDownVotes;
+            
+            // Update vote score display
+            const voteScoreRollback = commentCard.querySelector('.vote-score');
+            if (voteScoreRollback) {
+                const scoreRollback = originalUpVotes - originalDownVotes;
+                voteScoreRollback.textContent = scoreRollback;
+                voteScoreRollback.classList.remove('positive', 'negative');
+                if (scoreRollback > 0) voteScoreRollback.classList.add('positive');
+                else if (scoreRollback < 0) voteScoreRollback.classList.add('negative');
+            }
             
             if (originalHasVoted === 1) upvoteBtn.classList.add('voted');
             else upvoteBtn.classList.remove('voted');
@@ -1613,7 +1820,7 @@ async function voteComment(comentarioId, isUpVote) {
             
             commentCard.classList.add('optimistic-error');
             setTimeout(() => commentCard.classList.remove('optimistic-error'), 500);
-            alert('Erro ao votar: ' + errorText);
+            showToast(parseErrorMessage(errorText) || 'Erro ao votar', 'error');
             return;
         }
         
@@ -1627,8 +1834,15 @@ async function voteComment(comentarioId, isUpVote) {
             comentario.hasVoted = result.userVote;
         }
         
-        upvoteBtn.querySelector('.vote-count').textContent = comentario.upVotes;
-        downvoteBtn.querySelector('.vote-count').textContent = comentario.downVotes;
+        // Update vote score display with server values
+        const voteScoreServer = commentCard.querySelector('.vote-score');
+        if (voteScoreServer) {
+            const scoreServer = comentario.upVotes - comentario.downVotes;
+            voteScoreServer.textContent = scoreServer;
+            voteScoreServer.classList.remove('positive', 'negative');
+            if (scoreServer > 0) voteScoreServer.classList.add('positive');
+            else if (scoreServer < 0) voteScoreServer.classList.add('negative');
+        }
         
         // Success animation
         commentCard.classList.remove('optimistic-pending');
@@ -1641,8 +1855,16 @@ async function voteComment(comentarioId, isUpVote) {
         comentario.upVotes = originalUpVotes;
         comentario.downVotes = originalDownVotes;
         comentario.hasVoted = originalHasVoted;
-        upvoteBtn.querySelector('.vote-count').textContent = originalUpVotes;
-        downvoteBtn.querySelector('.vote-count').textContent = originalDownVotes;
+        
+        // Update vote score display
+        const voteScoreCatch = commentCard.querySelector('.vote-score');
+        if (voteScoreCatch) {
+            const scoreCatch = originalUpVotes - originalDownVotes;
+            voteScoreCatch.textContent = scoreCatch;
+            voteScoreCatch.classList.remove('positive', 'negative');
+            if (scoreCatch > 0) voteScoreCatch.classList.add('positive');
+            else if (scoreCatch < 0) voteScoreCatch.classList.add('negative');
+        }
         
         if (originalHasVoted === 1) upvoteBtn.classList.add('voted');
         else upvoteBtn.classList.remove('voted');
@@ -1651,7 +1873,7 @@ async function voteComment(comentarioId, isUpVote) {
         
         commentCard.classList.add('optimistic-error');
         setTimeout(() => commentCard.classList.remove('optimistic-error'), 500);
-        alert('Erro ao votar: ' + error.message);
+        showToast(parseErrorMessage(error.message) || 'Erro ao votar', 'error');
     } finally {
         commentCard.classList.remove('optimistic-pending');
         upvoteBtn.disabled = false;
@@ -1671,7 +1893,7 @@ function replyToComment(comentarioId) {
     // Find the comment card
     const commentCard = document.querySelector(`[data-comment-id="${comentarioId}"]`);
     if (!commentCard) {
-        alert('Comentário não encontrado.');
+        showToast('Comentário não encontrado.', 'error');
         return;
     }
     
@@ -1723,83 +1945,300 @@ function replyToComment(comentarioId) {
 }
 
 /**
- * Editar um comentário existente
+ * Editar um comentário existente - Edição Inline
  */
 function editComment(comentarioId) {
     // Find the comment data
     const comentario = allComments.find(c => c.id === comentarioId);
     
     if (!comentario) {
-        alert('Comentário não encontrado.');
+        showToast('Comentário não encontrado.', 'error');
         return;
+    }
+    
+    // Find the comment card element
+    const commentCard = document.querySelector(`[data-comment-id="${comentarioId}"]`);
+    if (!commentCard) {
+        showToast('Elemento do comentário não encontrado.', 'error');
+        return;
+    }
+    
+    // Check if already editing another comment
+    const existingEditContainer = document.querySelector('.inline-edit-container');
+    if (existingEditContainer) {
+        cancelInlineEdit();
     }
     
     // Store editing state
     editingCommentId = comentarioId;
-    editingCommentData = comentario;
+    inlineEditFiles = [];
+    inlineEditExistingFiles = comentario.arquivos ? [...comentario.arquivos] : [];
     
-    // Populate the editor with existing comment text
-    document.getElementById('commentText').value = comentario.texto;
+    // Add editing class to card
+    commentCard.classList.add('editing');
     
-    // Update submit button state immediately after setting text
-    updateSubmitButton();
-    
-    // Convert existing files (arquivos) to File objects for selectedFiles
-    // Since we can't create File objects from URLs directly, we'll fetch them as blobs
-    selectedFiles = [];
-    
-    if (comentario.arquivos && comentario.arquivos.length > 0) {
-        // Show a loading state while fetching files
-        const fileList = document.getElementById('fileList');
-        fileList.innerHTML = '<div class="loading-files">Carregando arquivos existentes...</div>';
-        
-        // Fetch all existing files
-        const filePromises = comentario.arquivos.map(async (arquivo) => {
-            try {
-                const response = await fetch(`/api/arquivos/${arquivo.id}`);
-                if (!response.ok) throw new Error('Failed to fetch file');
-                
-                const blob = await response.blob();
-                // Create a File object from the blob
-                const file = new File([blob], arquivo.nomeOriginal, { type: arquivo.tipoMime });
-                return file;
-            } catch (error) {
-                console.error('Error fetching file:', arquivo.nomeOriginal, error);
-                return null;
-            }
-        });
-        
-        Promise.all(filePromises).then(files => {
-            selectedFiles = files.filter(f => f !== null);
-            renderFileList();
-            updateSubmitButton();
-        });
-    } else {
-        renderFileList();
+    // Hide attachments during editing
+    const attachments = commentCard.querySelector('.comment-attachments');
+    if (attachments) {
+        attachments.style.display = 'none';
     }
     
-    // Update submit button state
-    updateSubmitButton();
+    // Get the review-content element
+    const reviewContent = commentCard.querySelector('.review-content');
     
-    // Open the editor
-    const editor = document.getElementById('commentEditor');
-    if (!editor.classList.contains('show')) {
-        toggleCommentEditor();
-    } else {
-        // If already open, just update the subtitle
-        updateEditorSubtitle();
-    }
+    // Create inline edit container with file upload
+    const editContainer = document.createElement('div');
+    editContainer.className = 'inline-edit-container';
+    editContainer.innerHTML = `
+        <textarea class="inline-edit-textarea" id="inlineEditText">${escapeHtml(comentario.texto)}</textarea>
+        
+        <!-- File Upload Section -->
+        <div class="inline-edit-files">
+            <div class="inline-edit-file-input-wrapper">
+                <input type="file" id="inlineEditFileInput" class="file-input" multiple 
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.webp,image/*,application/pdf">
+                <label for="inlineEditFileInput" class="file-upload-label inline-edit-file-label">
+                    <span class="file-icon">📎</span>
+                    <span class="file-text">Anexar arquivos</span>
+                </label>
+            </div>
+            <div id="inlineEditFileList" class="inline-edit-file-list"></div>
+        </div>
+        
+        <div class="inline-edit-actions">
+            <button type="button" class="btn-cancel" onclick="cancelInlineEdit()">Cancelar</button>
+            <button type="button" class="btn-save" id="inlineEditSaveBtn" onclick="saveInlineEdit(${comentarioId})">Salvar</button>
+        </div>
+    `;
     
-    // Scroll to the top where the editor is
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+    // Insert after review-content
+    reviewContent.parentNode.insertBefore(editContainer, reviewContent.nextSibling);
+    
+    // Render existing files
+    renderInlineEditFileList();
+    
+    // Add file input listener
+    const fileInput = document.getElementById('inlineEditFileInput');
+    fileInput.addEventListener('change', handleInlineEditFileSelect);
+    
+    // Focus on textarea and move cursor to end
+    const textarea = editContainer.querySelector('.inline-edit-textarea');
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    
+    // Add input listener to enable/disable save button
+    textarea.addEventListener('input', updateInlineEditSaveButton);
+    
+    // Scroll to make edit visible
+    commentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/**
+ * Handle file selection for inline edit
+ */
+function handleInlineEditFileSelect(event) {
+    const files = Array.from(event.target.files);
+    
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt'];
+    const allowedMimeTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain'
+    ];
+    
+    files.forEach(file => {
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+            showToast(`Arquivo "${file.name}" excede o tamanho máximo de 5MB`, 'error');
+            return;
+        }
+        
+        // Check file extension
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(extension)) {
+            showToast(`Tipo de arquivo não permitido: "${file.name}"`, 'error');
+            return;
+        }
+        
+        // Check MIME type
+        if (!allowedMimeTypes.includes(file.type)) {
+            showToast(`Tipo de arquivo não permitido: "${file.name}"`, 'error');
+            return;
+        }
+        
+        // Check if file already exists in new files
+        const existsInNew = inlineEditFiles.some(f => f.name === file.name && f.size === file.size);
+        // Check if file already exists in existing files
+        const existsInExisting = inlineEditExistingFiles.some(f => f.nomeOriginal === file.name);
+        
+        if (!existsInNew && !existsInExisting) {
+            inlineEditFiles.push(file);
+        }
     });
     
-    // Focus on textarea after scroll
-    setTimeout(() => {
-        document.getElementById('commentText').focus();
-    }, 500);
+    // Clear input to allow selecting the same file again
+    event.target.value = '';
+    
+    renderInlineEditFileList();
+}
+
+/**
+ * Render file list for inline edit
+ */
+function renderInlineEditFileList() {
+    const fileList = document.getElementById('inlineEditFileList');
+    if (!fileList) return;
+    
+    let html = '';
+    
+    // Render existing files (from server)
+    inlineEditExistingFiles.forEach((arquivo, index) => {
+        const icon = getFileIcon(arquivo.nomeOriginal);
+        html += `
+            <div class="inline-edit-file-item existing-file">
+                <div class="file-item-info">
+                    <span class="file-item-icon">${icon}</span>
+                    <span class="file-item-name">${escapeHtml(arquivo.nomeOriginal)}</span>
+                    <span class="file-item-size">${formatFileSize(arquivo.tamanho)}</span>
+                </div>
+                <button type="button" class="file-item-remove" onclick="removeInlineEditExistingFile(${index})" title="Remover arquivo">×</button>
+            </div>
+        `;
+    });
+    
+    // Render new files (to be uploaded)
+    inlineEditFiles.forEach((file, index) => {
+        const icon = getFileIcon(file.name);
+        html += `
+            <div class="inline-edit-file-item new-file">
+                <div class="file-item-info">
+                    <span class="file-item-icon">${icon}</span>
+                    <span class="file-item-name">${escapeHtml(file.name)}</span>
+                    <span class="file-item-size">${formatFileSize(file.size)}</span>
+                    <span class="file-item-badge">Novo</span>
+                </div>
+                <button type="button" class="file-item-remove" onclick="removeInlineEditNewFile(${index})" title="Remover arquivo">×</button>
+            </div>
+        `;
+    });
+    
+    fileList.innerHTML = html;
+}
+
+/**
+ * Remove existing file from inline edit
+ */
+function removeInlineEditExistingFile(index) {
+    inlineEditExistingFiles.splice(index, 1);
+    renderInlineEditFileList();
+}
+
+/**
+ * Remove new file from inline edit
+ */
+function removeInlineEditNewFile(index) {
+    inlineEditFiles.splice(index, 1);
+    renderInlineEditFileList();
+}
+
+/**
+ * Update save button state for inline edit
+ */
+function updateInlineEditSaveButton() {
+    const textarea = document.getElementById('inlineEditText');
+    const saveBtn = document.getElementById('inlineEditSaveBtn');
+    if (textarea && saveBtn) {
+        const hasText = textarea.value.trim().length > 0;
+        saveBtn.disabled = !hasText;
+    }
+}
+
+/**
+ * Cancelar edição inline
+ */
+function cancelInlineEdit() {
+    const editContainer = document.querySelector('.inline-edit-container');
+    if (editContainer) {
+        const commentCard = editContainer.closest('.review-card');
+        if (commentCard) {
+            commentCard.classList.remove('editing');
+            
+            // Restore attachments visibility
+            const attachments = commentCard.querySelector('.comment-attachments');
+            if (attachments) {
+                attachments.style.display = '';
+            }
+        }
+        editContainer.remove();
+    }
+    
+    // Clear editing state
+    editingCommentId = null;
+    inlineEditFiles = [];
+    inlineEditExistingFiles = [];
+}
+
+/**
+ * Salvar edição inline
+ */
+async function saveInlineEdit(comentarioId) {
+    const textarea = document.getElementById('inlineEditText');
+    const saveBtn = document.getElementById('inlineEditSaveBtn');
+    const novoTexto = textarea.value.trim();
+    
+    if (!novoTexto) {
+        showToast('O comentário não pode estar vazio.', 'error');
+        return;
+    }
+    
+    // Disable button and show loading
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Salvando...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('novoTexto', novoTexto);
+        
+        // Add IDs of existing files to keep
+        inlineEditExistingFiles.forEach(arquivo => {
+            formData.append('existingFileIds', arquivo.id);
+        });
+        
+        // Add new files to upload
+        inlineEditFiles.forEach(file => {
+            formData.append('files', file);
+        });
+        
+        const response = await fetch(`/api/comentario/editar/${comentarioId}`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            showToast(parseErrorMessage(errorText) || 'Erro ao editar comentário', 'error');
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Salvar';
+            return;
+        }
+        
+        const result = await response.json();
+        console.log('Comentário editado com sucesso:', result);
+        
+        // Reload page to show updated comment with new files
+        // This is simpler than trying to update all the file attachments in place
+        window.location.reload();
+        
+    } catch (error) {
+        console.error('Erro ao editar comentário:', error);
+        showToast(parseErrorMessage(error.message) || 'Erro ao editar comentário', 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Salvar';
+    }
 }
 
 
@@ -1860,7 +2299,7 @@ async function deleteComment(comentarioId) {
                 setTimeout(() => commentCard.classList.remove('optimistic-error'), 500);
             }
             
-            alert('Erro ao deletar comentário: ' + errorText);
+            showToast(parseErrorMessage(errorText) || 'Erro ao deletar comentário', 'error');
             return;
         }
         
@@ -1881,13 +2320,8 @@ async function deleteComment(comentarioId) {
 					markAsDeleted(allComments[indexGlobal]);
             }
             
-            // ✅ Atualizar visualização baseado no contexto atual
-            if (professorSelecionado === null) {
-                // Atualizar comentários da disciplina
-                const comentariosDisciplina = allComments.filter(c => !c.professorId);
-                mostrarComentarios(comentariosDisciplina, null);
-            } else {
-                // Atualizar comentários do professor
+            // ✅ Atualizar visualização - comentários agora são apenas de professores
+            if (professorSelecionado !== null) {
                 const comentariosProfessor = allComments.filter(c => 
                     String(c.professorId) === String(professorSelecionado)
                 );
@@ -1907,11 +2341,11 @@ async function deleteComment(comentarioId) {
         }, 300); // Small delay for animation
         
         // ✅ Feedback visual
-        alert('Comentário deletado com sucesso!');
+        showToast('Comentário deletado com sucesso!', 'success');
         
     } catch (error) {
         console.error('Erro ao deletar comentário:', error);
-        alert('Erro ao deletar comentário: ' + error.message);
+        showToast(parseErrorMessage(error.message) || 'Erro ao deletar comentário', 'error');
     }
 }
 
