@@ -69,10 +69,6 @@ public class Comentario {
 	@Column(name = "down_votes")
 	private Integer downVotes = 0;
 
-	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, orphanRemoval = true)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Set<Notificacao> notificacoes = new HashSet<>();
-
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(
 		name = "comentario_votes",
@@ -97,13 +93,13 @@ public class Comentario {
 	private Instant editedAt;
 
 
-	// ✅ Relacionamento direto com Disciplina e Professor (comentários agora são independentes de Avaliacao)
+	// ✅ Relacionamento direto com Disciplina e Professor (comentários agora são apenas para professores)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "disciplina_id", nullable = false)
 	private Disciplina disciplina;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "professor_id", nullable = true)
+	@JoinColumn(name = "professor_id", nullable = false)
 	private Professor professor;
 
 	@OneToMany(mappedBy = "comentario", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -178,18 +174,6 @@ public class Comentario {
 
 	public Instant getEditedAt() { return editedAt; }
 	public void setEditedAt(Instant editedAt) { this.editedAt = editedAt; }
-
-	public Set<Notificacao> getNotificacoes() {
-		return notificacoes;
-	}
-
-	public void setNotificacoes(Set<Notificacao> notificacoes) {
-		this.notificacoes = notificacoes;
-	}
-	
-	public void addNotificacao(Notificacao notificacao) {
-		this.notificacoes.add(notificacao);
-	}
 
 	public Integer hasVoted(String userEmail) {
 		if(votes.containsKey(userEmail)){

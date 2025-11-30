@@ -2,7 +2,6 @@ package com.example.factory;
 
 import com.example.model.Comentario;
 import com.example.model.Disciplina;
-import com.example.model.Notificacao;
 import com.example.model.Professor;
 import com.example.model.Usuario;
 
@@ -18,14 +17,11 @@ public class ComentarioFactory {
 	public static Comentario createReply(Usuario usuario, String texto, Comentario comentarioPai) {
 		Comentario resposta = new Comentario(usuario, texto, comentarioPai);
 
-		if(comentarioPai.getUsuario().getUserEmail().equals(usuario.getUserEmail())) {
+		if(comentarioPai.getUsuario().getEmail().equals(usuario.getEmail())) {
 			// Não notificar se o usuário respondeu a si mesmo
 			return resposta;
 		}
 		
-		Notificacao notificacao = comentarioPai.getUsuario().generateAlert(resposta);
-		resposta.addNotificacao(notificacao);
-
 		return resposta;
 	}
 }

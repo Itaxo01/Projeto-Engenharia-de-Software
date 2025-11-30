@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 @Service
 public class SessionService {
 	@Autowired
-	private UserService userService;
+	private UsuarioService userService;
 
 	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SessionService.class);
 	/**
@@ -56,7 +56,7 @@ public class SessionService {
 	 * @return true se o usuário for admin, senão não.
 	 */
 	public boolean currentUserIsAdmin(HttpServletRequest request) {
-		return userService.getAdmin(getCurrentUser(request));
+		return userService.getIsAdmin(getCurrentUser(request));
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class SessionService {
 		String session = getCurrentUser(request);
 		if (session == null) return false;
 		try {
-			return (!session.isEmpty() && userService.getUser(session) != null);
+			return (!session.isEmpty() && userService.getUsuario(session) != null);
 		} catch(Exception e) {
 			return false;
 		}

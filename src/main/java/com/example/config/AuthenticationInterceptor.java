@@ -20,12 +20,12 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     // URLs accessible to non-authenticated users
     private static final String[] PUBLIC_URLS = {
-        "/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/error"
+        "/", "/login/**", "/register/**", "/css/**", "/js/**", "/images/**", "/error"
     };
 
     // URLs that require authentication but not admin
     private static final String[] USER_URLS = {
-        "/dashboard", "/user", "/class", "/class/**", "/api/me", "/logout"
+        "/index", "/user", "/class", "/class/**", "/api/me", "/logout"
     };
 
     // URLs that require admin privileges
@@ -70,7 +70,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 return false;
             }
             if (!isAdmin) {
-                response.sendRedirect("/dashboard?error=accessDenied");
+                response.sendRedirect("/index?error=accessDenied");
                 return false;
             }
             return true;

@@ -14,6 +14,7 @@ import com.example.model.Disciplina;
 import com.example.model.Professor;
 import com.example.model.Usuario;
 import com.example.repository.DisciplinaRepository;
+import org.springframework.lang.NonNull;
 
 import jakarta.transaction.Transactional;
 
@@ -26,8 +27,12 @@ public class DisciplinaService {
     @Autowired
     private DisciplinaRepository disciplinaRepository;
 
-    // Criar nova disciplina
-    public Disciplina criarOuAtualizar(String codigo, String nome, Set<Professor> professores) {
+	 @Autowired
+	 private ProfessorService professorService;
+
+    
+    // Criar nova disciplina com semestre
+    public Disciplina criarOuAtualizar(String codigo, String nome, Set<Professor> professores, @NonNull String ultimoSemestre) {
         logger.debug("=== Buscando disciplina com código: {} ===", codigo);
 
         Optional<Disciplina> disciplina = disciplinaRepository.findByCodigo(codigo);
@@ -42,9 +47,8 @@ public class DisciplinaService {
                 logger.debug("Nome da disciplina atualizado de '{}' para '{}'", d.getNome(), nome);
             }
         } else {
-            d = new Disciplina();
-            d.setCodigo(codigo);
-            d.setNome(nome);
+            d = new Disciplina(codigo, nome);
+
             logger.info("*** CRIANDO NOVA DISCIPLINA: {} ***", codigo);
         }
         
@@ -52,12 +56,29 @@ public class DisciplinaService {
         int professoresAntes = d.getProfessores().size();
         logger.debug("Professores antes: {}", professoresAntes);
         
-        for (Professor professor : professores) {
+        for (Professor professorP : professores) {
+				if (professorP.getProfessorId() == null) {
+					logger.error("❌ Professor sem ID");
+					continue;
+				}
+
+				Optional<Professor> profExistente = professorService.buscarPorId(professorP.getProfessorId());
+				Professor professor;
+				if(profExistente.isPresent()) {
+					professor = profExistente.get();
+				} else {
+					professor = professorService.criarOuObter(professorP.getProfessorId(), professorP.getNome());
+				}
+
             if (!d.temProfessor(professor)) {
-                d.adicionarProfessor(professor);
-                logger.debug("Professor {} adicionado à disciplina {}", professor.getNome(), codigo);
+					d.adicionarProfessor(professor, ultimoSemestre);
+					logger.debug("Professor {} adicionado à disciplina {} (semestre: {})", 
+									professor.getNome(), codigo, ultimoSemestre);
             } else {
-                logger.debug("Professor {} já estava associado à disciplina {}", professor.getNome(), codigo);
+                // Professor já existe, apenas atualizar o semestre se fornecido
+					d.atualizarSemestreProfessor(professor, ultimoSemestre);
+					logger.debug("Professor {} já estava associado à disciplina {}, semestre atualizado para {}", 
+									professor.getNome(), codigo, ultimoSemestre);
             }
         }
 

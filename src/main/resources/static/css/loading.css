@@ -97,6 +97,44 @@
     border-radius: inherit;
 }
 
+/* Subtle loading overlay - less intrusive */
+.loading-overlay-subtle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(1px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+    border-radius: inherit;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.loading-overlay-subtle .spinner {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    border-color: rgba(0, 51, 102, 0.2);
+    border-top-color: var(--primary, #003366);
+}
+
+.loading-overlay-subtle .loading-overlay-text {
+    font-size: 12px;
+    color: var(--primary, #003366);
+    font-weight: 500;
+}
+
 .loading-overlay-dark {
     background: rgba(0, 0, 0, 0.7);
     color: white;

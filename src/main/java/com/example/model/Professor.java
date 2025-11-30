@@ -3,11 +3,12 @@ package com.example.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
@@ -28,9 +29,9 @@ public class Professor {
 	@Column(nullable = false)
 	private String nome;
 	
-	// Relacionamento Many-to-Many com Disciplina
-	@ManyToMany(mappedBy = "professores", fetch = FetchType.LAZY)
-	private Set<Disciplina> disciplinas = new HashSet<>();
+	// Relacionamento One-to-Many com ProfessorDisciplina
+	@OneToMany(mappedBy = "professor", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<ProfessorDisciplina> professorDisciplinas = new HashSet<>();
 
 	/** Construtor padrão necessário para JPA. */
 	public Professor(){}
@@ -50,20 +51,22 @@ public class Professor {
 	public String getProfessorId() {return professorId;}
 	public void setProfessorId(String professorId) {this.professorId = professorId;}
 
-	public Set<Disciplina> getDisciplinas() { return disciplinas; }
-	public void setDisciplinas(Set<Disciplina> disciplinas) { this.disciplinas = disciplinas; }
+	/** Lista de relacionamentos professor-disciplina. */
+	public Set<ProfessorDisciplina> getProfessorDisciplinas() { return professorDisciplinas; }
+	public void setProfessorDisciplinas(Set<ProfessorDisciplina> professorDisciplinas) { 
+		this.professorDisciplinas = professorDisciplinas; 
+	}
 
 	// Métodos auxiliares para gerenciamento de relacionamentos
-	public void adicionarDisciplina(Disciplina disciplina) {
-		if (!disciplinas.contains(disciplina)) {
-			disciplinas.add(disciplina);
-			disciplina.getProfessores().add(this);
-		}
+	public void adicionarDisciplina(Disciplina disciplina, String ultimoSemestre) {
+		ProfessorDisciplina pd = new ProfessorDisciplina(this, disciplina, ultimoSemestre);
+		professorDisciplinas.add(pd);
+		disciplina.getProfessorDisciplinas().add(pd);
 	}
 	
 	public void removerDisciplina(Disciplina disciplina) {
-		disciplinas.remove(disciplina);
-		disciplina.getProfessores().remove(this);
+		professorDisciplinas.removeIf(pd -> pd.getDisciplina().equals(disciplina));
+		disciplina.getProfessorDisciplinas().removeIf(pd -> pd.getProfessor().equals(this));
 	}
 
 	@Override
@@ -90,9 +93,5 @@ public class Professor {
 	/**
 	 * Record para representar um resumo(página de disciplina) do professor.
 	 */
-	public record ProfessorResumo(String nome, String professorId) {
-		public static ProfessorResumo from(Professor professor) {
-			return new ProfessorResumo(professor.getNome(), professor.getProfessorId());
-		}
-	}
+	
 }

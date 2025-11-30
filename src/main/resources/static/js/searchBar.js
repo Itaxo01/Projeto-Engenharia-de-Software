@@ -7,8 +7,8 @@ class DisciplinasCache {
         // Cache duration: 6 months (in milliseconds)
         this.cacheDuration = 6 * 30 * 24 * 60 * 60 * 1000; // 6 months
         
-        // Version to force cache refresh when needed
-        this.currentVersion = '1.0.4';
+        // Version to force cache refresh when needed (increment when DTO changes)
+        this.currentVersion = '1.1.0';
     }
 
     /**
@@ -239,7 +239,7 @@ class DisciplinasCache {
 // Global cache instance
 const disciplinasCache = new DisciplinasCache();
 
-// Expor funções para reutilização em outros módulos (dashboard.js)
+// Expor funções para reutilização em outros módulos (index.js)
 window.getDisciplinasData = function() {
     return disciplinas_fetch;
 };
@@ -279,6 +279,7 @@ searchInput.addEventListener('input', function() {
     if (query.length < 2) {
         searchResults.innerHTML = '';
         searchResults.style.display = 'none';
+        searchResults.classList.remove('show');
 		  selectedIndex = -1;
         return;
     }
@@ -296,11 +297,17 @@ function performSearch(query) {
         limit: 20  // Limit results for better performance
     });
     
-    // Transform Fuse results to our format
-    const results = fuseResults.map(result => ({
-        ...result.item,              // Original disciplina data
-        fuseScore: result.score,     // Fuse match score (lower = better)
-    }));
+    // Transform Fuse results to our format, including match info
+    const results = fuseResults.map(result => {
+        // Check if match was on professor name
+        const professorMatch = result.matches?.find(m => m.key === 'professores.nome');
+        
+        return {
+            ...result.item,              // Original disciplina data
+            fuseScore: result.score,     // Fuse match score (lower = better)
+            matchedProfessor: professorMatch ? professorMatch.value : null  // Professor name if matched
+        };
+    });
     
     displayResults(results, query);
 }
@@ -379,6 +386,10 @@ function initializeFuseJS() {
             {
                 name: 'nome',
                 weight: 1
+            },
+            {
+                name: 'professores.nome',
+                weight: 0.8  // Professor names as searchable tags
             }
         ],
         // Search configuration
@@ -411,37 +422,47 @@ function displayResults(results) {
     if (!results || results.length === 0) {
         searchResults.innerHTML = '<div class="search-item no-results">Nenhuma disciplina encontrada</div>';
         searchResults.style.display = 'block';
+        searchResults.classList.add('show');
         return;
     }
     
     const html = results.map((result) => {
-        // Use Fuse.js match information for better highlighting
+        // Check if match was due to professor name
+        const professorBadge = result.matchedProfessor 
+            ? `<div class="search-item-professor-match">Prof. ${result.matchedProfessor}</div>`
+            : '';
+        
         return `
             <div class="search-item" onclick="goToDisciplina('${result.codigo}')" data-codigo="${result.codigo}">
                 <div class="search-item-code">${result.codigo}</div>
                 <div class="search-item-name">${result.nome}</div>
+                ${professorBadge}
             </div>
         `;
     }).join('');
     
     searchResults.innerHTML = html;
     searchResults.style.display = 'block';
+    searchResults.classList.add('show');
 }
 
 function showLoading() {
     searchResults.innerHTML = '<div class="search-item loading">🔄 Carregando disciplinas...</div>';
     searchResults.style.display = 'block';
+    searchResults.classList.add('show');
 }
 
 function hideLoading() {
     if (searchResults.innerHTML.includes('Carregando')) {
         searchResults.style.display = 'none';
+        searchResults.classList.remove('show');
     }
 }
 
 function showError(message) {
     searchResults.innerHTML = `<div class="search-item error">❌ ${message}</div>`;
     searchResults.style.display = 'block';
+    searchResults.classList.add('show');
 }
 
 function goToDisciplina(codigo) {
@@ -452,6 +473,7 @@ function goToDisciplina(codigo) {
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.search-container')) {
         searchResults.style.display = 'none';
+        searchResults.classList.remove('show');
     }
 });
 

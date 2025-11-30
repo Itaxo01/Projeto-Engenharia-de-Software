@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Sistema Acadêmico</title>
+    <title>Cadastro - AvaliaUFSC</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/register.css">
     <script src="/js/register.js"></script>
@@ -13,15 +13,16 @@
     <div class="register-container">
         <div class="register-card">
             <div class="register-header">
-                <h1>Criar Conta</h1>
+                <h1>AvaliaUFSC</h1>
                 <p>Preencha os dados para criar sua conta</p>
             </div>
             
-            <form class="register-form" method="post" action="/register" enctype="multipart/form-data" novalidate>
+            <form class="register-form" method="post" action="/register/submit" enctype="multipart/form-data" novalidate>
 					<div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" 
-                           placeholder="Digite seu email">
+                           placeholder="Digite seu email"
+                           th:value="${emailValue != null ? emailValue : ''}">
 							<h5 style="text-align: center; color: rgb(136, 37, 37);" id="email-error-message"></h5>
 					</div>
 
@@ -29,14 +30,16 @@
                 <div class="form-group">
                     <label for="password">Senha</label>
                     <input type="password" id="password" name="password" 
-                           placeholder="Digite sua senha">
+                           placeholder="Digite sua senha"
+                           th:value="${passwordValue != null ? passwordValue : ''}">
 							<h5 style="text-align: center; color: rgb(136, 37, 37);" id="password-error-message"></h5>
                 </div>
                 
                 <div class="form-group">
                     <label for="confirmPassword">Confirmar Senha</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" 
-                           placeholder="Confirme sua senha">
+                           placeholder="Confirme sua senha"
+                           th:value="${passwordValue != null ? passwordValue : ''}">
 							<h5 style="text-align: center; color: rgb(136, 37, 37);" id="password-confirm-error-message"></h5>
                 </div>
                 
